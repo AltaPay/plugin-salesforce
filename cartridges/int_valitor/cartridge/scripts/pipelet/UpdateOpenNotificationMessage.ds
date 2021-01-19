@@ -1,0 +1,31 @@
+/**
+*	Update the message given to the customer, that the payment hasn't been verified yet.
+*	@input orderConfirmation : Boolean
+*   @output openMessage : String
+*
+*/
+importPackage( dw.system );
+
+function execute( args : PipelineDictionary ) : Number
+{
+	if(!args.orderConfirmation){
+		var openMessage : String = "The payment is still pending. An e-mail will be sent when payment information is complete.";
+		args.openMessage = openMessage;
+	}
+	return PIPELET_NEXT;
+}
+
+function updateOpenNotificationMessage (orderConfirmation) {
+
+	var dict = {orderConfirmation: orderConfirmation};
+
+	execute (dict);
+	
+	return dict.openMessage != undefined ? dict.openMessage : null;
+	
+}
+
+module.exports = {
+	execute: execute,
+	updateOpenNotificationMessage: updateOpenNotificationMessage
+}

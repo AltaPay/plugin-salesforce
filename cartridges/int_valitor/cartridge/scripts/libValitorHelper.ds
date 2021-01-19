@@ -1,0 +1,43 @@
+/**
+* libValitorHelper.ds
+* 
+* This script contains some Valitor related convenience methods.
+*
+*/
+importPackage( dw.crypto );
+importPackage( dw.order );
+importPackage( dw.system );
+importPackage( dw.util );
+
+function getValitorHelper() {
+	return ValitorHelper;
+}
+
+var ValitorHelper : Object = {
+	
+	isValitor		: false,
+	
+	/**
+	* Gets the VALITOR Payment Instrument for the LineItemCtnr.
+	* 
+	* @param lineItemCtnr : dw.order.LineItemCtnr the line item container
+	* 
+	* @return OrderPaymentInstrument
+	*/
+	getValitorPaymentInstrument : function( lineItemCtnr : LineItemCtnr ) : OrderPaymentInstrument {
+		this.isValitor = false;
+		
+		if ( !empty( lineItemCtnr ) ) {
+			for each ( var paymentInstrument : OrderPaymentInstrument in lineItemCtnr.getPaymentInstruments()) {
+				if ( paymentInstrument.paymentMethod.indexOf('VALITOR_') == 0 ) {
+					if ('paymentProviderPaymentStatus' in lineItemCtnr.custom) {
+						this.isValitor = lineItemCtnr.custom.paymentProviderPaymentStatus != 'VALITOR_BANKTRANSFER';
+					} else {
+						this.isValitor = true;
+					}
+					return paymentInstrument;
+				}
+			}	
+		}
+	}
+}

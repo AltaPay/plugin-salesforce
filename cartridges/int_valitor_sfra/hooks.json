@@ -1,0 +1,8 @@
+{
+    "hooks": [
+        {
+            "name": "app.payment.processor.valitor",
+            "script": "./cartridge/scripts/hooks/payment/processor/valitor"
+        }
+    ]
+}

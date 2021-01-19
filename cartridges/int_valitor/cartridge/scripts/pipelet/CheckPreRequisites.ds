@@ -1,0 +1,56 @@
+/**
+ *	Get the terminal to use in the payment request.
+ *
+ * @input  PaymentMethod : String The payment Method as this is required to determine the Terminal ID based on the site preference.
+ * @output TerminalID : String The TerminalID for Valitor Cartridge.	
+ */
+importPackage( dw.system );
+importPackage( dw.order );
+importPackage( dw.util );
+importPackage( dw.value );
+importPackage( dw.web );
+
+importScript("libValitor.ds");
+
+function execute( pdict : PipelineDictionary ) : Number
+{
+	//Default set TerminalID to null.
+	var terminalID = null;
+	
+	//Get Valitor terminal name
+	var paymentMethod : PaymentMethod = pdict.PaymentMethod;
+	if (paymentMethod != null) {
+		var valitorMgr : Object = getValitorMgr();	
+		var valitorTerminals : HashMap = valitorMgr.terminals;
+		
+		terminalID = valitorTerminals[paymentMethod];
+	}
+	else{
+		Logger.error("Payment method is null and can't determine which Valitor terminal to use.");
+		return PIPELET_ERROR;
+	}
+	
+	pdict.TerminalID = terminalID;
+    return PIPELET_NEXT;
+}
+
+function check (pdict) {
+	
+	var obj = {PaymentMethod: pdict.PaymentInstrument.paymentMethod};
+	
+	var ret = execute(obj);
+	
+	if (ret == PIPELET_NEXT) {
+		pdict.TerminalID = obj.TerminalID;
+		return true;	
+	}
+	else {
+		return false;
+	}
+	
+}
+
+module.exports = {
+	execute: execute,
+	check: check
+}

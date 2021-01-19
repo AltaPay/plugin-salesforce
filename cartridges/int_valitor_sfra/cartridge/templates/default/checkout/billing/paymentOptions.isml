@@ -1,0 +1,64 @@
+<isset name="customerEmailField" value="${pdict.forms.billingForm.customerEmail}" scope="page"/>
+<isset name="customerPhoneField" value="${pdict.forms.billingForm.phone}" scope="page"/>
+<isset name="paymentMethodField" value="${pdict.forms.billingForm.paymentMethod}" scope="page"/>
+<isset name="billingModel" value="${pdict.order.billing}" scope="page" />
+
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group
+            <isif condition=${customerEmailField.mandatory === true}>required</isif>
+            ${customerEmailField.htmlName}">
+            <label class="form-control-label" for="email">${Resource.msg('field.customer.email','checkout',null)}</label>
+            <span class="info-icon">
+                <span class="icon">i</span>
+                <div class="tooltip">
+                    ${Resource.msg('tooltip.email','creditCard',null)}
+                </div>
+            </span>
+            <input type="text" class="form-control email" id="email"
+                value="${pdict.order.orderEmail||''}" <isprint value=${customerEmailField.attributes} encoding="off"/> >
+            <div class="invalid-feedback"></div>
+        </div>
+    </div>
+    <div class="col-sm-6">
+        <div class="form-group
+            <isif condition=${customerPhoneField.mandatory === true}>required</isif>
+            ${customerPhoneField.htmlName}">
+            <label class="form-control-label" for="phoneNumber">${Resource.msg('field.customer.phone.number','checkout',null)}</label>
+            <input type="tel" class="form-control phone" id="phoneNumber"
+                value="${pdict.order.billing.billingAddress.address
+                ? pdict.order.billing.billingAddress.address.phone||''
+                : ''}" <isprint value=${customerPhoneField.attributes} encoding="off"/> >
+            <div class="invalid-feedback"></div>
+        </div>
+    </div>
+</div>
+
+<h5>${Resource.msg('valitor.heading.select.payment.method', 'valitor', null)}</h5>
+<div class="row leading-lines payment-method-list">
+    <isloop items="${billingModel.payment.applicablePaymentMethods}" var="paymentMethod" status="loopSate">
+        <div class="form-check col-9 start-lines">
+            <isif condition="${billingModel.payment.selectedPaymentMethod != null && billingModel.payment.selectedPaymentMethod.ID === paymentMethod.ID}">
+                <input id="paymentMethod-${paymentMethod.ID}" name="${paymentMethodField.htmlName}" id="${paymentMethod.ID}" type="radio" class="form-check-input" value="${paymentMethod.ID}" checked>
+            <iselse/>
+                <input id="paymentMethod-${paymentMethod.ID}" name="${paymentMethodField.htmlName}" id="${paymentMethod.ID}" type="radio" class="form-check-input" value="${paymentMethod.ID}">
+            </isif>   
+            <label class="form-check-label payment-method-option" for="paymentMethod-${paymentMethod.ID}">
+                <span class="display-name">${paymentMethod.name}</span>
+            </label>
+        </div>
+        <div class="col-3 text-right payment-method-images end-lines">
+            <isif condition="${paymentMethod.ID == 'VALITOR_CREDITCARDS'}">
+                <isloop items="${billingModel.payment.applicablePaymentCards}" var="creditCard">
+                    <isif condition="${creditCard.imageURL != null}">
+                        <span><img class="credit-card-image" src="${creditCard.imageURL}" alt="${creditCard.name}"></span>
+                    </isif>
+                </isloop>
+            <iselse/>
+                <isif condition="${paymentMethod.imageURL != null}">
+                    <span><img class="payment-method-image" src="${paymentMethod.imageURL}" alt="${paymentMethod.name}"></span>
+                </isif>
+            </isif>
+        </div>
+    </isloop>
+</div>

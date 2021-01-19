@@ -1,0 +1,4 @@
+{
+   "hooks": "./cartridge/scripts/hooks.json",
+   "init": ["int_valitor/cartridge/scripts/init/valitorServiceInit.ds"]
+}

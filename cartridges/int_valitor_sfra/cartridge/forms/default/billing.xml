@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<form xmlns="http://www.demandware.com/xml/form/2008-04-19">
+
+    <field formid="shippingAddressUseAsBillingAddress" label="profile.billingSameAsShipping" type="boolean"
+           binding="shippingAddressUseAsBillingAddress" checked="true" />
+
+    <include formid="addressFields" name="address"/>
+
+    <field formid="paymentMethod" type="string" mandatory="true" />
+
+    <field formid="customerEmail" label="profile.email" type="string" mandatory="true" binding="email"
+           max-length="254" missing-error="error.card.info.missing.email" />
+
+    <field formid="phone" label="profile.phone" description="address.phone.example" type="string" mandatory="true"
+           binding="phone" max-length="20" missing-error="error.card.info.missing.phone" />
+
+    <include formid="creditCardFields" name="creditCard"/>
+
+</form>

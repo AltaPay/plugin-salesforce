@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata xmlns="http://www.demandware.com/xml/impex/metadata/2006-10-31">
+	<type-extension type-id="SitePreferences">
+		<custom-attribute-definitions>
+			<attribute-definition attribute-id="valitorTerminals">
+				<display-name xml:lang="x-default">Valitor terminals</display-name>
+				<description xml:lang="x-default">Terminals to be used for authorization/capture requests.</description>
+				<type>text</type>
+				<mandatory-flag>false</mandatory-flag>
+			</attribute-definition>
+			<attribute-definition attribute-id="valitorPaymentPagePipeline">
+				<display-name xml:lang="x-default">Valitor payment page URL</display-name>
+				<description xml:lang="x-default">Commerce Cloud payment page URL Valitor should merge payment form into.</description>
+				<type>string</type>
+				<mandatory-flag>false</mandatory-flag>
+				<default-value>Valitor-CallbackForm</default-value>
+			</attribute-definition>
+			<attribute-definition attribute-id="valitorPaymentSuccessPipeline">
+				<display-name xml:lang="x-default">Valitor payment success URL</display-name>
+				<description xml:lang="x-default">Commerce Cloud success/receipt landing page if authorization is successfull.</description>
+				<type>string</type>
+				<mandatory-flag>false</mandatory-flag>
+				<default-value>Valitor-PaymentSuccess</default-value>
+			</attribute-definition>
+			<attribute-definition attribute-id="valitorPaymentFailPipeline">
+				<display-name xml:lang="x-default">Valitor payment fail URL</display-name>
+				<description xml:lang="x-default">Commerce Cloud fail landing page if authorization is unsuccessfull.</description>
+				<type>string</type>
+				<mandatory-flag>false</mandatory-flag>
+				<default-value>Valitor-PaymentFail</default-value>
+			</attribute-definition>
+			<attribute-definition attribute-id="valitorPaymentOpenPipeline">
+				<display-name xml:lang="x-default">Valitor payment open URL</display-name>
+				<description xml:lang="x-default">Commerce Cloud success/receipt landing page if authorization is open.</description>
+				<type>string</type>
+				<mandatory-flag>false</mandatory-flag>
+				<default-value>Valitor-PaymentOpen</default-value>
+			</attribute-definition>
+			<attribute-definition attribute-id="valitorPaymentNotificationPipeline">
+				<display-name xml:lang="x-default">Valitor payment notification URL</display-name>
+				<description xml:lang="x-default">Commerce Cloud notification landing page to update an open order.</description>
+				<type>string</type>
+				<mandatory-flag>false</mandatory-flag>
+				<default-value>Valitor-PaymentNotification</default-value>
+			</attribute-definition>
+			<attribute-definition attribute-id="valitorRedirectPipeline">
+				<display-name xml:lang="x-default">Valitor redirect page URL</display-name>
+				<description xml:lang="x-default">Commerce Cloud page shown during redirection between customer, webshop and Valitor.</description>
+				<type>string</type>
+				<mandatory-flag>false</mandatory-flag>
+				<default-value></default-value>
+			</attribute-definition>
+			<attribute-definition attribute-id="valitorWhiteListedIP">
+                <display-name xml:lang="x-default">Valitor WhiteListed IP's</display-name>
+                <type>set-of-string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+		</custom-attribute-definitions>
+		<group-definitions>
+			<attribute-group group-id="Valitor">
+				<display-name xml:lang="x-default">Valitor</display-name>
+				<attribute attribute-id="valitorTerminals"/>
+				<attribute attribute-id="valitorPaymentPagePipeline"/>
+				<attribute attribute-id="valitorPaymentSuccessPipeline"/>
+				<attribute attribute-id="valitorPaymentFailPipeline"/>
+				<attribute attribute-id="valitorPaymentOpenPipeline"/>
+				<attribute attribute-id="valitorPaymentNotificationPipeline"/>
+				<attribute attribute-id="valitorRedirectPipeline"/>
+				<attribute attribute-id="valitorWhiteListedIP"/>
+			</attribute-group>
+		</group-definitions>
+	</type-extension>
+</metadata>

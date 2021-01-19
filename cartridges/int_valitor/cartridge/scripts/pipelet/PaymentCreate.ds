@@ -1,0 +1,249 @@
+/**
+* Creates an Valitor payment.
+*
+* @input Basket : dw.order.Basket The basket to use in the payment creation.
+* @input Order : dw.order.Order The Order to use in the payment creation.
+* @input TerminalID : String 
+* @output CreatePaymentURL : String Valitor createPayment url with parameters.
+*
+*/
+importPackage( dw.svc );
+importPackage( dw.net );
+importPackage( dw.order );
+importPackage( dw.system );
+importPackage( dw.value );
+importPackage( dw.web );
+importScript("int_valitor:libValitor.ds");
+importScript("int_valitor:libValitorHelper.ds");
+importScript("int_valitor:libValitorHelper.ds");
+importScript("int_valitor:jssdk/SalesForceSDK.ds");
+
+var CREATEPAYMENTURL : String = "/merchant/API/createPaymentRequest";
+
+function execute( args : PipelineDictionary ) : Number
+{
+	var order : Order = args.Order; 
+	var req = request;
+	
+	var valitorMgr : Object = getValitorMgr();
+
+	var currencyCode : String = order.currencyCode != null ? order.currencyCode : session.currency.currencyCode; 
+	
+	if(TaxMgr.taxationPolicy == TaxMgr.TAX_POLICY_GROSS && order.totalGrossPrice.available) {
+		paymentTotal = order.totalGrossPrice;
+	} else if (TaxMgr.taxationPolicy == TaxMgr.TAX_POLICY_NET && order.totalNetPrice.available) {
+	
+		if (order.totalTax.available) {
+			paymentTotal = order.totalNetPrice.add(order.totalTax);
+		} else {
+			paymentTotal = order.totalNetPrice;
+		}
+		
+	} else {
+		paymentTotal = order.getAdjustedMerchandizeTotalPrice(true).add(order.giftCertificateTotalPrice);
+	}
+	
+	var paymentInstrument : OrderPaymentInstrument = null;
+	
+	//Get Valitor terminal name
+	var valitorTeminalName : String = args.TerminalID;
+	if (valitorTeminalName == null) {
+		var valitorHelper : Object = getValitorHelper();
+		paymentInstrument = valitorHelper.getValitorPaymentInstrument(order);
+		valitorTeminalName = valitorMgr.terminals[paymentInstrument.paymentMethod];
+	}
+	
+	//Create parameters
+	var paramObj = new Object();
+	paramObj['terminal'] = valitorTeminalName;
+	paramObj['shop_orderid'] = order.orderNo;
+	paramObj['amount'] = paymentTotal.value.toFixed(2);
+	paramObj['currency'] = currencyCode;
+	paramObj['language'] = convertLanguageCode(request.locale);
+	paramObj['type'] = 'payment'; //See documentation for other payment types.
+	
+	//Callback config parameters
+	if ( !empty(valitorMgr.paymentPagePipeline) ) {
+		paramObj['config[callback_form]'] = URLUtils.https( valitorMgr.paymentPagePipeline );
+	}
+	
+	//Credit card token:
+	var ST = require('~/cartridge/scripts/pipelet/SaveCreditCardToken.ds');
+	var ccToken = ST.getCcToken();
+	if (ccToken != undefined && ccToken != null) {
+		paramObj['ccToken'] = ccToken;
+	}
+		
+	//CSRF TOKEN:
+	var CSRFProtection = require('dw/web/CSRFProtection');
+	var name = CSRFProtection.getTokenName();
+	var token = '?' + name + '=' + req.httpParameterMap.csrf_token.stringValue;
+	
+	paramObj['config[callback_ok]'] = URLUtils.https( valitorMgr.paymentSuccessPipeline  ) + token;
+	paramObj['config[callback_fail]'] = URLUtils.https( valitorMgr.paymentFailPipeline ) + token;
+	paramObj['config[callback_open]'] = URLUtils.https( valitorMgr.paymentOpenPipeline ) + token;
+	
+	if (!empty(valitorMgr.redirectPipeline)) {
+		paramObj['config[callback_redirect]'] = URLUtils.https( valitorMgr.redirectPipeline );
+	}
+	if (!empty(valitorMgr.paymentNotificationPipeline)) {
+		paramObj['config[callback_notification]'] = URLUtils.https( valitorMgr.paymentNotificationPipeline ) + token;
+	}
+	
+	//Customer config parameters
+	paramObj['customer_info[email]'] = order.customerEmail;
+	paramObj['customer_info[username]'] = order.customerEmail;
+	if (order.billingAddress.phone != null && !empty(order.billingAddress.phone)) {
+		paramObj['customer_info[customer_phone]'] = order.billingAddress.phone;
+	}
+	
+	//Billing address parameters
+	paramObj['customer_info[billing_firstname]'] = order.billingAddress.firstName;
+	paramObj['customer_info[billing_lastname]'] = order.billingAddress.lastName;
+	paramObj['customer_info[billing_address]'] = order.billingAddress.address1;
+	paramObj['customer_info[billing_postal]'] = order.billingAddress.postalCode;
+	paramObj['customer_info[billing_city]'] = order.billingAddress.city;
+	if (order.billingAddress.stateCode != null && !empty(order.billingAddress.stateCode)) {
+		paramObj['customer_info[billing_region]'] = order.billingAddress.stateCode;
+	}
+	paramObj['customer_info[billing_country]'] = order.billingAddress.countryCode;
+	
+	//Shipping config parameters
+	paramObj['customer_info[shipping_firstname]'] = order.defaultShipment.shippingAddress.firstName;
+	paramObj['customer_info[shipping_lastname]'] = order.defaultShipment.shippingAddress.lastName;
+	paramObj['customer_info[shipping_address]'] = order.defaultShipment.shippingAddress.address1;
+	paramObj['customer_info[shipping_postal]'] = order.defaultShipment.shippingAddress.postalCode;
+	paramObj['customer_info[shipping_city]'] = order.defaultShipment.shippingAddress.city;
+	if (order.defaultShipment.shippingAddress.stateCode != null && !empty(order.defaultShipment.shippingAddress.stateCode)) {
+		paramObj['customer_info[shipping_region]'] = order.defaultShipment.shippingAddress.stateCode;
+	}
+	paramObj['customer_info[shipping_country]'] = order.defaultShipment.shippingAddress.countryCode;
+	
+	//Orderlines parameters
+	if (order.shipments != null) {
+		var lineIndex : Number = 1;
+		for each (let shipment : Shipment in order.shipments) {
+			//Add shipping
+			paramObj['orderLines[0][description]'] = dw.web.Resource.msg('valitor.paymentcreate.shipment','valitor','Shipment');
+			paramObj['orderLines[0][itemId]'] = 'shipment';
+			paramObj['orderLines[0][quantity]'] = '1';
+			paramObj['orderLines[0][unitPrice]'] = shipment.shippingTotalNetPrice;
+			paramObj['orderLines[0][taxAmount]'] = shipment.shippingTotalTax;
+			paramObj['orderLines[0][goodsType]'] = 'shipment';
+				
+			//Add products
+			for each (let productLineItem : ProductLineItem in shipment.productLineItems) {
+				var unitPrice : Number = productLineItem.adjustedNetPrice / productLineItem.quantity;
+				paramObj['orderLines['+lineIndex+'][description]'] = productLineItem.productName;
+				paramObj['orderLines['+lineIndex+'][itemId]'] = productLineItem.productID;
+				paramObj['orderLines['+lineIndex+'][quantity]'] = productLineItem.quantity;
+				paramObj['orderLines['+lineIndex+'][unitPrice]'] = unitPrice.toFixed(2);
+				paramObj['orderLines['+lineIndex+'][taxAmount]'] = productLineItem.adjustedTax;
+				paramObj['orderLines['+lineIndex+'][goodsType]'] = 'item';
+				
+				lineIndex++;
+			}
+				
+			//Add non product line discounts
+			var totalDiscount = 0;
+			var totalDicsountExclVAT = 0;
+			if (order.priceAdjustments.length > 0) {
+				for each (var pa in order.priceAdjustments) {
+					totalDiscount += (pa.price.value * -1);
+					totalDicsountExclVAT += (pa.netPrice.value * -1);
+				}
+			}
+			if (order.defaultShipment.adjustedShippingTotalPrice.value != order.shippingTotalPrice.value) {
+				totalDiscount += (order.shippingTotalPrice.value - order.defaultShipment.adjustedShippingTotalPrice.value);
+				totalDicsountExclVAT += (order.shippingTotalNetPrice.value - order.defaultShipment.adjustedShippingTotalNetPrice.value);
+			}
+	
+			if (totalDicsountExclVAT > 0) {
+				paramObj['orderLines['+lineIndex+'][description]'] = dw.web.Resource.msg('valitor.paymentcreate.handling','valitor','Handling');
+				paramObj['orderLines['+lineIndex+'][itemId]'] = 'handling';
+				paramObj['orderLines['+lineIndex+'][quantity]'] = '1';
+				paramObj['orderLines['+lineIndex+'][unitPrice]'] = totalDicsountExclVAT * -1;
+				paramObj['orderLines['+lineIndex+'][taxAmount]'] = totalDicsountExclVAT - totalDiscount;
+				paramObj['orderLines['+lineIndex+'][goodsType]'] = 'handling';
+			}
+		}
+	}
+	
+	//Add Order token
+	paramObj['transaction_info[demandware_order_token]'] = order.getOrderToken();
+	
+	/*
+	//add the sale_reconciliation_identifier 
+	paramObj['sale_reconciliation_identifier'] = "Insert reconciliation identifier here";
+	*/
+	
+	//Cookies
+	var cookies : Cookies = request.httpCookies;
+	var cookieArr = new Array();
+	for each (var cookie in cookies) {
+		cookieArr.push ([cookie.name, cookie.value].join( '=' ));
+	}
+	var cookieString : String = cookieArr.join( ";" );
+	paramObj['cookie'] = cookieString;
+	
+	paramObj.toHash = function() { // Valitor api requires this method to be implemented
+		return this;
+	};
+		
+	try {
+ 		
+ 		var service: HTTPFormService = ServiceRegistry.get ("int_valitor.service");
+ 		
+ 		var factory = new SalesForceValitorFactory(service);
+
+		var mapi = factory.getMerchantApi('', '', ''); // No parameters are necessary: the parameters are already saved inside the service
+		 		    	
+    	var response: PaymentRequestResponse = mapi.createPaymentRequest(paramObj);
+    	
+		if (response.success()) {
+			args.CreatePaymentURL = response.getUrl().toString();
+		} 
+		else {
+			args.CreatePaymentURL = "";
+			var errorMessage = response.getErrorMessage();
+			dw.system.Logger.error("Valitor error during create payment request. ErrorMessage = " + response.getErrorMessage());
+		}
+    
+    } 
+    catch (e) {
+    	args.CreatePaymentURL = "";
+    	var exception = e;
+    	dw.system.Logger.error("Valitor error during create payment request: " + e);
+    }
+    
+   return PIPELET_NEXT;
+}
+
+function convertLanguageCode(languageCode){
+	var pattern = /(.{2,3})(_)/;
+	var match = pattern.exec(languageCode);
+	if(match != null){
+		return match[1];
+	}
+	else{
+		return languageCode;
+	}
+}
+
+function create (pdict) {
+	
+	execute(pdict);
+	
+	if (pdict.CreatePaymentURL == '') {
+		return false;
+	}
+	else {
+		return true;
+	}
+	
+}
+
+module.exports = {
+	execute: execute,
+	create: create
+}

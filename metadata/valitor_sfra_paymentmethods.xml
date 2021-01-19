@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<payment-settings xmlns="http://www.demandware.com/xml/impex/paymentsettings/2009-09-15">
+
+    <payment-method method-id="VALITOR_CREDITCARDS">
+        <name xml:lang="x-default">Credit Card</name>
+        <enabled-flag>false</enabled-flag>
+        <processor-id>VALITOR</processor-id>
+    </payment-method>
+
+    <payment-method method-id="VALITOR_MOBILEPAY">
+        <name xml:lang="x-default">MobilePay</name>
+        <enabled-flag>false</enabled-flag>
+        <processor-id>VALITOR</processor-id>
+    </payment-method>
+
+    <payment-method method-id="VALITOR_VIABILL">
+        <name xml:lang="x-default">Viabill</name>
+        <enabled-flag>false</enabled-flag>
+        <processor-id>VALITOR</processor-id>
+    </payment-method>
+
+    <payment-method method-id="VALITOR_PAYPAL">
+        <name xml:lang="x-default">PayPal</name>
+        <enabled-flag>false</enabled-flag>
+        <processor-id>VALITOR</processor-id>
+    </payment-method>
+
+    <payment-method method-id="VALITOR_KLARNA_INVOICE">
+        <name xml:lang="x-default">Klarna Invoice</name>
+        <enabled-flag>false</enabled-flag>
+        <processor-id>VALITOR</processor-id>
+    </payment-method>
+
+    <payment-method method-id="VALITOR_KLARNA_ACCOUNT">
+        <name xml:lang="x-default">Klarna Account</name>
+        <enabled-flag>false</enabled-flag>
+        <processor-id>VALITOR</processor-id>
+    </payment-method>
+
+    <payment-method method-id="VALITOR_SOFORT">
+        <name xml:lang="x-default">Sofort</name>
+        <enabled-flag>false</enabled-flag>
+        <processor-id>VALITOR</processor-id>
+    </payment-method>
+
+    <payment-method method-id="VALITOR_IDEAL">
+        <name xml:lang="x-default">iDEAL</name>
+        <enabled-flag>false</enabled-flag>
+        <processor-id>VALITOR</processor-id>
+    </payment-method>
+
+    <payment-method method-id="VALITOR_INVOICE">
+        <name xml:lang="x-default">Invoice</name>
+        <enabled-flag>false</enabled-flag>
+        <processor-id>VALITOR</processor-id>
+    </payment-method>
+
+</payment-settings>

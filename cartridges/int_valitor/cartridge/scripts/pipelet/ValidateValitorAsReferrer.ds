@@ -1,0 +1,56 @@
+/**
+* Validate that Valitor is referrer.
+* 	@input XMLString : String The returned xml parameter value from create payment request.
+*
+* 	@output IsReferrerValitor : Boolean
+*	@output orderToken : String
+*
+*/
+// importPackage( dw.system );
+importScript("int_valitor:libValitor.ds");
+
+var VALITORREFERRERIP : Array = ["77.66.40.133"];
+var Site = require('dw/system/Site'); 
+var WHITELISTED_VALITOR_REFERRER_IPs = Site.getCurrent().getCustomPreferenceValue('valitorWhiteListedIP'); 
+
+function execute( args : PipelineDictionary ) : Number
+{
+	
+	var ret = validateValitorAsReferrer (args.XMLString);
+
+	args.IsReferrerValitor = ret.IsReferrerValitor;
+	args.orderToken= ret.orderToken;
+
+	return PIPELET_NEXT;
+}
+
+function validateValitorAsReferrer (XMLString) 
+{
+
+	var orderToken = '';
+	if(XMLString != null && !empty(XMLString)){
+		var xml_obj : XML = new XML(XMLString);
+		for(var index in xml_obj.Body.Transactions.Transaction.PaymentInfos.PaymentInfo) {
+			var paymentInfo = xml_obj.Body.Transactions.Transaction.PaymentInfos.PaymentInfo[index];
+			if(paymentInfo["@name"] == 'demandware_order_token')
+			{
+				orderToken = ""+paymentInfo;
+				break;
+			}
+		}
+	}
+	
+	var IsReferrerValitor = WHITELISTED_VALITOR_REFERRER_IPs.indexOf(request.httpRemoteAddress) > -1; 
+	//var IsReferrerValitor = VALITORREFERRERIP == request.httpRemoteAddress;
+	
+	return {
+		IsReferrerValitor: IsReferrerValitor,
+		orderToken: orderToken
+	};
+	
+}
+
+module.exports = {
+	execute: execute,
+	validateValitorAsReferrer: validateValitorAsReferrer
+}

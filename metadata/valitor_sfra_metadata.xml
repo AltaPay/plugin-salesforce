@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata xmlns="http://www.demandware.com/xml/impex/metadata/2006-10-31">
+    
+    <type-extension type-id="Order">
+        <custom-attribute-definitions>
+            <attribute-definition attribute-id="valitorErrorCode">
+                <display-name xml:lang="x-default">Valitor Error Code</display-name>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="valitorErrorMessage">
+                <display-name xml:lang="x-default">Valitor Error Message</display-name>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="valitorPaymentID">
+                <display-name xml:lang="x-default">Valitor Payment ID</display-name>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="valitorTransactionID">
+                <display-name xml:lang="x-default">Valitor Transaction ID</display-name>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="valitorTransactionStatus">
+                <display-name xml:lang="x-default">Valitor Transaction Status</display-name>
+                <type>enum-of-string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <value-definitions>
+                    <value-definition default="true">
+                        <display xml:lang="x-default">NONE</display>
+                        <value>NONE</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">PREAUTH ERROR</display>
+                        <value>PREAUTH_ERROR</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">PREAUTH FAILED</display>
+                        <value>PREAUTH_FAILED</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">PREAUTH</display>
+                        <value>PREAUTH</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">3D SECURE ERROR</display>
+                        <value>3DSECURE_ERROR</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">WALLET_OPEN</display>
+                        <value>WALLET_OPEN</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">WALLET_INITIALIZE_ERROR</display>
+                        <value>WALLET_INITIALIZE_ERROR</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">WALLET_INITIALIZE_FAILED</display>
+                        <value>WALLET_INITIALIZE_FAILED</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">EPAYMENT_OPEN</display>
+                        <value>EPAYMENT_OPEN</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">EPAYMENT_CANCELLED</display>
+                        <value>EPAYMENT_CANCELLED</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">EPAYMENT_DECLINED</display>
+                        <value>EPAYMENT_DECLINED</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">BANK_PAYMENT_FINALIZED</display>
+                        <value>BANK_PAYMENT_FINALIZED</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">INVOICE_INITIALIZED</display>
+                        <value>INVOICE_INITIALIZED</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">INVOICE_INITIALIZED_FAILED</display>
+                        <value>INVOICE_INITIALIZED_FAILED</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">INVOICE_INITIALIZED_ERROR</display>
+                        <value>INVOICE_INITIALIZED_ERROR</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">INVOICE_OPEN</display>
+                        <value>INVOICE_OPEN</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">INVOICE_CUSTOMER_VERIFIED</display>
+                        <value>INVOICE_CUSTOMER_VERIFIED</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">IDEAL_INITIALIZED</display>
+                        <value>IDEAL_INITIALIZED</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">IDEAL_INITIALIZE_FAILED</display>
+                        <value>IDEAL_INITIALIZE_FAILED</value>
+                    </value-definition>
+                     <value-definition>
+                        <display xml:lang="x-default">IDEAL_INITIALIZE_ERROR</display>
+                        <value>IDEAL_INITIALIZE_ERROR</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">RELEASED FAILED</display>
+                        <value>RELEASED_FAILED</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">RELEASED</display>
+                        <value>RELEASED</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">CAPTURED FAILED</display>
+                        <value>CAPTURED_FAILED</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">CAPTURED</display>
+                        <value>CAPTURED</value>
+                    </value-definition>
+                </value-definitions>
+            </attribute-definition>         
+        </custom-attribute-definitions>
+        <group-definitions>
+            <attribute-group group-id="Valitor">
+                <display-name xml:lang="x-default">Valitor</display-name>
+                <attribute attribute-id="valitorTransactionStatus"/>
+                <attribute attribute-id="valitorTransactionID"/>
+                <attribute attribute-id="valitorPaymentID"/>
+                <attribute attribute-id="valitorErrorCode"/>
+                <attribute attribute-id="valitorErrorMessage"/>
+            </attribute-group>
+        </group-definitions>
+    </type-extension>
+
+    <type-extension type-id="OrderPaymentInstrument">
+        <custom-attribute-definitions>
+            <attribute-definition attribute-id="reconciliationIdentifier">
+                <display-name xml:lang="x-default">Reconciliation Identifier</display-name>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+        </custom-attribute-definitions>
+    </type-extension>
+
+    <type-extension type-id="Profile">
+        <custom-attribute-definitions>
+            <attribute-definition attribute-id="valitorCreditCardToken">
+                <display-name xml:lang="x-default">Credit Card Token for Valitor</display-name>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+        </custom-attribute-definitions>
+        <group-definitions>
+            <attribute-group group-id="Valitor">
+                <display-name xml:lang="x-default">Valitor</display-name>
+                <attribute attribute-id="valitorCreditCardToken"/>
+            </attribute-group>
+        </group-definitions>
+    </type-extension>
+     
+    <type-extension type-id="SitePreferences">
+        <custom-attribute-definitions>
+            <attribute-definition attribute-id="valitorBaseProductionURL">
+                <display-name xml:lang="x-default">Valitor base production URL</display-name>
+                <description xml:lang="x-default">Base production URL that needs to be used for requests</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <default-value>https://[YourShopName].pensio.com</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="valitorBaseTestURL">
+                <display-name xml:lang="x-default">Valitor base test URL</display-name>
+                <description xml:lang="x-default">Base test URL that needs to be used for requests</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <default-value>https://testgateway.pensio.com</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="valitorPassword">
+                <display-name xml:lang="x-default">Valitor Production Password</display-name>
+                <description xml:lang="x-default">Password for production terminals</description>
+                <type>password</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="valitorPaymentFailPipeline">
+                <display-name xml:lang="x-default">Valitor payment fail URL</display-name>
+                <description xml:lang="x-default">Commerce Cloud fail landing page if authorization is unsuccessfull.</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <default-value>Valitor-PaymentFail</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="valitorPaymentNotificationPipeline">
+                <display-name xml:lang="x-default">Valitor payment notification URL</display-name>
+                <description xml:lang="x-default">Commerce Cloud notification landing page to update an open order.</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <default-value>Valitor-PaymentNotification</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="valitorPaymentOpenPipeline">
+                <display-name xml:lang="x-default">Valitor payment open URL</display-name>
+                <description xml:lang="x-default">Commerce Cloud success/receipt landing page if authorization is open.</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <default-value>Valitor-PaymentOpen</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="valitorPaymentPagePipeline">
+                <display-name xml:lang="x-default">Valitor payment page URL</display-name>
+                <description xml:lang="x-default">Commerce Cloud payment page URL Valitor should merge payment form into.</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <default-value>Valitor-CallbackForm</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="valitorPaymentSuccessPipeline">
+                <display-name xml:lang="x-default">Valitor payment success URL</display-name>
+                <description xml:lang="x-default">Commerce Cloud success/receipt landing page if authorization is successfull.</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <default-value>Valitor-PaymentSuccess</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="valitorTerminals">
+                <display-name xml:lang="x-default">Valitor terminals</display-name>
+                <description xml:lang="x-default">Terminals to be used for authorization/capture requests.</description>
+                <type>text</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="valitorTestMode">
+                <display-name xml:lang="x-default">Valitor Test Mode</display-name>
+                <description xml:lang="x-default">Defines if the testing mode should be enabled.</description>
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <default-value>false</default-value>
+            </attribute-definition>
+            <attribute-definition attribute-id="valitorTestPassword">
+                <display-name xml:lang="x-default">Valitor Test Password</display-name>
+                <description xml:lang="x-default">Password for test terminals</description>
+                <type>password</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="valitorTestUsername">
+                <display-name xml:lang="x-default">Valitor Test Username</display-name>
+                <description xml:lang="x-default">Username for test terminals</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="valitorUsername">
+                <display-name xml:lang="x-default">Valitor Production Username</display-name>
+                <description xml:lang="x-default">Username for production terminals</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="valitorWhiteListedIP">
+                <display-name xml:lang="x-default">Valitor WhiteListed IP's</display-name>
+                <type>set-of-string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+        </custom-attribute-definitions>
+        <group-definitions>
+            <attribute-group group-id="Valitor">
+                <display-name xml:lang="x-default">Valitor</display-name>
+                <attribute attribute-id="valitorTestMode"/>
+                <attribute attribute-id="valitorBaseProductionURL"/>
+                <attribute attribute-id="valitorBaseTestURL"/>
+                <attribute attribute-id="valitorUsername"/>
+                <attribute attribute-id="valitorPassword"/>
+                <attribute attribute-id="valitorTestUsername"/>
+                <attribute attribute-id="valitorTestPassword"/>
+                <attribute attribute-id="valitorTerminals"/>
+                <attribute attribute-id="valitorPaymentPagePipeline"/>
+                <attribute attribute-id="valitorPaymentSuccessPipeline"/>
+                <attribute attribute-id="valitorPaymentFailPipeline"/>
+                <attribute attribute-id="valitorPaymentOpenPipeline"/>
+                <attribute attribute-id="valitorPaymentNotificationPipeline"/>
+                <attribute attribute-id="valitorWhiteListedIP"/>
+            </attribute-group>
+        </group-definitions>
+    </type-extension>
+</metadata>

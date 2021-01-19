@@ -1,0 +1,81 @@
+{
+	"terminals": {
+		"production": {
+			"GBP": [{
+				"id": "VALITOR_CREDITCARDS_GBP",
+				"name": "salesforce Test Terminal",
+				"allowedlocales": ["en_GB"]
+			}, {
+				"id": "VALITOR_PAYPAL_GBP",
+				"name": "salesforce PayPal Wallet Test Terminal",
+				"allowedlocales": ["en", "en_GB"]
+			}]
+		},
+		"test": {
+            "USD": [{
+				"id": "VALITOR_CREDITCARDS_USD",
+				"name": "salesforce Test Terminal",
+				"allowedlocales": ["en", "en_US"]
+			}, {
+				"id": "VALITOR_PAYPAL_USD",
+				"name": "salesforce PayPal Wallet Test Terminal",
+				"allowedlocales": ["en", "en_US"]
+			}, {
+				"id": "VALITOR_INVOICE_USD",
+				"name": "salesforce Invoice Test Terminal",
+				"allowedlocales": ["en", "en_US"]
+			}],
+			"GBP": [{
+				"id": "VALITOR_CREDITCARDS_GBP",
+				"name": "salesforce Test Terminal",
+				"allowedlocales": ["en", "en_GB"]
+			}, {
+				"id": "VALITOR_PAYPAL_GBP",
+				"name": "salesforce PayPal Wallet Test Terminal",
+				"allowedlocales": ["en", "en_GB"]
+			}, {
+				"id": "VALITOR_INVOICE_GBP",
+				"name": "salesforce Invoice Test Terminal",
+				"allowedlocales": ["en", "en_GB"]
+			}],
+			"EUR": [{
+				"id": "VALITOR_CREDITCARDS_EUR",
+				"name": "salesforce Test Terminal",
+				"allowedlocales": ["fr", "fr_FR"]
+			}, {
+				"id": "VALITOR_PAYPAL_EUR",
+				"name": "salesforce PayPal Wallet Test Terminal",
+				"allowedlocales": ["fr", "fr_FR"]
+			}, {
+				"id": "VALITOR_IDEAL_EUR",
+				"name": "salesforce iDEAL Test Terminal",
+				"allowedlocales": ["fr", "fr_FR"]
+			}, {
+				"id": "VALITOR_INVOICE_EUR",
+				"name": "salesforce Invoice Test Terminal",
+				"allowedlocales": ["fr", "fr_FR"]
+			}],
+			"DKK": [{
+				"id": "VALITOR_CREDITCARDS_DKK",
+				"name": "salesforce Test Terminal",
+				"allowedlocales": ["da", "da_DK"]
+			}, {
+				"id": "VALITOR_PAYPAL_DKK",
+				"name": "salesforce PayPal Wallet Test Terminal",
+				"allowedlocales": ["da", "da_DK"]
+			}, {
+				"id": "VALITOR_INVOICE_DKK",
+				"name": "salesforce Invoice Test Terminal",
+				"allowedlocales": ["da", "da_DK"]
+			}, {
+				"id": "VALITOR_MOBILEPAY_DKK",
+				"name": "salesforce MobilePay Test Terminal",
+				"allowedlocales": ["da", "da_DK"]
+			}, {
+				"id": "VALITOR_VIABILL_DKK",
+				"name": "salesforce ViaBill Test Terminal",
+				"allowedlocales": ["da", "da_DK"]
+			}]
+		}
+	}
+}

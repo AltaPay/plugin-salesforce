@@ -1,0 +1,3 @@
+{
+   "init": ["int_valitor/cartridge/scripts/init/valitorServiceInit.ds"]
+}

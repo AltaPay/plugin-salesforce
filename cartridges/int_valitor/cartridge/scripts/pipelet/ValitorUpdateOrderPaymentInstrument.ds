@@ -1,0 +1,126 @@
+/**
+ * Adds the payment values from Valitor to the order payment instrument on the current order.
+ *
+ * @input Order 	: dw.order.Order The current order
+ * @input XMLString : String The returned xml parameter value from create payment request.
+ * @input OrderConfirmed : Boolean This indicates, that the payment has been confirmed or not.
+ */
+importPackage( dw.order );
+importPackage( dw.system );
+importScript( 'int_valitor:/libValitorHelper.ds' );
+importScript( 'int_valitor:jssdk/Rhino-Valitor-Jssdk-20170629_033936.js' );
+
+function execute( args : PipelineDictionary ) : Number {
+	
+	var order : Order = args.Order;
+	if( args.Order == null) {
+		Logger.error( 'ValitorUpdateOrderPaymentInstrument.ds: Order isn\'t available.' );
+		return PIPELET_ERROR;
+	}
+	
+	var valitorHelper : Object = getValitorHelper();
+	var valitorPaymentInstrument : OrderPaymentInstrument = valitorHelper.getValitorPaymentInstrument( order );
+	if ( valitorPaymentInstrument == null ) {
+		Logger.error( 'ValitorUpdateOrderPaymentInstrument.ds: PaymentInstrument not found!');
+		return PIPELET_ERROR;
+	} else if ( !valitorHelper.isValitor ) {
+		//Not an Valitor payment.
+		return PIPELET_NEXT;
+	}
+
+	if (args.XMLString != null && !empty(args.XMLString)) {
+		
+		var xml_obj : XML = new XML(args.XMLString);
+		
+		var factory = new ResponseFactory();
+		
+		var cbr = factory.getCallbackResponse(xml_obj);
+		
+		//Create parameters
+		var MaskedCardNo : String = encodeURIComponent(cbr.getPayment(0).getCreditCardMaskedPan());
+		var TransactionID : String = encodeURIComponent(cbr.getTransactionId());
+		var CreditCardType : String = encodeURIComponent(cbr.getPayment(0).getPaymentSchemeName());
+		var CardExirationMonth : String = encodeURIComponent(cbr.getPayment(0).getCreditCardExpiryMonth());
+		var CardExirationYear : String = encodeURIComponent(cbr.getPayment(0).getCreditCardExpiryYear());
+		var ReconciliationID : String = encodeURIComponent(cbr.getPayment(0).getReconciliationIdentifier());
+	}
+	
+	//Settings payment status
+	if(args.OrderConfirmed){
+		order.setConfirmationStatus(Order.CONFIRMATION_STATUS_CONFIRMED);
+	}
+	else{
+		order.setConfirmationStatus(Order.CONFIRMATION_STATUS_NOTCONFIRMED);
+	}
+
+	//setting card number	
+	if ( !empty(MaskedCardNo) ) {
+		valitorPaymentInstrument.setCreditCardNumber( MaskedCardNo );
+	}
+	//setting transaction id	
+	var paymentTransaction : dw.order.PaymentTransaction = valitorPaymentInstrument.paymentTransaction;
+	paymentTransaction.setTransactionID( TransactionID );
+
+	//setting expiration date	
+	if ( !empty(CardExirationMonth) && !empty(CardExirationYear) ) {
+		var month : String = CardExirationMonth;
+		var year : String = CardExirationYear.substr(2, 4);
+		
+		valitorPaymentInstrument.setCreditCardExpirationMonth(parseInt(month, 10));
+		valitorPaymentInstrument.setCreditCardExpirationYear(parseInt(year, 10));
+	}
+	
+	//Set reconciliation ID
+    try{
+        var txn = require('dw/system/Transaction');
+        var custom : CustomAttributes = valitorPaymentInstrument.getCustom();
+        if(ReconciliationID != null){
+            txn.wrap (
+                function () {
+                    custom.reconciliationIdentifier = ReconciliationID;
+                });
+        }
+    }
+    catch(e){
+        //The reconciliationIdentifier was set on the Order Payment Instrument        
+    }
+    
+	//Update payment instrument
+	if(valitorPaymentInstrument != null){
+		var paymentManager : dw.order.PaymentMgr = PaymentMgr.getPaymentMethod(valitorPaymentInstrument.paymentMethod);
+	  	valitorPaymentInstrument.paymentTransaction.paymentProcessor = paymentManager.paymentProcessor;
+	}
+	
+	//setting credit card type
+	var creditCardType : String = CreditCardType;
+	if ( !empty(creditCardType) ) {
+		valitorPaymentInstrument.setCreditCardType(creditCardType);
+	}
+	
+   return PIPELET_NEXT;
+}
+
+function updateOrderPaymentInstrument (order: Order, xmlString: String, orderConfirmed: Boolean) {
+	
+	var ret = execute(
+		{
+			Order: order,
+			XMLString: xmlString,
+			OrderConfirmed: orderConfirmed
+		});
+		
+	if (ret == PIPELET_NEXT) {
+		return true;
+	}
+	else {
+		return false;
+	}
+	
+}
+
+module.exports = {
+	execute: execute,
+	updateOrderPaymentInstrument: updateOrderPaymentInstrument
+}
+
+
