@@ -206,7 +206,7 @@ From the SFCC Business Manager:
     | **AltaPay Test Username** | Username for the test gateway and terminals. |
     | **AltaPay Test Password** | Password for the test gateway and terminals. |
     | **AltaPay Timeout** | Timeout (seconds) for communication with AltaPay backend. <br> **Warning:** Do not change this without consulting AltaPay. |
-    | **AltaPay Terminals** | Mapping of payment methods in Salesforce and terminals in the AltaPay payment gateway. <br> A terminal can only contain one payment method and one currency, but it is possible to add all the relevant terminals. <br> ![terminals.png](docs/terminals.png) <br> The setting must be structured as shown in the screen illustration. <br> The attribute ‘id’ must correspond with the payment method added in: **Merchant Tools** → **Ordering** → **Payment Methods** plus the preferred currency. The attribute ‘name’ is the name and identifier of the AltaPay terminal. The attribute ‘allowedlocales’ defines which locales that can use the terminal. |
+    | **AltaPay Terminals** | Mapping of payment methods in Salesforce and terminals in the AltaPay payment gateway. <br> A terminal can only contain one payment method and one currency, but it is possible to add all the relevant terminals. <br> ![terminals.png](docs/terminals.png) <br> The setting must be structured as shown in the screen illustration. <br> The attribute **id** must correspond with the payment method added in: **Merchant Tools** > **Ordering** > **Payment Methods** plus the preferred currency. The attribute **name** is the name and identifier of the AltaPay terminal. The attribute **allowedlocales** defines which locales that can use the terminal. |
 
     ---
 
@@ -332,7 +332,7 @@ Add the code below to use the AltaPay specific client JS when the AltaPay cartri
 
     ![checkoutisml](docs/checkoutisml.png)
 
-4. Insert altapayCheckout.js file provided in the “Custom Code” folder to **app_storefront_base** > **cartridge** > **client** > **default** > **js**
+4. Insert altapayCheckout.js file provided in the **Custom Code** folder to **app_storefront_base** > **cartridge** > **client** > **default** > **js**
 
     ![altapayCheckoutjs](docs/altapayCheckoutjs.png)
 
@@ -386,7 +386,7 @@ A Test bank is also available if the merchant needs to test PayPal, iDEAL, or ot
 
 **Preconditions for the following test scenarios:**
 
-1. Imported `altapay_sfra_metadata.xml`
+1. Imported `valitor_sfra_metadata.xml`
    - Updated the ‘Custom Site Preferences’ with AltaPay user with API access rights
    - Added terminals for credit card and/or alternative payment
 2. Items available in the storefront
@@ -396,92 +396,92 @@ A Test bank is also available if the merchant needs to test PayPal, iDEAL, or ot
 ### Successful Card Payment
 
 1. Add an item to the cart.  
-2. Click **“View cart.”**  
-3. When the shopping cart is shown, click on the **“Checkout”** button.  
+2. Click **View cart.**  
+3. When the shopping cart is shown, click on the **Checkout** button.  
 4. Select either **Guest checkout** or **Login**.  
    - If guest checkout, fill in the information.  
 5. Select shipping method.  
-6. Click on **“Next: Payment”** button.  
+6. Click on **Next: Payment** button.  
 7. Fill in remaining information.  
-8. Select **“Credit Card”** as payment method.  
-9. Click on **“Next: Place Order”** button.  
+8. Select **Credit Card** as payment method.  
+9. Click on **Next: Place Order** button.  
 10. The payment page appears. Ensure it is a payment page for card payments.  
-11. Enter card details (use random numbers) and click on **“Submit”** button.  
+11. Enter card details (use random numbers) and click on **Submit** button.  
 12. Verify that the confirmation page is shown with correct information and without any error message. Take a note of the order number.  
 13. From the SFCC Business Manager navigate to: **Merchant Tools → Ordering → Orders.**  
-    Locate and select the order and verify that the order has been handled correctly – **“Confirmation Status” = confirmed.**  
+    Locate and select the order and verify that the order has been handled correctly – **Confirmation Status” = confirmed.**  
 14. Log in to [https://testgateway.altapaysecure.com](https://testgateway.altapaysecure.com) and locate the order by the order number via the search box in the top right corner.  
-    Check that the amount corresponds with the information in Business Manager and ensure that the status of the payment is **“preauth.”**
+    Check that the amount corresponds with the information in Business Manager and ensure that the status of the payment is **preauth.**
 
 ### Failed Card Payment
 
 1. Add an item to the cart.  
-2. Click **“View cart.”**  
-3. When the shopping cart is shown, click on the **“Checkout”** button.  
+2. Click **View cart.**  
+3. When the shopping cart is shown, click on the **Checkout** button.  
 4. Select either **Guest checkout** or **Login**.  
    - If guest checkout, fill in the information.  
 5. Select shipping method.  
-6. Click on **“Next: Payment”** button.  
+6. Click on **Next: Payment** button.  
 7. Fill in remaining information.  
-8. Select **“Credit Card”** as payment method.  
-9. Click on **“Next: Place Order”** button.  
+8. Select **Credit Card** as payment method.  
+9. Click on **Next: Place Order** button.  
 10. The payment page appears. Ensure it is a payment page for card payments.  
 11. Enter card details – use the following payment information:  
     - **Card number:** 4180000000000566  
     - **Expiry month:** 05  
     - **Expiry year:** 2019  
     - **CVC:** 444  
-12. Click on **“Submit”** button.  
+12. Click on **Submit** button.  
 13. Ensure that the user is redirected back to the Checkout flow.  
     Error messages are returned from the AltaPay controller, but the merchant must implement custom functionality to show these messages.  
     See **Requirements** for more details.  
 14. From the SFCC Business Manager, navigate to: **Merchant Tools → Ordering → Orders.**  
-    Locate and select the order and verify that the order has been handled correctly – **“Order Status” = failed.**  
+    Locate and select the order and verify that the order has been handled correctly – **Order Status” = failed.**  
     Take a note of the order number.  
 15. Log in to [https://testgateway.altapaysecure.com](https://testgateway.altapaysecure.com) and locate the order by the order number via the search box in the top right corner.  
-    Ensure that the status of the order is **“preauth_failed.”**
+    Ensure that the status of the order is **preauth_failed.**
 
 ### 3D Secure Card Payment
 
 1. Add an item to the cart.  
-2. Click **“View cart.”**  
-3. When the shopping cart is shown, click on the **“Checkout”** button.  
+2. Click **View cart.**  
+3. When the shopping cart is shown, click on the **Checkout** button.  
 4. Select either **Guest checkout** or **Login**.  
    - If guest checkout, fill in the information.  
 5. Select shipping method.  
-6. Click on **“Next: Payment”** button.  
+6. Click on **Next: Payment** button.  
 7. Fill in remaining information.  
-8. Select **“Credit Card”** as payment method.  
-9. Click on **“Next: Place Order”** button.  
+8. Select **Credit Card** as payment method.  
+9. Click on **Next: Place Order** button.  
 10. The payment page appears. Ensure it is a payment page for card payments.  
 11. Enter card details – use the following payment information:  
     - **Card number:** 4170000000000568  
     - **Expire month:** 05  
     - **Expire year:** 2019  
     - **CVC:** 444  
-12. Click on **“Submit”** button.  
+12. Click on **Submit** button.  
 13. The user is redirected to the issuing bank **3D Secure confirmation page**.  
     Enter the correct validation information. If you are testing against the test gateway, a mock-up 3D Secure page is shown.  
-    Click **“Redirect”** button.  
+    Click **Redirect** button.  
 14. Verify that the confirmation page is shown with correct information and without any error message.  
     Take a note of the order number.  
 15. From the SFCC Business Manager navigate to: **Merchant Tools → Ordering → Orders.**  
-    Locate and select the order and verify that the order has been handled correctly – **“Confirmation Status” = confirmed.**  
+    Locate and select the order and verify that the order has been handled correctly – **Confirmation Status” = confirmed.**  
 16. Log in to [https://testgateway.altapaysecure.com](https://testgateway.altapaysecure.com) and locate the order by the order number via the search box in the top right corner.  
-    Check that the amount corresponds with the information in Business Manager and ensure that the status of the payment is **“preauth”** and **“3D Secure result”** is successful.
+    Check that the amount corresponds with the information in Business Manager and ensure that the status of the payment is **preauth** and **3D Secure result** is successful.
 
 ### 3D Secure Failed Card Payment
 
 1. Add an item to the cart.  
-2. Click **“View cart.”**  
-3. When the shopping cart is shown, click on the **“Checkout”** button.  
+2. Click **View cart.**  
+3. When the shopping cart is shown, click on the **Checkout** button.  
 4. Select either **Guest checkout** or **Login**.  
    - If guest checkout, fill in the information.  
 5. Select shipping method.  
-6. Click on **“Next: Payment”** button.  
+6. Click on **Next: Payment** button.  
 7. Fill in remaining information.  
-8. Select **“Credit Card”** as payment method.  
-9. Click on **“Next: Place Order”** button.  
+8. Select **Credit Card** as payment method.  
+9. Click on **Next: Place Order** button.  
 10. The payment page appears. Ensure it is a payment page for card payments.  
 11. Enter card details – use the following payment information:  
     - **Card number:** 4170000000000568  
@@ -490,182 +490,182 @@ A Test bank is also available if the merchant needs to test PayPal, iDEAL, or ot
     - **CVC:** 444  
 12. The user is redirected to the issuing bank **3D Secure confirmation page**.  
     Enter the correct validation information. If you are testing against the test gateway, a mock-up 3D Secure page is shown.  
-    Click **“Redirect”** button.  
+    Click **Redirect** button.  
 13. Ensure that the user is redirected back to the Checkout flow.  
     Error messages are returned from the AltaPay controller but the merchant will have to implement custom functionality to show these messages.  
     See **Requirements** for more details.  
 14. From the SFCC Business Manager navigate to: **Merchant Tools → Ordering → Orders.**  
-    Locate and select the order and verify that the order has been handled correctly – **“Order Status” = failed.**  
+    Locate and select the order and verify that the order has been handled correctly – **Order Status” = failed.**  
     Take a note of the order number.  
 15. Log in to [https://testgateway.altapaysecure.com](https://testgateway.altapaysecure.com) and locate the order by the order number via the search box in the top right corner.  
-    Ensure that the status of the order is **“preauth_failed.”**
+    Ensure that the status of the order is **preauth_failed.**
 
 ### Successful Alternative Payment
 
 1. Add an item to the cart.  
-2. Click **“View cart.”**  
-3. When the shopping cart is shown, click on the **“Checkout”** button.  
+2. Click **View cart.**  
+3. When the shopping cart is shown, click on the **Checkout** button.  
 4. Select either **Guest checkout** or **Login**.  
    - If guest checkout, fill in the information.  
 5. Select shipping method.  
-6. Click on **“Next: Payment”** button.  
+6. Click on **Next: Payment** button.  
 7. Fill in remaining information.  
-8. Select preferred **“alternative”** payment option as payment method.  
-9. Click on **“Next: Place Order”** button.  
+8. Select preferred **alternative** payment option as payment method.  
+9. Click on **Next: Place Order** button.  
 10. Verify that the customer is redirected to the alternative payment provider webpage.  
     Verify the pending payment.  
 11. If you are testing against the test gateway, a mock-up for bank and alternative payment solutions will be shown.  
-    If that is the case, click **“Sign in”** (no credentials needed) and **“Accept.”**  
+    If that is the case, click **Sign in** (no credentials needed) and **Accept.**  
 12. Verify that the confirmation page is shown with correct information and without any error message.  
 13. Take a note of the order number.  
 14. From the SFCC Business Manager navigate to: **Merchant Tools → Ordering → Orders.**  
-    Locate and select the order and verify that the order has been handled correctly – **“Confirmation Status” = confirmed.**  
+    Locate and select the order and verify that the order has been handled correctly – **Confirmation Status” = confirmed.**  
 15. Log in to [https://testgateway.altapaysecure.com](https://testgateway.altapaysecure.com) and locate the order by the order number via the search box in the top right corner.  
-    Check that the amount corresponds with the information in Business Manager and ensure that the status of the payment is **“preauth”** or **“bank_payment_finalized,”** depending on the acquirer.
+    Check that the amount corresponds with the information in Business Manager and ensure that the status of the payment is **preauth** or **bank_payment_finalized,** depending on the acquirer.
 
 
 ### Failed Alternative Payment (Customer Cancel)
 
 1. Add an item to the cart.  
-2. Click **“View cart.”**  
-3. When the shopping cart is shown, click on the **“Checkout”** button.  
+2. Click **View cart.**  
+3. When the shopping cart is shown, click on the **Checkout** button.  
 4. Select either **Guest checkout** or **Login**.  
    - If guest checkout, fill in the information.  
 5. Select shipping method.  
-6. Click on **“Next: Payment”** button.  
+6. Click on **Next: Payment** button.  
 7. Fill in remaining information.  
-8. Select preferred **“alternative”** payment option as payment method.  
-9. Click on **“Next: Place Order”** button.  
+8. Select preferred **alternative** payment option as payment method.  
+9. Click on **Next: Place Order** button.  
 10. If you are testing against the test gateway, a mock-up for bank and alternative payment solutions will be shown.  
-    If that is the case, click **“Developer options”** and **“Cancel.”**  
+    If that is the case, click **Developer options** and **Cancel.**  
 11. Ensure that the user is redirected back to the Checkout flow.  
     Error messages are returned from the AltaPay controller, but the merchant will have to implement custom functionality to show these messages.  
     See **Requirements** for more details.  
 12. From the SFCC Business Manager navigate to: **Merchant Tools → Ordering → Orders.**  
-    Locate and select the order and verify that the order has been handled correctly – **“Order Status” = failed.**  
+    Locate and select the order and verify that the order has been handled correctly – **Order Status” = failed.**  
 13. Take a note of the order number.  
 14. Log in to [https://testgateway.altapaysecure.com](https://testgateway.altapaysecure.com) and locate the order by the order number via the search box in the top right corner.  
-    Check that the amount corresponds with the information in Business Manager and ensure that the status of the payment is **“epayment_cancelled”** or **“preauth_failed,”** depending on the acquirer.
+    Check that the amount corresponds with the information in Business Manager and ensure that the status of the payment is **epayment_cancelled** or **preauth_failed,** depending on the acquirer.
 
 ### Failed Alternative Payment
 
 1. Add an item to the cart.  
-2. Click **“View cart.”**  
-3. When the shopping cart is shown, click on the **“Checkout”** button.  
+2. Click **View cart.**  
+3. When the shopping cart is shown, click on the **Checkout** button.  
 4. Select either **Guest checkout** or **Login**.  
    - If guest checkout, fill in the information.  
 5. Select shipping method.  
-6. Click on **“Next: Payment”** button.  
+6. Click on **Next: Payment** button.  
 7. Fill in remaining information.  
-8. Select preferred **“alternative”** payment option as payment method.  
-9. Click on **“Next: Place Order”** button.  
+8. Select preferred **alternative** payment option as payment method.  
+9. Click on **Next: Place Order** button.  
 10. If you are testing against the test gateway, a mock-up for bank and alternative payment solutions will be shown.  
-    If that is the case, click **“Developer options”** and **“Declined.”**  
+    If that is the case, click **Developer options** and **Declined.**  
 11. Ensure that the user is redirected back to the Checkout flow.  
     Error messages are returned from the AltaPay controller, but the merchant will have to implement custom functionality to show these messages.  
     See **Requirements** for more details.  
 12. From the SFCC Business Manager navigate to: **Merchant Tools → Ordering → Orders.**  
-    Locate and select the order and verify that the order has been handled correctly – **“Order Status” = failed.**  
+    Locate and select the order and verify that the order has been handled correctly – **Order Status” = failed.**  
 13. Take a note of the order number.  
 14. Log in to [https://testgateway.altapaysecure.com](https://testgateway.altapaysecure.com) and locate the order by the order number via the search box in the top right corner.  
-    Check that the amount corresponds with the information in Business Manager and ensure that the status of the payment is **“epayment_declined”** or **“preauth_failed,”** depending on the acquirer.
+    Check that the amount corresponds with the information in Business Manager and ensure that the status of the payment is **epayment_declined** or **preauth_failed,** depending on the acquirer.
 
 
 ### Successful Alternative Payment Notification
 
 1. Add an item to the cart.  
-2. Click **“View cart.”**  
-3. When the shopping cart is shown, click on the **“Checkout”** button.  
+2. Click **View cart.**  
+3. When the shopping cart is shown, click on the **Checkout** button.  
 4. Select either **Guest checkout** or **Login**.  
    - If guest checkout, fill in the information.  
 5. Select shipping method.  
-6. Click on **“Next: Payment”** button.  
+6. Click on **Next: Payment** button.  
 7. Fill in remaining information.  
-8. Select preferred **“alternative”** payment option as payment method.  
-9. Click on **“Next: Place Order”** button.  
+8. Select preferred **alternative** payment option as payment method.  
+9. Click on **Next: Place Order** button.  
 10. Verify that the customer is redirected to the alternative payment provider webpage.  
     Verify the pending payment.  
 11. If you are testing against the test gateway, a mock-up for bank and alternative payment solutions will be shown.  
-    If that is the case, click **“Developer options”** and **“Open”** (opens in a new window).  
+    If that is the case, click **Developer options** and **Open** (opens in a new window).  
     Do not close the test bank page.  
 12. Verify that the confirmation page is shown with correct information and without any error message.  
 13. Take a note of the order number.  
 14. From the SFCC Business Manager navigate to: **Merchant Tools → Ordering → Orders.**  
-    Locate and select the order and verify that the order has been handled correctly – **“Confirmation Status” = Not confirmed.**  
+    Locate and select the order and verify that the order has been handled correctly – **Confirmation Status” = Not confirmed.**  
 15. Go back to the test bank page and click **‘Call success notification now.’**  
     It can take a couple of minutes before the actual notification is triggered via the API.  
-16. Repeat step 5 and verify that the status has changed from **“Not confirmed”** to **“Confirmed.”**  
+16. Repeat step 5 and verify that the status has changed from **Not confirmed** to **Confirmed.**  
 17. Log in to [https://testgateway.altapaysecure.com](https://testgateway.altapaysecure.com) and locate the order by the order number via the search box in the top right corner.  
-    Check that the amount corresponds with the information in Business Manager and ensure that the status of the payment is **“preauth”** or **“bank_payment_finalized,”** depending on the acquirer.
+    Check that the amount corresponds with the information in Business Manager and ensure that the status of the payment is **preauth** or **bank_payment_finalized,** depending on the acquirer.
 
 ### Failed Alternative Payment Notification
 
 1. Add an item to the cart.  
-2. Click **“View cart.”**  
-3. When the shopping cart is shown, click on the **“Checkout”** button.  
+2. Click **View cart.**  
+3. When the shopping cart is shown, click on the **Checkout** button.  
 4. Select either **Guest checkout** or **Login**.  
    - If guest checkout, fill in the information.  
 5. Select shipping method.  
-6. Click on **“Next: Payment”** button.  
+6. Click on **Next: Payment** button.  
 7. Fill in remaining information.  
-8. Select preferred **“alternative”** payment option as payment method.  
-9. Click on **“Next: Place Order”** button.  
+8. Select preferred **alternative** payment option as payment method.  
+9. Click on **Next: Place Order** button.  
 10. Verify that the customer is redirected to the alternative payment provider webpage.  
     Verify the pending payment.  
 11. If you are testing against the test gateway, a mock-up for bank and alternative payment solutions will be shown.  
-    If that is the case, click **“Developer options”** and **“Open”** (opens in a new window).  
+    If that is the case, click **Developer options** and **Open** (opens in a new window).  
     Do not close the test bank page.  
 12. Verify that the confirmation page is shown with correct information and without any error message.  
 13. Take a note of the order number.  
 14. From the SFCC Business Manager navigate to: **Merchant Tools → Ordering → Orders.**  
-    Locate and select the order and verify that the order has been handled correctly – **“Confirmation Status” = Not confirmed.**  
+    Locate and select the order and verify that the order has been handled correctly – **Confirmation Status” = Not confirmed.**  
 15. Go back to the test bank page and click **‘Call declined notification now.’**  
     It can take a couple of minutes before the actual notification is triggered via the API.  
-16. Repeat step 5 and verify that the status has changed from **“Not confirmed”** to **“Cancelled.”**
+16. Repeat step 5 and verify that the status has changed from **Not confirmed** to **Cancelled.**
 
 ### Fraud Checking (Accepted Credit Card)
 
 1. Add an item to the cart.  
-2. Click **“View cart.”**  
-3. When the shopping cart is shown, click on the **“Checkout”** button.  
+2. Click **View cart.**  
+3. When the shopping cart is shown, click on the **Checkout** button.  
 4. Select either **Guest checkout** or **Login**.  
    - If guest checkout, fill in the information.  
 5. Select shipping method.  
-6. Click on **“Next: Payment”** button.  
+6. Click on **Next: Payment** button.  
 7. Fill in remaining information.  
-8. Select **“Credit Card”** as payment method.  
-9. Click on **“Next: Place Order”** button.  
+8. Select **Credit Card** as payment method.  
+9. Click on **Next: Place Order** button.  
 10. The payment page appears. Ensure it is a payment page for card payments.  
-11. Use a credit card number enabled for fraud checking — for example, **4170000000000006**, which returns the **“Accept”** status.  
+11. Use a credit card number enabled for fraud checking — for example, **4170000000000006**, which returns the **Accept** status.  
 12. Verify that the confirmation page is shown with correct information and without any error message.  
     Take a note of the order number.  
 13. From the SFCC Business Manager navigate to: **Merchant Tools → Ordering → Orders.**  
-    Locate and select the order and verify that the order has been handled correctly – **“Confirmation Status” = Confirmed.**  
+    Locate and select the order and verify that the order has been handled correctly – **Confirmation Status” = Confirmed.**  
 14. Log in to [https://testgateway.altapaysecure.com](https://testgateway.altapaysecure.com) and locate the order by the order number via the search box in the top right corner.  
-    Check that the amount corresponds with the information in Business Manager and ensure that the status of the payment is **“preauth.”**  
+    Check that the amount corresponds with the information in Business Manager and ensure that the status of the payment is **preauth.**  
 15. Repeat with a credit card that returns the **‘Challenge’** status — for example, **5250000000000121.**  
 16. Repeat with a credit card that returns the **‘Unknown’** status — for example, **5110000000000113.**
 
 ### Fraud Checking (Denied Credit Card)
 
 1. Add an item to the cart.  
-2. Click **“View cart.”**  
-3. When the shopping cart is shown, click on the **“Checkout”** button.  
+2. Click **View cart.**  
+3. When the shopping cart is shown, click on the **Checkout** button.  
 4. Select either **Guest checkout** or **Login**.  
    - If guest checkout, fill in the information.  
 5. Select shipping method.  
-6. Click on **“Next: Payment”** button.  
+6. Click on **Next: Payment** button.  
 7. Fill in remaining information.  
-8. Select **“Credit Card”** as payment method.  
-9. Click on **“Next: Place Order”** button.  
+8. Select **Credit Card** as payment method.  
+9. Click on **Next: Place Order** button.  
 10. The payment page appears. Ensure it is a payment page for card payments.  
 11. Use a credit card number enabled for fraud checking — for example, **4170000000000105**, and check that it returns the **‘Deny’** status.  
 12. Ensure that the user is redirected back to the Checkout flow.  
     Error messages are returned from the AltaPay controller, but as described in the limitations section, the merchant will have to implement custom functionality to show these messages.  
 13. From the SFCC Business Manager navigate to: **Merchant Tools → Ordering → Orders.**  
-    Locate and select the order and verify that the order has been handled correctly – **“Order Status” = Failed.**  
+    Locate and select the order and verify that the order has been handled correctly – **Order Status” = Failed.**  
 14. Log in to [https://testgateway.altapaysecure.com](https://testgateway.altapaysecure.com) and locate the order by the order number via the search box in the top right corner.  
-    Check that the amount corresponds with the information in Business Manager and ensure that the status of the payment is **“preauth.”**
+    Check that the amount corresponds with the information in Business Manager and ensure that the status of the payment is **preauth.**
  
 
 
@@ -674,7 +674,7 @@ A Test bank is also available if the merchant needs to test PayPal, iDEAL, or ot
 Follow the steps below to set up the reconciliation identifier.
 
 1. Navigate to:  
-   `int_altapay_sfra/cartridge/scripts/createRequestParameters.js`
+   `int_valitor_sfra/cartridge/scripts/createRequestParameters.js`
 
 2. Find the **Reconciliation Identifier** section and remove the comments.
 
