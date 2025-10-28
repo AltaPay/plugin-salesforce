@@ -56,7 +56,7 @@ be provided by AltaPay.
     -   Gateway
 
 > **Note:** 
-> * If the API user credentials have not yet been created, refer to the [Creating a New API User](#creating-a-new-api-user) section for step-by-step instructions.
+> If the API user credentials have not yet been created, refer to the [Creating a New API User](#creating-a-new-api-user) section for step-by-step instructions.
 
 ## Installation
 
@@ -158,13 +158,13 @@ From the SFCC Business Manager:
 
 3. In the **Import & Export Files** section, click the **Upload** link or button.
 
-4. Upload the file **valitor_sfra_metadata.xml** from the repository.
+4. Upload the file **valitor_sfra_paymentmethods.xml** from the repository.
 
 5. In the **Payment Methods** section, click the **Import** button.
 
     ![import_payment_method.png](docs/import_payment_method.png)
 
-6. Select **valitor_sfra_metadata.xml** and click the **Next** button.
+6. Select **valitor_sfra_paymentmethods.xml** and click the **Next** button.
 
 7. Wait for validation and click the **Next** button.
 
@@ -200,7 +200,7 @@ From the SFCC Business Manager:
     | **AltaPay Cartridge Enabled** | Defines if the AltaPay integration is enabled. |
     | **AltaPay Test Mode** | Defines if the testing mode should be enabled. |
     | **AltaPay base Production URL** | Production gateway URL. e.g. https://yourname.altapaysecure.com/ |
-    | **AltaPay base Test URL** | Test gateway URL. E.g. https://testgateway.altapaysecure.com/ |
+    | **AltaPay base Test URL** | Test gateway URL. e.g. https://testgateway.altapaysecure.com/ |
     | **AltaPay Production Username** | Username for the production gateway and terminals. |
     | **AltaPay Production Password** | Password for the production gateway and terminals. |
     | **AltaPay Test Username** | Username for the test gateway and terminals. |
