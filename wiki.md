@@ -35,8 +35,6 @@ This plugin enables **AltaPay** as the Payment Service Provider (PSP) for storef
 
 - [Localization](#localization)
 
-[Customization](#customization)
-
 [Testing](#testing)
 
 [Reconcile Orders](#reconcile-orders)
@@ -52,11 +50,15 @@ be provided by AltaPay.
     -   Username
     -   Password
 2.  AltaPay gateway information:
-    -   Terminal
+    -   AltaPay Terminal Configuration JSON: Used for mapping payment methods in Salesforce to terminals in the AltaPay payment gateway.
     -   Gateway
 
 > **Note:** 
 > If the API user credentials have not yet been created, refer to the [Creating a New API User](#creating-a-new-api-user) section for step-by-step instructions.
+
+## Functional Overview
+
+![payment_flow.png](docs/payment_flow.png)
 
 ## Installation
 
@@ -107,6 +109,7 @@ From the SFCC Business Manager:
 
 6. Wait for validation to complete, and click the **Import** button.
 
+Once the import is successful, all the necessary fields will be created in Salesforce to allow our solution to function. You will have configuration fields to set up the environment, as well as payment data fields that help you understand the payment status and provide information necessary for debugging.
 
 ### Import Web Service
 
@@ -206,7 +209,7 @@ From the SFCC Business Manager:
     | **AltaPay Test Username** | Username for the test gateway and terminals. |
     | **AltaPay Test Password** | Password for the test gateway and terminals. |
     | **AltaPay Timeout** | Timeout (seconds) for communication with AltaPay backend. <br> **Warning:** Do not change this without consulting AltaPay. |
-    | **AltaPay Terminals** | Mapping of payment methods in Salesforce and terminals in the AltaPay payment gateway. <br> A terminal can only contain one payment method and one currency, but it is possible to add all the relevant terminals. <br> ![terminals.png](docs/terminals.png) <br> The setting must be structured as shown in the screen illustration. <br> The attribute **id** must correspond with the payment method added in: **Merchant Tools** > **Ordering** > **Payment Methods** plus the preferred currency. The attribute **name** is the name and identifier of the AltaPay terminal. The attribute **allowedlocales** defines which locales that can use the terminal. |
+    | **AltaPay Terminals / Payment Methods** | Mapping of payment methods in Salesforce and terminals in the AltaPay payment gateway. <br> A terminal can only contain one payment method and one currency, However, it is possible to use the same terminal for multiple payment methods. By sharing your requirements with AltaPay, we will ensure that the correct configuration and JSON mapping are created to meet your needs. <br> ![terminals.png](docs/terminals.png) <br> The setting must be structured as shown in the screen illustration. <br> The attribute **id** must correspond with the payment method added in: **Merchant Tools** > **Ordering** > **Payment Methods** plus the preferred currency. The attribute **name** is the name and identifier of the AltaPay terminal. The attribute **allowedlocales** defines which locales that can use the terminal. <br><br> **Note:** The JSON file containing the terminal configuration will be provided by AltaPay. This file defines the mapping between Salesforce payment methods and the terminals configured in the AltaPay payment gateway. |
 
     ---
 
@@ -221,6 +224,14 @@ From the SFCC Business Manager:
     | **AltaPay Payment Open URL** | To support an asynchronous payment (e.g. wallet payments) where the provider not always accept the payment upfront this callback is called. To indicate this event an open payment contains the confirmation status ‘Not confirmed’. |
     | **AltaPay Payment Notification URL** | In case a payment has not returned an answer (e.g. customer closes window prior to returning to the shop), or when an open payment is accepted/declined. When an answer arrives, this callback is called. This does not apply to card payments. |
     | **AltaPay Redirect Page URL** | This URL is used when the customer is redirected to a third party (e.g. 3D Secure) to inform the customer about the redirection. A default non-branded page is shown if nothing else is stated. |
+
+    > **Note**
+    >
+    > These callbacks are handled automatically by AltaPay.
+    > 
+    > If you wish to modify how the flow works, you may override them. However, you will need to manage and track the payment state internally within Salesforce.
+    >
+    > This option is recommended only for advanced setups. 
 
     ---
 
@@ -284,81 +295,6 @@ From the SFCC Business Manager:
         | ZH | Chinese |
 
         If you (the merchant) use an unsupported language, the payment page is shown in English as default.
-
-## Customization
-
-We have made some adjustments to the standard SiteGenesis, which you will need to implement to use AltaPay as the Payment Service Provider (PSP) on your storefront.
-
-You will need to modify the following four files:
-
-| **File** | **Location** |
-|-----------|---------------|
-| **Checkout.js** | app_storefront_base/cartridge/Controllers/Checkout.js |
-| **checkout.isml** | app_storefront_base/cartridge/templates/default/checkout/checkout.isml |
-| **ALTAPAY.js** | app_storefront_base/hooks.json |
-| **package.json** | app_storefront_base/scripts/hooks/payment/processor/ALTAPAY.js |
-
-You will also need to add the following files:
-
-| **File** | **Location** |
-|-----------|---------------|
-| **hooks.js** | app_storefront_base/client/default/js/altapayCheckout.js |
-| **altapayCheckout.js** | Package.json |
-
-### Enabling the AltaPay Cartridge (Checkout.js)
-Add the code below to the “Checkout-Begin” controller to activate the cartridge (plugin).
-
-1. Navigate to: **app_storefront_base** > **cartridge** > **Controllers** > **Checkout.js**
-
-2. Insert **altaPayEnabled** property in the rendering object.  
-
-3. Look for an example in the folder **Custom Code**.
-
-    ```javascript
-    altaPayEnabled:
-    dw.system.Site.current.getCustomPreferenceValue('altaPayCartridgeEnabled')
-    ```
-
-    ![checkoutjs](docs/checkoutjs.png)
-
-### Using the AltaPay Specific Client JS (checkout.isml)
-Add the code below to use the AltaPay specific client JS when the AltaPay cartridge is enabled.
-
-1. Navigate to: **app_storefront_base** > **cartridge** > **templates** > **default** > **checkout** > **checkout.isml**  
-
-2. Insert the AltaPay cartridge enabled check in the top `<isscript>` tag.  
-
-3. Look for an example in the folder **Custom Code**.
-
-    ![checkoutisml](docs/checkoutisml.png)
-
-4. Insert altapayCheckout.js file provided in the **Custom Code** folder to **app_storefront_base** > **cartridge** > **client** > **default** > **js**
-
-    ![altapayCheckoutjs](docs/altapayCheckoutjs.png)
-
-5. Navigate to package.json file in the root folder of your project
-
-6. Insert the “path” configs to package.json.
-
-7. Remember to compile the client JS with this command: npm run compile:js
-
-    ![altapayCheckoutjs](docs/packagejson.png)
-
-### Adding the AltaPay Processor Hook
-Add the code below to add AltaPay as a processor.
-
-1. Navigate to: **app_storefront_base/hooks.json**
-
-2. Insert **AltaPay** below the **basic_credit** processor.
-
-    ![basic_credit](docs/basic_credit.png)
-
-### Inserting the AltaPay Processor
-
-1. Insert the **ALTAPAY processor script** provided in the **Custom Code** folder into:  
-   `app_storefront_base -> cartridge -> scripts -> hooks -> processor`
-
-    ![altapayjs](docs/altapayjs.png)
 
 ### External Interfaces
 
