@@ -136,11 +136,11 @@ From the SFCC Business Manager:
 
 1. Select your site from the list in the top navigation bar.
 
-2. Navigate to: Merchant Tools > Ordering > Payment Processors.
+2. Navigate to: **Merchant Tools** > **Ordering** > **Payment Processors**.
 
 3. Click the **New** button.
 
-4. For the ID, enter altapay in all capital letters.
+4. For the ID, enter **ALTAPAY** in all capital letters.
 
 5. For the Description, enter **AltaPay Checkout**.
 
@@ -182,21 +182,31 @@ From the SFCC Business Manager:
 
 ## Configuration
 
+From the SFCC Business Manager:
+
+1. Select your site from the list in the top navigation bar.
+
+2. Navigate to: **Merchant Tools** > **Site Preferences** > **Custom Preferences** > **AltaPay**:
+
+3. This is where the merchant can access and configure the AltaPay integration.
+
+4. Fill out the settings as desired. Descriptions of the site preferences are listed in the tables below.
+
 ### Credentials
 Use the following preferences to configure your AltaPay **credentials**.
 
 | **Preference** | **Description** |
 |----------------|-----------------|
-| AltaPay Cartridge Enabled | Preference that defines if the AltaPay integration is enabled. |
-| AltaPay Test Mode | Preference that defines if the testing mode should be enabled. |
-| AltaPay base Production URL | URL to the production gateway. e.g. https://yourname.altapaysecure.com/ |
-| AltaPay base Test URL | URL to the test gateway. E.g. https://testgateway.altapaysecure.com/ |
-| AltaPay Production Username | Username for the production gateway and terminals. |
-| AltaPay Production Password | Password for the production gateway and terminals. |
-| AltaPay Test Username | Username for the test gateway and terminals. |
-| AltaPay Test Password | Password for the test gateway and terminals. |
-| AltaPay Timeout | Timeout (seconds) for communication with AltaPay backend. <br> **Warning:** Do not change this without consulting AltaPay. |
-| AltaPay Terminals | Mapping of payment methods in Salesforce and terminals in the AltaPay payment gateway. <br> A terminal can only contain one payment method and one currency, but it is possible to add all the relevant terminals. <br> ![terminals.png](docs/terminals.png) <br> The setting must be structured as shown in the screen illustration. <br> The attribute ‘id’ must correspond with the payment method added in: **Merchant Tools** → **Ordering** → **Payment Methods** plus the preferred currency. The attribute ‘name’ is the name and identifier of the AltaPay terminal. The attribute ‘allowedlocales’ defines which locales that can use the terminal. |
+| **AltaPay Cartridge Enabled** | Defines if the AltaPay integration is enabled. |
+| **AltaPay Test Mode** | Defines if the testing mode should be enabled. |
+| **AltaPay base Production URL** | Production gateway URL. e.g. https://yourname.altapaysecure.com/ |
+| **AltaPay base Test URL** | Test gateway URL. E.g. https://testgateway.altapaysecure.com/ |
+| **AltaPay Production Username** | Username for the production gateway and terminals. |
+| **AltaPay Production Password** | Password for the production gateway and terminals. |
+| **AltaPay Test Username** | Username for the test gateway and terminals. |
+| **AltaPay Test Password** | Password for the test gateway and terminals. |
+| **AltaPay Timeout** | Timeout (seconds) for communication with AltaPay backend. <br> **Warning:** Do not change this without consulting AltaPay. |
+| **AltaPay Terminals** | Mapping of payment methods in Salesforce and terminals in the AltaPay payment gateway. <br> A terminal can only contain one payment method and one currency, but it is possible to add all the relevant terminals. <br> ![terminals.png](docs/terminals.png) <br> The setting must be structured as shown in the screen illustration. <br> The attribute ‘id’ must correspond with the payment method added in: **Merchant Tools** → **Ordering** → **Payment Methods** plus the preferred currency. The attribute ‘name’ is the name and identifier of the AltaPay terminal. The attribute ‘allowedlocales’ defines which locales that can use the terminal. |
 
 ---
 
@@ -205,12 +215,12 @@ Define callback URLs to handle different payment flow events.
 
 | **Preference** | **Description** |
 |----------------|-----------------|
-| AltaPay Payment Page URL | URL for controlling the payment form page which is shown to the customer. It is possible to customize the payment page by changing the callbackform.isml template. |
-| AltaPay Payment Success URL | When a payment is accepted, this callback URL is called, and the data received from AltaPay is validated. |
-| AltaPay Payment Fail URL | In case a payment fails this callback is called. This can be due to incorrect card details, declined by the bank etc. The data received from AltaPay is stored on the order and the customer is redirected back to checkout page. |
-| AltaPay Payment Open URL | To support an asynchronous payment (e.g. wallet payments) where the provider not always accept the payment upfront this callback is called. To indicate this event an open payment contains the confirmation status ‘Not confirmed’. |
-| AltaPay Payment Notification URL | In case a payment has not returned an answer (e.g. customer closes window prior to returning to the shop), or when an open payment is accepted/declined. When an answer arrives, this callback is called. This does not apply to card payments. |
-| AltaPay Redirect Page URL | This URL is used when the customer is redirected to a third party (e.g. 3D Secure) to inform the customer about the redirection. A default non-branded page is shown if nothing else is stated. |
+| **AltaPay Payment Page URL** | URL for controlling the payment form page which is shown to the customer. It is possible to customize the payment page by changing the callbackform.isml template. |
+| **AltaPay Payment Success URL** | When a payment is accepted, this callback URL is called, and the data received from AltaPay is validated. |
+| **AltaPay Payment Fail URL** | In case a payment fails this callback is called. This can be due to incorrect card details, declined by the bank etc. The data received from AltaPay is stored on the order and the customer is redirected back to checkout page. |
+| **AltaPay Payment Open URL** | To support an asynchronous payment (e.g. wallet payments) where the provider not always accept the payment upfront this callback is called. To indicate this event an open payment contains the confirmation status ‘Not confirmed’. |
+| **AltaPay Payment Notification URL** | In case a payment has not returned an answer (e.g. customer closes window prior to returning to the shop), or when an open payment is accepted/declined. When an answer arrives, this callback is called. This does not apply to card payments. |
+| **AltaPay Redirect Page URL** | This URL is used when the customer is redirected to a third party (e.g. 3D Secure) to inform the customer about the redirection. A default non-branded page is shown if nothing else is stated. |
 
 ---
 
@@ -219,13 +229,7 @@ Whitelist trusted AltaPay IPs to ensure secure communication.
 
 | **Preference** | **Description** |
 |----------------|-----------------|
-| AltaPay Whitelisted IPs | List of IP addresses that AltaPay is communicating from. Used to secure that only request from AltaPay is handled. 
-
-You are advised to verify that the following IP addresses are added:
-
-185.206.120.0/24 (ipv6: 2a10:a200::/29)
-185.203.232.129
-185.203.233.129 |
+| **AltaPay Whitelisted IP's** | List of IP addresses that AltaPay is communicating from. Used to secure that only request from AltaPay is handled. <br> You are advised to verify that the following IP addresses are added: <br> 185.206.120.0/24 (ipv6: 2a10:a200::/29)<br> 185.203.232.129<br> 185.203.233.129 |
 
 ---
 
@@ -234,9 +238,9 @@ Set up email notifications for error reporting and alerts.
 
 | **Preference** | **Description** |
 |----------------|-----------------|
-| AltaPay Error Notifications Enabled | Preference that defines if notification emails should be send when error events occurs in the payment flow. |
-| AltaPay Notification Sender | Email used as sender on notification emails, default is ‘noreply@dsalesforce.com’. |
-| AltaPay Notification Recipients | List of notification recipients. |
+| **AltaPay Error Notifications Enabled** | Preference that defines if notification emails should be send when error events occurs in the payment flow. |
+| **AltaPay Notification Sender** | Email used as sender on notification emails, default is ‘noreply@dsalesforce.com’. |
+| **AltaPay Notification Recipients** | List of notification recipients. |
  
 
 ## Localization
@@ -289,26 +293,26 @@ You will need to modify the following four files:
 
 | **File** | **Location** |
 |-----------|---------------|
-| Checkout.js | app_storefront_base/cartridge/Controllers/Checkout.js |
-| checkout.isml | app_storefront_base/cartridge/templates/default/checkout/checkout.isml |
-| ALTAPAY.js | app_storefront_base/hooks.json |
-| package.json | app_storefront_base/scripts/hooks/payment/processor/ALTAPAY.js |
+| **Checkout.js** | app_storefront_base/cartridge/Controllers/Checkout.js |
+| **checkout.isml** | app_storefront_base/cartridge/templates/default/checkout/checkout.isml |
+| **ALTAPAY.js** | app_storefront_base/hooks.json |
+| **package.json** | app_storefront_base/scripts/hooks/payment/processor/ALTAPAY.js |
 
 You will also need to add the following files:
 
 | **File** | **Location** |
 |-----------|---------------|
-| hooks.js | app_storefront_base/client/default/js/altapayCheckout.js |
-| altapayCheckout.js | Package.json |
+| **hooks.js** | app_storefront_base/client/default/js/altapayCheckout.js |
+| **altapayCheckout.js** | Package.json |
 
 ### Enabling the AltaPay Cartridge (Checkout.js)
 Add the code below to the “Checkout-Begin” controller to activate the cartridge (plugin).
 
-1. Navigate to: app_storefront_base -> cartridge -> Controllers -> Checkout.js  
+1. Navigate to: **app_storefront_base** > **cartridge** > **Controllers** > **Checkout.js**
 
-2. Insert ‘altaPayEnabled’ property in the rendering object.  
+2. Insert **altaPayEnabled** property in the rendering object.  
 
-3. Look for an example in the folder ‘Custom Code’.
+3. Look for an example in the folder **Custom Code**.
 
     ```javascript
     altaPayEnabled:
@@ -320,15 +324,15 @@ Add the code below to the “Checkout-Begin” controller to activate the cartri
 ### Using the AltaPay Specific Client JS (checkout.isml)
 Add the code below to use the AltaPay specific client JS when the AltaPay cartridge is enabled.
 
-1. Navigate to: app_storefront_base -> cartridge -> templates -> default -> checkout -> checkout.isml  
+1. Navigate to: **app_storefront_base** > **cartridge** > **templates** > **default** > **checkout** > **checkout.isml**  
 
 2. Insert the AltaPay cartridge enabled check in the top `<isscript>` tag.  
 
-3. Look for an example in the folder ‘Custom Code’.
+3. Look for an example in the folder **Custom Code**.
 
     ![checkoutisml](docs/checkoutisml.png)
 
-4. Insert altapayCheckout.js file provided in the “Custom Code” folder to app_storefront_base -> cartridge -> client -> default -> js
+4. Insert altapayCheckout.js file provided in the “Custom Code” folder to **app_storefront_base** > **cartridge** > **client** > **default** > **js**
 
     ![altapayCheckoutjs](docs/altapayCheckoutjs.png)
 
