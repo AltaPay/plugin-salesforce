@@ -409,7 +409,7 @@ A Test bank is also available if the merchant needs to test PayPal, iDEAL, or ot
 11. Enter card details (use random numbers) and click on **Submit** button.  
 12. Verify that the confirmation page is shown with correct information and without any error message. Take a note of the order number.  
 13. From the SFCC Business Manager navigate to: **Merchant Tools → Ordering → Orders.**  
-    Locate and select the order and verify that the order has been handled correctly – **Confirmation Status” = confirmed.**  
+    Locate and select the order and verify that the order has been handled correctly – **Confirmation Status = confirmed.**  
 14. Log in to [https://testgateway.altapaysecure.com](https://testgateway.altapaysecure.com) and locate the order by the order number via the search box in the top right corner.  
     Check that the amount corresponds with the information in Business Manager and ensure that the status of the payment is **preauth.**
 
@@ -436,7 +436,7 @@ A Test bank is also available if the merchant needs to test PayPal, iDEAL, or ot
     Error messages are returned from the AltaPay controller, but the merchant must implement custom functionality to show these messages.  
     See **Requirements** for more details.  
 14. From the SFCC Business Manager, navigate to: **Merchant Tools → Ordering → Orders.**  
-    Locate and select the order and verify that the order has been handled correctly – **Order Status” = failed.**  
+    Locate and select the order and verify that the order has been handled correctly – **Order Status = failed.**  
     Take a note of the order number.  
 15. Log in to [https://testgateway.altapaysecure.com](https://testgateway.altapaysecure.com) and locate the order by the order number via the search box in the top right corner.  
     Ensure that the status of the order is **preauth_failed.**
@@ -466,7 +466,7 @@ A Test bank is also available if the merchant needs to test PayPal, iDEAL, or ot
 14. Verify that the confirmation page is shown with correct information and without any error message.  
     Take a note of the order number.  
 15. From the SFCC Business Manager navigate to: **Merchant Tools → Ordering → Orders.**  
-    Locate and select the order and verify that the order has been handled correctly – **Confirmation Status” = confirmed.**  
+    Locate and select the order and verify that the order has been handled correctly – **Confirmation Status = confirmed.**  
 16. Log in to [https://testgateway.altapaysecure.com](https://testgateway.altapaysecure.com) and locate the order by the order number via the search box in the top right corner.  
     Check that the amount corresponds with the information in Business Manager and ensure that the status of the payment is **preauth** and **3D Secure result** is successful.
 
@@ -495,7 +495,7 @@ A Test bank is also available if the merchant needs to test PayPal, iDEAL, or ot
     Error messages are returned from the AltaPay controller but the merchant will have to implement custom functionality to show these messages.  
     See **Requirements** for more details.  
 14. From the SFCC Business Manager navigate to: **Merchant Tools → Ordering → Orders.**  
-    Locate and select the order and verify that the order has been handled correctly – **Order Status” = failed.**  
+    Locate and select the order and verify that the order has been handled correctly – **Order Status = failed.**  
     Take a note of the order number.  
 15. Log in to [https://testgateway.altapaysecure.com](https://testgateway.altapaysecure.com) and locate the order by the order number via the search box in the top right corner.  
     Ensure that the status of the order is **preauth_failed.**
@@ -519,7 +519,7 @@ A Test bank is also available if the merchant needs to test PayPal, iDEAL, or ot
 12. Verify that the confirmation page is shown with correct information and without any error message.  
 13. Take a note of the order number.  
 14. From the SFCC Business Manager navigate to: **Merchant Tools → Ordering → Orders.**  
-    Locate and select the order and verify that the order has been handled correctly – **Confirmation Status” = confirmed.**  
+    Locate and select the order and verify that the order has been handled correctly – **Confirmation Status = confirmed.**  
 15. Log in to [https://testgateway.altapaysecure.com](https://testgateway.altapaysecure.com) and locate the order by the order number via the search box in the top right corner.  
     Check that the amount corresponds with the information in Business Manager and ensure that the status of the payment is **preauth** or **bank_payment_finalized,** depending on the acquirer.
 
@@ -542,7 +542,7 @@ A Test bank is also available if the merchant needs to test PayPal, iDEAL, or ot
     Error messages are returned from the AltaPay controller, but the merchant will have to implement custom functionality to show these messages.  
     See **Requirements** for more details.  
 12. From the SFCC Business Manager navigate to: **Merchant Tools → Ordering → Orders.**  
-    Locate and select the order and verify that the order has been handled correctly – **Order Status” = failed.**  
+    Locate and select the order and verify that the order has been handled correctly – **Order Status = failed.**  
 13. Take a note of the order number.  
 14. Log in to [https://testgateway.altapaysecure.com](https://testgateway.altapaysecure.com) and locate the order by the order number via the search box in the top right corner.  
     Check that the amount corresponds with the information in Business Manager and ensure that the status of the payment is **epayment_cancelled** or **preauth_failed,** depending on the acquirer.
@@ -565,7 +565,7 @@ A Test bank is also available if the merchant needs to test PayPal, iDEAL, or ot
     Error messages are returned from the AltaPay controller, but the merchant will have to implement custom functionality to show these messages.  
     See **Requirements** for more details.  
 12. From the SFCC Business Manager navigate to: **Merchant Tools → Ordering → Orders.**  
-    Locate and select the order and verify that the order has been handled correctly – **Order Status” = failed.**  
+    Locate and select the order and verify that the order has been handled correctly – **Order Status = failed.**  
 13. Take a note of the order number.  
 14. Log in to [https://testgateway.altapaysecure.com](https://testgateway.altapaysecure.com) and locate the order by the order number via the search box in the top right corner.  
     Check that the amount corresponds with the information in Business Manager and ensure that the status of the payment is **epayment_declined** or **preauth_failed,** depending on the acquirer.
@@ -591,7 +591,7 @@ A Test bank is also available if the merchant needs to test PayPal, iDEAL, or ot
 12. Verify that the confirmation page is shown with correct information and without any error message.  
 13. Take a note of the order number.  
 14. From the SFCC Business Manager navigate to: **Merchant Tools → Ordering → Orders.**  
-    Locate and select the order and verify that the order has been handled correctly – **Confirmation Status” = Not confirmed.**  
+    Locate and select the order and verify that the order has been handled correctly – **Confirmation Status = Not confirmed.**  
 15. Go back to the test bank page and click **‘Call success notification now.’**  
     It can take a couple of minutes before the actual notification is triggered via the API.  
 16. Repeat step 5 and verify that the status has changed from **Not confirmed** to **Confirmed.**  
@@ -618,7 +618,7 @@ A Test bank is also available if the merchant needs to test PayPal, iDEAL, or ot
 12. Verify that the confirmation page is shown with correct information and without any error message.  
 13. Take a note of the order number.  
 14. From the SFCC Business Manager navigate to: **Merchant Tools → Ordering → Orders.**  
-    Locate and select the order and verify that the order has been handled correctly – **Confirmation Status” = Not confirmed.**  
+    Locate and select the order and verify that the order has been handled correctly – **Confirmation Status = Not confirmed.**  
 15. Go back to the test bank page and click **‘Call declined notification now.’**  
     It can take a couple of minutes before the actual notification is triggered via the API.  
 16. Repeat step 5 and verify that the status has changed from **Not confirmed** to **Cancelled.**
@@ -640,7 +640,7 @@ A Test bank is also available if the merchant needs to test PayPal, iDEAL, or ot
 12. Verify that the confirmation page is shown with correct information and without any error message.  
     Take a note of the order number.  
 13. From the SFCC Business Manager navigate to: **Merchant Tools → Ordering → Orders.**  
-    Locate and select the order and verify that the order has been handled correctly – **Confirmation Status” = Confirmed.**  
+    Locate and select the order and verify that the order has been handled correctly – **Confirmation Status = Confirmed.**  
 14. Log in to [https://testgateway.altapaysecure.com](https://testgateway.altapaysecure.com) and locate the order by the order number via the search box in the top right corner.  
     Check that the amount corresponds with the information in Business Manager and ensure that the status of the payment is **preauth.**  
 15. Repeat with a credit card that returns the **‘Challenge’** status — for example, **5250000000000121.**  
@@ -663,7 +663,7 @@ A Test bank is also available if the merchant needs to test PayPal, iDEAL, or ot
 12. Ensure that the user is redirected back to the Checkout flow.  
     Error messages are returned from the AltaPay controller, but as described in the limitations section, the merchant will have to implement custom functionality to show these messages.  
 13. From the SFCC Business Manager navigate to: **Merchant Tools → Ordering → Orders.**  
-    Locate and select the order and verify that the order has been handled correctly – **Order Status” = Failed.**  
+    Locate and select the order and verify that the order has been handled correctly – **Order Status = Failed.**  
 14. Log in to [https://testgateway.altapaysecure.com](https://testgateway.altapaysecure.com) and locate the order by the order number via the search box in the top right corner.  
     Check that the amount corresponds with the information in Business Manager and ensure that the status of the payment is **preauth.**
  
