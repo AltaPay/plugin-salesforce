@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <services xmlns="http://www.demandware.com/xml/impex/services/2014-09-26">
     <service-credential service-credential-id="int.maketpay.auth">
-        <url>https://testgateway.altapaysecure.com/checkout/v1/api/authenticate</url>
+        <url>Service URL</url>
         <user-id/>
-        <password encrypted="true" encryption-type="common.export">Ew7COGjxxJeJt5W9E+qeZ8ZiHyZuHGSPO11fms805QU=</password>
+        <password encrypted="true" encryption-type="common.export">*****************************************</password>
     </service-credential>
 
     <service-credential service-credential-id="int.marketpay.session">
-        <url>https://testgateway.altapaysecure.com/checkout/v1/api/session</url>
+        <url>Service URL</url>
         <user-id/>
-        <password encrypted="true" encryption-type="common.export">jIH3jtzMJ8Q50Lq0U33+WjY2sDqqOe3nidfin7v/IWw=</password>
+        <password encrypted="true" encryption-type="common.export">*****************************************</password>
     </service-credential>
 
     <service-profile service-profile-id="int.maketpay.auth">
