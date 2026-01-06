@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns="http://www.demandware.com/xml/impex/services/2014-09-26">
+    <service-credential service-credential-id="int.maketpay.auth">
+        <url>Service URL</url>
+        <user-id/>
+        <password encrypted="true" encryption-type="common.export">*****************************************</password>
+    </service-credential>
+
+    <service-credential service-credential-id="int.marketpay.session">
+        <url>Service URL</url>
+        <user-id/>
+        <password encrypted="true" encryption-type="common.export">*****************************************</password>
+    </service-credential>
+
+    <service-profile service-profile-id="int.maketpay.auth">
+        <timeout-millis>1000</timeout-millis>
+        <rate-limit-enabled>false</rate-limit-enabled>
+        <rate-limit-calls>0</rate-limit-calls>
+        <rate-limit-millis>0</rate-limit-millis>
+        <cb-enabled>true</cb-enabled>
+        <cb-calls>0</cb-calls>
+        <cb-millis>0</cb-millis>
+    </service-profile>
+
+    <service-profile service-profile-id="int.marketpay.session">
+        <timeout-millis>1000</timeout-millis>
+        <rate-limit-enabled>false</rate-limit-enabled>
+        <rate-limit-calls>0</rate-limit-calls>
+        <rate-limit-millis>0</rate-limit-millis>
+        <cb-enabled>true</cb-enabled>
+        <cb-calls>0</cb-calls>
+        <cb-millis>0</cb-millis>
+    </service-profile>
+
+    <service service-id="int.marketpay.auth">
+        <service-type>HTTP</service-type>
+        <enabled>true</enabled>
+        <log-prefix>marketpay</log-prefix>
+        <comm-log-enabled>true</comm-log-enabled>
+        <force-prd-enabled>true</force-prd-enabled>
+        <mock-mode-enabled>false</mock-mode-enabled>
+        <profile-id>int.maketpay.auth</profile-id>
+        <credential-id>int.maketpay.auth</credential-id>
+    </service>
+
+    <service service-id="int.marketpay.session">
+        <service-type>HTTP</service-type>
+        <enabled>true</enabled>
+        <log-prefix>marketpay</log-prefix>
+        <comm-log-enabled>true</comm-log-enabled>
+        <force-prd-enabled>true</force-prd-enabled>
+        <mock-mode-enabled>false</mock-mode-enabled>
+        <profile-id>int.marketpay.session</profile-id>
+        <credential-id>int.marketpay.session</credential-id>
+    </service>
+
+</services>
