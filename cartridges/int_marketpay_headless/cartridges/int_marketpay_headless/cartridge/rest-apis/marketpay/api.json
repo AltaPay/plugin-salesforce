@@ -1,7 +1,6 @@
 {
     "endpoints": [
       {"endpoint": "createCheckoutSession", "schema": "schema.yaml", "implementation": "script"},
-      {"endpoint": "createCheckoutSession", "schema": "schema_v2.yaml", "implementation": "script_v2"},
       {"endpoint": "getNextOrderId", "schema": "schema.yaml", "implementation": "script"},
       {"endpoint": "getPaymentMethodConfigration", "schema": "schema.yaml", "implementation": "script"}
     ]

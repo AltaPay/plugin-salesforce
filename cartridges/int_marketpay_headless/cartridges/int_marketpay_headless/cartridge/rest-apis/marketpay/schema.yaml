@@ -1,7 +1,7 @@
 schema.yaml:
 openapi: 3.0.0
 info:
-  version: 2.0.1
+  version: 1.0.1
   title: Get Session and Token API
 components:
   securitySchemes:
