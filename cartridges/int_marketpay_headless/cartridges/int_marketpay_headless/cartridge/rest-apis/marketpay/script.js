@@ -1,5 +1,5 @@
-var RESTResponseMgr = require('dw/system/RESTResponseMgr');
-var marketPay = require('*/cartridge/scripts/services/marketPay')
+const RESTResponseMgr = require('dw/system/RESTResponseMgr');
+const marketPay = require('*/cartridge/scripts/services/marketPay')
 
 exports.createCheckoutSession = function () {
     var requestBody = request.httpParameterMap.requestBodyAsString;
