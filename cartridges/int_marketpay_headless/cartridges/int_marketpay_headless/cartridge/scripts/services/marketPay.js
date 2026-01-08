@@ -75,7 +75,12 @@ function getMarketPaySessionService() {
             svc.addHeader('Content-Type', 'application/json');
             svc.addHeader('Authorization', 'Bearer ' + payload.token);
 
-            return JSON.stringify({});
+            //var log = Logger.getLogger('marketpay', 'service');
+            //log.info('MarketPay Session Request Body: ' + JSON.stringify(payload.requestBody));
+            Logger.info('MarketPay Session Request Body: ' + JSON.stringify(payload.requestBody));
+            //return JSON.stringify({});
+            return JSON.stringify(payload.requestBody);
+            //return JSON.stringify({hello: 'hello'});
         },
 
         parseResponse: function (svc, client) {
@@ -152,11 +157,14 @@ function getAuthToken() {
  *  - token: The MarketPay authentication token
  *  - sessionId: The created MarketPay session ID
  */
-function getTokenAndSessionId() {
+function getTokenAndSessionId(requestBody) {
     const token = getAuthToken();
 
     const sessionService = getMarketPaySessionService();
-    const result = sessionService.call({ token: token });
+    const result = sessionService.call({ 
+                                        token: token,
+                                        requestBody: requestBody                                  
+                                    });
 
     if (!result.ok || !result.object || !result.object.sessionId) {
         Logger.error('MarketPay Session API error', result.errorMessage);

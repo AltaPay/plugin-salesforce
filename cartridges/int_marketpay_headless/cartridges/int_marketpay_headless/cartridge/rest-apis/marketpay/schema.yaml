@@ -1,7 +1,7 @@
 schema.yaml:
 openapi: 3.0.0
 info:
-  version: 1.0.1
+  version: 2.0.1
   title: Get Session and Token API
 components:
   securitySchemes:
@@ -35,6 +35,113 @@ paths:
           schema:
             type: string
             minLength: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - order
+                - configuration
+              properties:
+                order:
+                  type: object
+                  required:
+                    - orderId
+                    - amount
+                  properties:
+                    orderId:
+                      type: string
+                      minLength: 1
+                    amount:
+                      type: object
+                      required:
+                        - value
+                        - currency
+                      properties:
+                        value:
+                          type: number
+                          minimum: 0
+                        currency:
+                          type: string
+                          minLength: 3
+                          maxLength: 3
+                    orderLines:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          itemId:
+                            type: string
+                          description:
+                            type: string
+                          quantity:
+                            type: integer
+                            minimum: 1
+                          unitPrice:
+                            type: number
+                            minimum: 0
+                    customer:
+                      type: object
+                      properties:
+                        firstName:
+                          type: string
+                        lastName:
+                          type: string
+                        email:
+                          type: string
+                          format: email
+                        billingAddress:
+                          type: object
+                          properties:
+                            street:
+                              type: string
+                            city:
+                              type: string
+                            country:
+                              type: string
+                              minLength: 2
+                              maxLength: 2
+                            zipCode:
+                              type: string
+                        shippingAddress:
+                          type: object
+                          properties:
+                            street:
+                              type: string
+                            city:
+                              type: string
+                            country:
+                              type: string
+                              minLength: 2
+                              maxLength: 2
+                            zipCode:
+                              type: string
+                    transactionInfo:
+                      type: object
+                      additionalProperties: true
+                configuration:
+                  type: object
+                  required:
+                    - paymentType
+                  properties:
+                    paymentType:
+                      type: string
+                      minLength: 1
+                    bodyFormat:
+                      type: string
+                    autoCapture:
+                      type: boolean
+                    paymentDisplayType:
+                      type: string
+                    country:
+                      type: string
+                      minLength: 2
+                      maxLength: 2
+                    language:
+                      type: string
+                      minLength: 2
       responses:
         "200":
           description: Returns created Auth Token and Session ID
@@ -65,4 +172,5 @@ paths:
                       "type": "page not found",
                     }
 security:
-  - AmOAuth2: ["c_checkoutsession_rw"]
+  - ShopperToken: ["c_checkoutsession_rw"]
+
