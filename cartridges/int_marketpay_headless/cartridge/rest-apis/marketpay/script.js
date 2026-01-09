@@ -2,7 +2,9 @@ const RESTResponseMgr = require('dw/system/RESTResponseMgr');
 const marketPay = require('*/cartridge/scripts/services/marketPay')
 
 exports.createCheckoutSession = function () {
-    const result = marketPay.getTokenAndSessionId();
+    var requestBody = request.httpParameterMap.requestBodyAsString;
+    var requestData = JSON.parse(requestBody);
+    var result = marketPay.getTokenAndSessionId(requestData);
     try {
         RESTResponseMgr
             .createSuccess(result)
