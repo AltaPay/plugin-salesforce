@@ -1,8 +1,13 @@
 'use strict';
 
 const Site = require('dw/system/Site');
+const Logger = require('dw/system/Logger');
 
 function getFormattedDataForMarketPaySession(basket) {
+
+    var Locale = require('dw/util/Locale');
+    var currentLocale = Locale.getLocale(request.locale);
+    var countryCode = currentLocale.country;
 
     // Initialize the order data object
     var orderData = {
@@ -21,7 +26,7 @@ function getFormattedDataForMarketPaySession(basket) {
             bodyFormat: "JSON",
             autoCapture: false,
             paymentDisplayType: "REDIRECT",
-            country: "DK",
+            country: countryCode,
             language: Site.getCurrent().getDefaultLocale().split('_')[0] || "en"
         }
     };
@@ -39,22 +44,6 @@ function getFormattedDataForMarketPaySession(basket) {
             });
         }
     }
-
-    /*
-    // Add shipping line item if available
-    var shippingLineItems = basket.getShippingLineItems();
-    if (shippingLineItems && shippingLineItems.length > 0) {
-        for (var j = 0; j < shippingLineItems.length; j++) {
-            var shippingItem = shippingLineItems[j];
-            orderData.order.orderLines.push({
-                itemId: shippingItem.getUUID(),
-                description: "Delivery",
-                quantity: 1,
-                unitPrice: shippingItem.getAdjustedPrice().getValue()
-            });
-        }
-    }
-    */
 
     // Format customer information with validation
     var customer = basket.getCustomer();

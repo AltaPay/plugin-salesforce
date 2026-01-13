@@ -12,39 +12,37 @@ exports.modifyGETResponse_v2 = function (basket, paymentMethodResultResponse) {
         const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');        
     
         var marketPayTokenAndSession = marketPay.getTokenAndSessionId(marketPayDataHelper.getFormattedDataForMarketPaySession(basket));
-        var marketPayPaymentMethods = marketPay.getPaymentMethods(marketPayTokenAndSession.token, marketPayTokenAndSession.sessionId);
+        var marketPayPaymentMethods = marketPay.getPaymentMethods(marketPayTokenAndSession.token, marketPayTokenAndSession.sessionId);        
 
         const site = require('*/cartridge/scripts/helpers/site.js');
         var marketPayTerminalsMapping = site.getCustomPreference('marketpayTerminals');
+        var paymentMethods = paymentMethodResultResponse.applicablePaymentMethods;        
+        var currentLocale = Site.getCurrent().defaultLocale;        
+        var currencyCode = Site.getCurrent().getDefaultCurrency();
         
         session.privacy.marketPayTokenAndSession = JSON.stringify(marketPayTokenAndSession);
                 
         // Parse JSON if it's a string
         if (typeof marketPayTerminalsMapping === 'string') {
             marketPayTerminalsMapping = JSON.parse(marketPayTerminalsMapping);
-        }
-        
-        var paymentMethods = paymentMethodResultResponse.applicablePaymentMethods;
+        }            
 
-        // Get current locale from basket or request    
-        var currentLocale = Site.getCurrent().defaultLocale;        
-        var currencyCode = Site.getCurrent().getDefaultCurrency();
-
-        Logger.info("CurrentLocale: " + currentLocale);
-        Logger.info("currencyCode: "+ currencyCode);
-
-    // MarketPay specific payment method IDs to validate
-    var marketPayMethods = [
-        'MARKETPAY_CREDITCARDS',
-        'MARKETPAY_IDEAL',
-        'MARKETPAY_INVOICE',
-        'MARKETPAY_KLARNA_ACCOUNT',
-        'MARKETPAY_KLARNA_INVOICE',
-        'MARKETPAY_MOBILEPAY',
-        'MARKETPAY_PAYPAL',
-        'MARKETPAY_SOFORT',
-        'MARKETPAY_VIABILL'
-    ];
+        // MarketPay specific payment method IDs to validate
+        var marketPayMethods = [
+            'MARKETPAY_CREDITCARD',
+            'MARKETPAY_MOBILEPAY',
+            'MARKETPAY_VIPPS',
+            'MARKETPAY_KLARNA',
+            'MARKETPAY_IDEAL',
+            'MARKETPAY_VIABILL',
+            'MARKETPAY_SWISH',
+            'MARKETPAY_BANCONTACT',
+            'MARKETPAY_BANKPAYMENT',
+            'MARKETPAY_TWINT',
+            'MARKETPAY_TRUSTLY',
+            'MARKETPAY_PRZELEWY24',
+            'MARKETPAY_PAYPAL',
+        ];
 
         // Check if marketPayTerminalsMapping is valid
         if (!marketPayTerminalsMapping || !marketPayTerminalsMapping.terminals) {
@@ -52,8 +50,8 @@ exports.modifyGETResponse_v2 = function (basket, paymentMethodResultResponse) {
             return;
         }
 
-    // Convert ArrayList to JavaScript array, then filter
-    var filteredMethods = paymentMethods.toArray().filter(function (method) {
+        // Convert ArrayList to JavaScript array, then filter
+        var filteredMethods = paymentMethods.toArray().filter(function (method) {
 
         // Only process MarketPay payment methods
         if (marketPayMethods.indexOf(method.id) === -1) {
@@ -91,22 +89,17 @@ exports.modifyGETResponse_v2 = function (basket, paymentMethodResultResponse) {
                             access_token: marketPayTokenAndSession.token,
                             sessionId: marketPayTokenAndSession.sessionId,
                             paymentMethod: paymentMethod
-                        }
-                        
+                        }                        
                         break;
                     }
                 }
             }
-
             return true;
         }
-
         return false;
     });
 
-        paymentMethodResultResponse.applicablePaymentMethods = filteredMethods;
-
-        Logger.info("modifyGetResponse called");
+        paymentMethodResultResponse.applicablePaymentMethods = filteredMethods;        
 
     } catch (e) {
         Logger.error("Error in modifyGETResponse_v2: " + e.message);
