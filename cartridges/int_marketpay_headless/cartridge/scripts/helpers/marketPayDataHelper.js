@@ -26,7 +26,7 @@ function getFormattedDataForMarketPaySession(basket) {
             bodyFormat: "JSON",
             autoCapture: false,
             paymentDisplayType: "REDIRECT",
-            country: countryCode,
+            //country: countryCode, @todo later
             language: Site.getCurrent().getDefaultLocale().split('_')[0] || "en"
         }
     };
