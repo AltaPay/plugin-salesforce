@@ -1,0 +1,176 @@
+schema.yaml:
+openapi: 3.0.0
+info:
+  version: 1.0.1
+  title: Get Session and Token API
+components:
+  securitySchemes:
+    ShopperToken:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://my-shortcode.api.commercecloud.salesforce.com/shopper/auth/v1/organizations/my-org-id/oauth2/authorize
+          tokenUrl: https://my-shortcode.api.commercecloud.salesforce.com/shopper/auth/v1/organizations/my-org-id/oauth2/token
+          scopes:
+            c_checkoutsession_rw: Create and return session and token
+        clientCredentials:
+          tokenUrl: https://my-shortcode.api.commercecloud.salesforce.com/shopper/auth/v1/organizations/my-org-id/oauth2/token
+          scopes:
+            c_checkoutsession_rw: Create and return session and token
+paths:
+  /checkoutsession:
+    post:
+      summary: Create the Auth Token and Session ID
+      operationId: createCheckoutSession
+      parameters:
+        - in: query
+          name: siteId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - in: query
+          name: locale
+          required: false
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - order
+                - configuration
+              properties:
+                order:
+                  type: object
+                  required:
+                    - orderId
+                    - amount
+                  properties:
+                    orderId:
+                      type: string
+                      minLength: 1
+                    amount:
+                      type: object
+                      required:
+                        - value
+                        - currency
+                      properties:
+                        value:
+                          type: number
+                          minimum: 0
+                        currency:
+                          type: string
+                          minLength: 3
+                          maxLength: 3
+                    orderLines:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          itemId:
+                            type: string
+                          description:
+                            type: string
+                          quantity:
+                            type: integer
+                            minimum: 1
+                          unitPrice:
+                            type: number
+                            minimum: 0
+                    customer:
+                      type: object
+                      properties:
+                        firstName:
+                          type: string
+                        lastName:
+                          type: string
+                        email:
+                          type: string
+                          format: email
+                        billingAddress:
+                          type: object
+                          properties:
+                            street:
+                              type: string
+                            city:
+                              type: string
+                            country:
+                              type: string
+                              minLength: 2
+                              maxLength: 2
+                            zipCode:
+                              type: string
+                        shippingAddress:
+                          type: object
+                          properties:
+                            street:
+                              type: string
+                            city:
+                              type: string
+                            country:
+                              type: string
+                              minLength: 2
+                              maxLength: 2
+                            zipCode:
+                              type: string
+                    transactionInfo:
+                      type: object
+                      additionalProperties: true
+                configuration:
+                  type: object
+                  required:
+                    - paymentType
+                  properties:
+                    paymentType:
+                      type: string
+                      minLength: 1
+                    bodyFormat:
+                      type: string
+                    autoCapture:
+                      type: boolean
+                    paymentDisplayType:
+                      type: string
+                    country:
+                      type: string
+                      minLength: 2
+                      maxLength: 2
+                    language:
+                      type: string
+                      minLength: 2
+      responses:
+        "200":
+          description: Returns created Auth Token and Session ID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  length:
+                    type: number
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        token:
+                          type: string
+                        sessionId:
+                          type: string
+        "404":
+          description: Returns general errors
+          content:
+            application/json:
+              examples:
+                not_found:
+                  value:
+                    {
+                      "type": "page not found",
+                    }
+security:
+  - ShopperToken: ["c_checkoutsession_rw"]
+

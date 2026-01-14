@@ -1,5 +1,6 @@
 'use strict';
 
+const Logger = require('dw/system/Logger');
 const Site = require('dw/system/Site');
 
 /**

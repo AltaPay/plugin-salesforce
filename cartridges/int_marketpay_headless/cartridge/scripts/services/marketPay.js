@@ -55,6 +55,47 @@ function getMarketPayAuthenticateService() {
     });
 }
 
+function getService(serviceType) {
+    return LocalServiceRegistry.createService('marketpay.http.service', {
+        createRequest: function (svc, payload) {
+            
+            var log = Logger.getLogger("marketpay");
+
+            log.info("GetService Marketing _url:" + svc.getURL()+'/'+serviceType);
+            log.info("GetService token:" + payload.token);
+            log.info("GetService body:" + JSON.stringify(payload.requestBody));
+
+
+            svc.setURL(svc.getURL()+'/'+serviceType);
+
+            svc.setRequestMethod('GET');
+            svc.addHeader('Content-Type', 'application/json');
+            svc.addHeader('Authorization', 'Bearer ' + payload.token);
+
+            return JSON.stringify(payload.requestBody);
+        },
+
+        parseResponse: function (svc, client) {
+            try {
+                return JSON.parse(client.text);
+            } catch (e) {
+                throw new Error('Failed to parse session response: ' + e.message);
+            }
+        },
+
+        filterLogMessage: function (msg) {
+            return msg; // Mask if needed
+        },
+
+        mockCall: function () {
+            return {
+                status: 'SUCCESS',
+                sessionId: 'mock-session-id'
+            };
+        }
+    });
+}
+
 /**
  * Creates and returns a LocalServiceRegistry service for creating a MarketPay session.
  *
@@ -68,14 +109,18 @@ function getMarketPayAuthenticateService() {
  * @returns {dw.svc.HTTPService}
  * A configured MarketPay session service instance.
  */
+
+
 function getMarketPaySessionService() {
     return LocalServiceRegistry.createService('int.marketpay.session', {
         createRequest: function (svc, payload) {
+
+
             svc.setRequestMethod('POST');
             svc.addHeader('Content-Type', 'application/json');
             svc.addHeader('Authorization', 'Bearer ' + payload.token);
 
-            return JSON.stringify({});
+            return JSON.stringify(payload.requestBody);
         },
 
         parseResponse: function (svc, client) {
@@ -152,11 +197,14 @@ function getAuthToken() {
  *  - token: The MarketPay authentication token
  *  - sessionId: The created MarketPay session ID
  */
-function getTokenAndSessionId() {
+function getTokenAndSessionId(requestBody) {
     const token = getAuthToken();
 
     const sessionService = getMarketPaySessionService();
-    const result = sessionService.call({ token: token });
+    const result = sessionService.call({ 
+                                        token: token,
+                                        requestBody: requestBody                                  
+                                    });
 
     if (!result.ok || !result.object || !result.object.sessionId) {
         Logger.error('MarketPay Session API error', result.errorMessage);
@@ -169,6 +217,49 @@ function getTokenAndSessionId() {
     };
 }
 
+function getPaymentMethods(authToken, checkoutSessionId) {
+
+    const service = getService(`session/${checkoutSessionId}/payment-methods`);
+    const result = service.call({ 
+                                        token: authToken,
+                                        requestBody: {}                                  
+                                    });
+
+    //Logger.info('MarketPay PaymentMethods', JSON.stringify(result));                                    
+    
+    if (!result.ok) {
+        Logger.error('MarketPay PaymentMethods API error', result.errorMessage);
+        throw new Error('Failed to retrieve MarketPay Payment Methods');
+    }
+
+
+
+    return result.object;
+}
+
+function createPayment(authToken, checkoutSessionId, paymentMethodId) {
+
+    const service = getService(`payment`);
+    const result = service.call({ 
+                                        token: authToken,
+                                        requestBody: {
+                                            paymentMethodId: paymentMethodId,
+                                            sessionId: checkoutSessionId
+                                        }                                  
+                                    });
+
+    if (!result.ok || !result.object ) {
+        Logger.error('MarketPay createPayment API error', result.errorMessage);
+        throw new Error('Failed to create MarketPay session ID');
+    }
+
+    return result.object;
+}
+
 module.exports = {
-    getTokenAndSessionId: getTokenAndSessionId
+    getTokenAndSessionId: getTokenAndSessionId,
+    getPaymentMethods: getPaymentMethods, 
+    createPayment: createPayment
 };
+
+
