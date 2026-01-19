@@ -3,6 +3,50 @@
 const Site = require('dw/system/Site');
 const Logger = require('dw/system/Logger');
 
+
+/**
+ * createOrderNo entry point for setting or creating order number
+ * @returns {string} order number
+ */
+/*
+function createOrderNo(basket) {
+    var orderNo;
+    var isOrderExist;
+
+    try {
+        Transaction.begin();
+
+        orderNo = basket.custom.marketPayUsedOrderNo;
+
+        if (!orderNo) {
+            orderNo = OrderMgr.createOrderSequenceNo();
+            basket.custom.marketPayUsedOrderNo = orderNo;
+        } else {
+            try {
+                isOrderExist = !empty(OrderMgr.getOrder(orderNo));
+
+                if (isOrderExist) {
+                    orderNo = OrderMgr.createOrderSequenceNo();
+                    basket.custom.marketPayUsedOrderNo = orderNo;
+                }
+            } catch (error) {
+                Logger.error("Error in createOrderNo: " + error.message);
+                orderNo = OrderMgr.createOrderSequenceNo();
+                basket.custom.marketPayUsedOrderNo = orderNo;
+            }
+        }
+
+        Transaction.commit();
+    } catch (e) {
+        Transaction.rollback();
+        Logger.error("Transaction error in createOrderNo: " + e.message);
+        throw e;
+    }
+
+    return orderNo;
+}
+*/
+
 function getFormattedDataForMarketPaySession(basket) {
 
     var Locale = require('dw/util/Locale');
@@ -12,7 +56,7 @@ function getFormattedDataForMarketPaySession(basket) {
     // Initialize the order data object
     var orderData = {
         order: {
-            orderId: basket.getUUID(),
+            orderId: basket.custom.marketPayUsedOrderNo,
             amount: {
                 value: basket.getTotalGrossPrice().getValue(),
                 currency: basket.getCurrencyCode()
@@ -91,6 +135,8 @@ function getFormattedDataForMarketPaySession(basket) {
             };
         }
     }
+
+    Logger.info("SessionBody: "+ JSON.stringify(orderData));
 
     return orderData;
 }
