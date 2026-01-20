@@ -1,16 +1,10 @@
 const RESTResponseMgr = require('dw/system/RESTResponseMgr');
 const marketPay = require('*/cartridge/scripts/services/marketPay')
-const Logger = require('dw/system/Logger');
 
 exports.createCheckoutSession = function () {
     var requestBody = request.httpParameterMap.requestBodyAsString;
     var requestData = JSON.parse(requestBody);
     var result = marketPay.getTokenAndSessionId(requestData);
-
-    var paymentMethods = marketPay.getPaymentMethods(result.token, result.sessionId);
-
-    Logger.info(`MarketPayLog: ${JSON.stringify(paymentMethods)}`);
-
     try {
         RESTResponseMgr
             .createSuccess(result)

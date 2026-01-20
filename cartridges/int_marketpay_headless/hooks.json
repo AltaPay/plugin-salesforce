@@ -1,24 +1,11 @@
 {
     "hooks": [
         {
-            "name": "dw.order.createOrderNo",
-            "script": "./cartridge/scripts/hooks/orderHooks.js"
-        },
-        {
-            "name": "dw.ocapi.shop.basket.afterPOST",
-            "script": "./cartridge/scripts/hooks/basketPaymentHooks.js"
-
-        },        
-        {
             "name": "dw.ocapi.shop.basket.payment_methods.modifyGETResponse_v2",
             "script": "./cartridge/scripts/hooks/basketPaymentHooks.js"
         },
         {
-            "name": "dw.ocapi.shop.basket.payment_instrument.beforePOST",
-            "script": "./cartridge/scripts/hooks/basketPaymentHooks.js"
-        },
-        {
-            "name": "dw.ocapi.shop.basket.payment_instrument.modifyPOSTResponse",
+            "name": "dw.ocapi.shop.basket.payment_instrument.afterPOST",
             "script": "./cartridge/scripts/hooks/basketPaymentHooks.js"
         }     
     ]
