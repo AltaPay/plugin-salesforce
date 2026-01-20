@@ -4,8 +4,6 @@ const Site = require('dw/system/Site');
 const Logger = require('dw/system/Logger');
 const BasketMgr = require('dw/order/BasketMgr');
 
-
-
 exports.afterPOST = function (basketId) {
 
     Logger.info("basket afterPost Called ");
@@ -123,18 +121,6 @@ exports.modifyGETResponse_v2 = function (basket, paymentMethodResultResponse) {
     }
 };
 
-/*
-exports.beforePOST = function(basket, paymentInstrument) {
-
-    Logger.info("MarketPay: payment instrument beforePOST");
-    Logger.info("c_marketpayPaymentMethodID: " + paymentInstrument.c_marketpayPaymentMethodID);
-
-    // Token and sessionId should be sent from PWA in the request body
-    Logger.info("beforePost token: " + paymentInstrument.c_marketPayToken);
-    Logger.info("beforePost sessionID: " + paymentInstrument.c_marketPaySessionID);
-};
-*/
-
 exports.modifyPOSTResponse = function(basket, basketResponse, paymentInstrumentRequest ) {
 
     Logger.info("MarketPay: payment instrument modifyPOSTREsponse ");
@@ -142,8 +128,8 @@ exports.modifyPOSTResponse = function(basket, basketResponse, paymentInstrumentR
     const marketPayService = require('*/cartridge/scripts/services/marketPay');
     const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
 
-    if(paymentInstrumentRequest.c_marketpayPaymentMethodID && 
-        paymentInstrumentRequest.c_marketPayToken && 
+    if (paymentInstrumentRequest.c_marketpayPaymentMethodID &&
+        paymentInstrumentRequest.c_marketPayToken &&
         paymentInstrumentRequest.c_marketPaySessionID) {
 
         Logger.info("c_marketpayPaymentMethodID: " + paymentInstrumentRequest.c_marketpayPaymentMethodID);
@@ -153,12 +139,9 @@ exports.modifyPOSTResponse = function(basket, basketResponse, paymentInstrumentR
         Logger.info("beforePost sessionID: " + paymentInstrumentRequest.c_marketPaySessionID);
 
         // Token and sessionId should be sent from PWA in the request body
-            
-
-
-        var mpPayment = marketPayService.createPayment(paymentInstrumentRequest.c_marketPayToken, 
-                                                                    paymentInstrumentRequest.c_marketPaySessionID,
-                                                                    paymentInstrumentRequest.c_marketpayPaymentMethodID);
+        var mpPayment = marketPayService.createPayment(paymentInstrumentRequest.c_marketPayToken,
+            paymentInstrumentRequest.c_marketPaySessionID,
+            paymentInstrumentRequest.c_marketpayPaymentMethodID);
         basketResponse.c_marketPay = mpPayment;
     } else {
         var missingFields = [];
@@ -181,9 +164,3 @@ exports.modifyPOSTResponse = function(basket, basketResponse, paymentInstrumentR
         return;
     }
 };
-
-
-
-
-
-

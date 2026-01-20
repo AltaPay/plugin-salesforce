@@ -6,7 +6,6 @@ exports.createCheckoutSession = function () {
     var requestBody = request.httpParameterMap.requestBodyAsString;
     var requestData = JSON.parse(requestBody);
     var result = marketPay.getTokenAndSessionId(requestData);
-
     var paymentMethods = marketPay.getPaymentMethods(result.token, result.sessionId);
 
     Logger.info(`MarketPayLog: ${JSON.stringify(paymentMethods)}`);

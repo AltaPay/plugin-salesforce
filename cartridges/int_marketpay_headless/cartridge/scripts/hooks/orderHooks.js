@@ -9,29 +9,6 @@ var BasketMgr = require('dw/order/BasketMgr');
  * @returns {string|null} - Custom order number or null to use default
  */
 exports.createOrderNo = function () {
-
-    /*
-    var basket = BasketMgr.getCurrentBasket();
-
-    Logger.info("createOrderNo Hook called, basket is null: " + (basket == null));
-
-    if (!basket) {
-        Logger.info("MarketPay: No basket found, using default order number");
-        return null;
-    }
-
-    var orderNo = basket.custom.marketPayUsedOrderNo;
-
-    if (orderNo) {
-        Logger.info("MarketPay: Using custom order number: " + orderNo);
-        return orderNo;
-    }
-
-    Logger.info("MarketPay: No custom order number found, using default");
-    return null;
-
-    */
-
     var orderNo;
     var isOrderExist;
 
@@ -70,7 +47,6 @@ exports.createOrderNo = function () {
         Logger.error("Transaction error in createOrderNo: " + e.message);
         throw e;
     }
-
 
     Logger.info("createOrderNo Hook called, OrderNo: " + orderNo);
 

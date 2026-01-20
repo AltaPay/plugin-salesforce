@@ -5,7 +5,6 @@ const Encoding = require('dw/crypto/Encoding');
 const Bytes = require('dw/util/Bytes');
 const Logger = require('dw/system/Logger');
 
-
 /**
  * Creates and returns a LocalServiceRegistry service for authenticating with MarketPay.
  *
@@ -55,7 +54,6 @@ function getMarketPayAuthenticateService() {
         }
     });
 }
-
 
 function getService(serviceType, method) {
     return LocalServiceRegistry.createService('marketpay.http.service', {
