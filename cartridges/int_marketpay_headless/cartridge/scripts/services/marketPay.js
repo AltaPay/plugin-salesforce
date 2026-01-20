@@ -5,6 +5,7 @@ const Encoding = require('dw/crypto/Encoding');
 const Bytes = require('dw/util/Bytes');
 const Logger = require('dw/system/Logger');
 
+
 /**
  * Creates and returns a LocalServiceRegistry service for authenticating with MarketPay.
  *
@@ -55,7 +56,8 @@ function getMarketPayAuthenticateService() {
     });
 }
 
-function getService(serviceType) {
+
+function getService(serviceType, method) {
     return LocalServiceRegistry.createService('marketpay.http.service', {
         createRequest: function (svc, payload) {
             
@@ -68,7 +70,7 @@ function getService(serviceType) {
 
             svc.setURL(svc.getURL()+'/'+serviceType);
 
-            svc.setRequestMethod('GET');
+            svc.setRequestMethod(method);
             svc.addHeader('Content-Type', 'application/json');
             svc.addHeader('Authorization', 'Bearer ' + payload.token);
 
@@ -219,7 +221,7 @@ function getTokenAndSessionId(requestBody) {
 
 function getPaymentMethods(authToken, checkoutSessionId) {
 
-    const service = getService(`session/${checkoutSessionId}/payment-methods`);
+    const service = getService(`session/${checkoutSessionId}/payment-methods`, 'GET');
     const result = service.call({ 
                                         token: authToken,
                                         requestBody: {}                                  
@@ -239,7 +241,7 @@ function getPaymentMethods(authToken, checkoutSessionId) {
 
 function createPayment(authToken, checkoutSessionId, paymentMethodId) {
 
-    const service = getService(`payment`);
+    const service = getService(`payment`, 'POST');
     const result = service.call({ 
                                         token: authToken,
                                         requestBody: {
