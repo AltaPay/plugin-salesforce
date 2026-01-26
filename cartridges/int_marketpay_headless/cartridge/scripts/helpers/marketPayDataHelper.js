@@ -12,7 +12,7 @@ function getFormattedDataForMarketPaySession(basket) {
     // Initialize the order data object
     var orderData = {
         order: {
-            orderId: basket.getUUID(),
+            orderId: basket.custom.marketPayUsedOrderNo,
             amount: {
                 value: basket.getTotalGrossPrice().getValue(),
                 currency: basket.getCurrencyCode()
@@ -26,7 +26,7 @@ function getFormattedDataForMarketPaySession(basket) {
             bodyFormat: "JSON",
             autoCapture: false,
             paymentDisplayType: "REDIRECT",
-            country: countryCode,
+            // country: countryCode, @todo Get the country from basket or customer profile
             language: Site.getCurrent().getDefaultLocale().split('_')[0] || "en"
         }
     };
@@ -91,6 +91,8 @@ function getFormattedDataForMarketPaySession(basket) {
             };
         }
     }
+
+    Logger.info("SessionBody: "+ JSON.stringify(orderData));
 
     return orderData;
 }
