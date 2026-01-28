@@ -6,20 +6,17 @@
         },
         {
             "name": "dw.ocapi.shop.basket.afterPOST",
-            "script": "./cartridge/scripts/hooks/basketPaymentHooks.js"
-
+            "script": "./cartridge/scripts/hooks/basketHooks.js"            
         },        
         {
             "name": "dw.ocapi.shop.basket.payment_methods.modifyGETResponse_v2",
             "script": "./cartridge/scripts/hooks/basketPaymentHooks.js"
         },
         {
-            "name": "dw.ocapi.shop.basket.payment_instrument.beforePOST",
-            "script": "./cartridge/scripts/hooks/basketPaymentHooks.js"
-        },
-        {
-            "name": "dw.ocapi.shop.basket.payment_instrument.modifyPOSTResponse",
-            "script": "./cartridge/scripts/hooks/basketPaymentHooks.js"
-        }     
+            "name": "dw.ocapi.shop.basket.payment_instrument.afterPOST",
+            "script": "./cartridge/scripts/hooks/basketPaymentHooks.js"            
+        }            
     ]
+
 }
+
