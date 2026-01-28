@@ -1,12 +1,8 @@
 'use strict';
 
-const Site = require('dw/system/Site');
 const Logger = require('dw/system/Logger');
-const BasketMgr = require('dw/order/BasketMgr');
 
 exports.afterPOST = function (basketId) {
-
-    Logger.info("basket afterPost Called ");
 
     var HookMgr = require('dw/system/HookMgr');
 
