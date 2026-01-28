@@ -61,43 +61,6 @@ function fetchNewToken() {
     throw new Error("Failed to get token: " + (result.errorMessage || 'Unknown error'));
 }
 
-function getMarketPayAuthenticateService() {
-    let authString;
-    let encodedAuthString;
-
-    return LocalServiceRegistry.createService('int.marketpay.auth', {
-        createRequest: function (svc, payload) {
-            svc.setRequestMethod('POST');
-            svc.addHeader('Content-Type', 'application/json');
-
-            authString = payload.username + ':' + payload.password;
-            encodedAuthString = Encoding.toBase64(new Bytes(authString));
-            svc.addHeader('Authorization', 'Basic ' + encodedAuthString);
-
-            return JSON.stringify(payload);
-        },
-
-        parseResponse: function (svc, client) {
-            try {
-                return JSON.parse(client.text);
-            } catch (e) {
-                throw new Error('Failed to parse authentication response: ' + e.message);
-            }
-        },
-
-        filterLogMessage: function (msg) {
-            return msg; // Mask if needed
-        },
-
-        mockCall: function () {
-            return {
-                status: 'SUCCESS',
-                token: 'mock-auth-token'
-            };
-        }
-    });
-}
-
 function getService(serviceType, method, url) {
     return LocalServiceRegistry.createService('marketpay.http.service', {
         createRequest: function (svc, payload) {
@@ -297,5 +260,3 @@ module.exports = {
     getPaymentMethods: getPaymentMethods,
     createPayment: createPayment
 };
-
-

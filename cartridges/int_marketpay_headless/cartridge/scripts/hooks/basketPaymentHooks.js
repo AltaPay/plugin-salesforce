@@ -2,7 +2,6 @@
 
 const Site = require('dw/system/Site');
 const Logger = require('dw/system/Logger');
-const BasketMgr = require('dw/order/BasketMgr');
 const Transaction = require('dw/system/Transaction');
 
 
@@ -106,13 +105,6 @@ exports.modifyGETResponse_v2 = function (basket, paymentMethodResultResponse) {
         // Return original payment methods on error
         return;
     }
-};
-
-
-exports.modifyPOSTResponse = function(basket, basketResponse, paymentInstrumentRequest ) {
-
-    Logger.info("basket modifyPOSTResponse called");
-
 };
 
 exports.afterPOST = function (basket, paymentInstrument) { 
