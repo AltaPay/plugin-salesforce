@@ -4,6 +4,10 @@ const LocalServiceRegistry = require('dw/svc/LocalServiceRegistry');
 const Encoding = require('dw/crypto/Encoding');
 const Bytes = require('dw/util/Bytes');
 const Logger = require('dw/system/Logger');
+var CacheMgr = require('dw/system/CacheMgr');
+
+const CACHE_ID = 'marketPayRestOauthToken';
+const CACHE_KEY = 'oauth_token';
 
 /**
  * Creates and returns a LocalServiceRegistry service for authenticating with MarketPay.
@@ -18,6 +22,82 @@ const Logger = require('dw/system/Logger');
  * @returns {dw.svc.HTTPService}
  * A configured MarketPay authentication service instance.
  */
+
+function fetchNewToken() {
+
+    const tokenService = LocalServiceRegistry.createService("int.marketpay.auth", {
+        createRequest: function (service, params) {
+            service.setRequestMethod("POST");
+            service.addHeader("Content-Type", "application/x-www-form-urlencoded");
+
+            const credentials = service.getConfiguration().getCredential();
+            const clientId = credentials.getUser();
+            const clientSecret = credentials.getPassword();
+
+            const authString = clientId + ":" + clientSecret;
+            const base64Auth = Encoding.toBase64(new Bytes(authString));            
+            service.addHeader("Authorization", "Basic " + base64Auth);
+
+            return JSON.stringify({});
+        },
+        parseResponse: function (service, response) {
+            return JSON.parse(response.text);
+        }
+    });
+
+    const result = tokenService.call();
+
+    if (result.ok && result.object && result.object.token) {
+        const accessToken = result.object.token;
+
+        // Cache the token (expires automatically after 3500 seconds)
+        const cache = CacheMgr.getCache(CACHE_ID);
+        cache.put(CACHE_KEY, accessToken);
+
+        return accessToken;
+    }
+
+
+    throw new Error("Failed to get token: " + (result.errorMessage || 'Unknown error'));
+}
+
+function fetchNewAuthToken() {
+
+    var tokenService = LocalServiceRegistry.createService("int.marketpay.auth", {
+        createRequest: function (service, params) {
+            service.setRequestMethod("POST");
+            service.addHeader("Content-Type", "application/x-www-form-urlencoded");
+
+            // Get credentials
+            var credentials = service.getConfiguration().getCredential();
+            var clientId = credentials.getUser();
+            var clientSecret = credentials.getPassword();
+
+            // Create Basic Auth header manually
+            var authString = clientId + ":" + clientSecret;
+            var base64Auth = Encoding.toBase64(new Bytes(authString));
+            service.addHeader("Authorization", "Basic " + base64Auth);
+
+            return JSON.stringify({});
+        },
+        parseResponse: function (service, response) {
+            return JSON.parse(response.text);
+        }
+    });
+
+    var result = tokenService.call();
+
+    if (result.ok) {
+        var tokenData = result.object;
+        //this.cacheToken(tokenData);
+        //return tokenData.token;
+
+        return tokenData;
+    }
+
+    throw new Error("Failed to get token: " + result.errorMessage);
+}
+
 function getMarketPayAuthenticateService() {
     let authString;
     let encodedAuthString;
@@ -55,22 +135,24 @@ function getMarketPayAuthenticateService() {
     });
 }
 
-function getService(serviceType, method) {
+function getService(serviceType, method, url) {
     return LocalServiceRegistry.createService('marketpay.http.service', {
         createRequest: function (svc, payload) {
-            
+
             var log = Logger.getLogger("marketpay");
 
-            log.info("GetService Marketing _url:" + svc.getURL()+'/'+serviceType);
-            log.info("GetService token:" + payload.token);
+            log.info("GetService Marketing _url:" + svc.getURL() + '/' + serviceType);
+            log.info("GetService token:" + getAuthToken());
             log.info("GetService body:" + JSON.stringify(payload.requestBody));
 
-
-            svc.setURL(svc.getURL()+'/'+serviceType);
+            if (url == null)
+                svc.setURL(svc.getURL() + '/' + serviceType);
+            else
+                svc.setURL(url);
 
             svc.setRequestMethod(method);
             svc.addHeader('Content-Type', 'application/json');
-            svc.addHeader('Authorization', 'Bearer ' + payload.token);
+            svc.addHeader('Authorization', 'Bearer ' + getAuthToken());
 
             return JSON.stringify(payload.requestBody);
         },
@@ -95,6 +177,7 @@ function getService(serviceType, method) {
         }
     });
 }
+
 
 /**
  * Creates and returns a LocalServiceRegistry service for creating a MarketPay session.
@@ -158,22 +241,18 @@ function getMarketPaySessionService() {
  * @returns {string}
  * The MarketPay authentication token.
  */
-function getAuthToken() {
-    const site = require('*/cartridge/scripts/helpers/site.js');
-    const authService = getMarketPayAuthenticateService();
-    const payload = {
-        username: site.getCustomPreference('marketpayUsername'),
-        password: site.getCustomPreference('marketpayPassword')
-    };
+function getAuthToken() {    
+    
+    const cache = CacheMgr.getCache(CACHE_ID);
+    let token = cache.get(CACHE_KEY);
 
-    const result = authService.call(payload);
-
-    if (!result.ok || !result.object || !result.object.token) {
-        Logger.error('MarketPay Authenticate API error');
-        throw new Error('Failed to retrieve MarketPay authentication token');
+    // If token exists in cache, return it (cache handles expiry)
+    if (token) {
+        return token;
     }
 
-    return result.object.token;
+    // Otherwise fetch new token
+    return fetchNewToken();
 }
 
 /**
@@ -198,13 +277,13 @@ function getAuthToken() {
  *  - sessionId: The created MarketPay session ID
  */
 function getTokenAndSessionId(requestBody) {
-    const token = getAuthToken();
+    const token = getAuthToken();    
 
     const sessionService = getMarketPaySessionService();
-    const result = sessionService.call({ 
-                                        token: token,
-                                        requestBody: requestBody                                  
-                                    });
+    const result = sessionService.call({
+        token: token,
+        requestBody: requestBody
+    });
 
     if (!result.ok || !result.object || !result.object.sessionId) {
         Logger.error('MarketPay Session API error', result.errorMessage);
@@ -213,42 +292,36 @@ function getTokenAndSessionId(requestBody) {
 
     return {
         token: token,
-        sessionId: result.object.sessionId
+        sessionId: result.object.sessionId        
     };
 }
 
-function getPaymentMethods(authToken, checkoutSessionId) {
+function getPaymentMethods(checkoutSessionId) {
 
     const service = getService(`session/${checkoutSessionId}/payment-methods`, 'GET');
-    const result = service.call({ 
-                                        token: authToken,
-                                        requestBody: {}                                  
-                                    });
+    const result = service.call({        
+        requestBody: {}
+    });
 
-    //Logger.info('MarketPay PaymentMethods', JSON.stringify(result));                                    
-    
     if (!result.ok) {
         Logger.error('MarketPay PaymentMethods API error', result.errorMessage);
         throw new Error('Failed to retrieve MarketPay Payment Methods');
     }
 
-
-
     return result.object;
 }
 
-function createPayment(authToken, checkoutSessionId, paymentMethodId) {
+function createPayment(checkoutSessionId, paymentMethodId, onInitiatePaymentURL) {
 
-    const service = getService(`payment`, 'POST');
-    const result = service.call({ 
-                                        token: authToken,
-                                        requestBody: {
-                                            paymentMethodId: paymentMethodId,
-                                            sessionId: checkoutSessionId
-                                        }                                  
-                                    });
+    const service = getService(`payment`, 'POST', onInitiatePaymentURL);
+    const result = service.call({        
+        requestBody: {
+            paymentMethodId: paymentMethodId,
+            sessionId: checkoutSessionId
+        }
+    });
 
-    if (!result.ok || !result.object ) {
+    if (!result.ok || !result.object) {
         Logger.error('MarketPay createPayment API error', result.errorMessage);
         throw new Error('Failed to create MarketPay session ID');
     }
@@ -258,8 +331,9 @@ function createPayment(authToken, checkoutSessionId, paymentMethodId) {
 
 module.exports = {
     getTokenAndSessionId: getTokenAndSessionId,
-    getPaymentMethods: getPaymentMethods, 
-    createPayment: createPayment
+    getPaymentMethods: getPaymentMethods,
+    createPayment: createPayment,
+    fetchNewAuthToken: fetchNewAuthToken
 };
 
 
