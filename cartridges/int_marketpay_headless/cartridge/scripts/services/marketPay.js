@@ -61,43 +61,6 @@ function fetchNewToken() {
     throw new Error("Failed to get token: " + (result.errorMessage || 'Unknown error'));
 }
 
-function fetchNewAuthToken() {
-
-    var tokenService = LocalServiceRegistry.createService("int.marketpay.auth", {
-        createRequest: function (service, params) {
-            service.setRequestMethod("POST");
-            service.addHeader("Content-Type", "application/x-www-form-urlencoded");
-
-            // Get credentials
-            var credentials = service.getConfiguration().getCredential();
-            var clientId = credentials.getUser();
-            var clientSecret = credentials.getPassword();
-
-            // Create Basic Auth header manually
-            var authString = clientId + ":" + clientSecret;
-            var base64Auth = Encoding.toBase64(new Bytes(authString));
-            service.addHeader("Authorization", "Basic " + base64Auth);
-
-            return JSON.stringify({});
-        },
-        parseResponse: function (service, response) {
-            return JSON.parse(response.text);
-        }
-    });
-
-    var result = tokenService.call();
-
-    if (result.ok) {
-        var tokenData = result.object;
-        //this.cacheToken(tokenData);
-        //return tokenData.token;
-
-        return tokenData;
-    }
-
-    throw new Error("Failed to get token: " + result.errorMessage);
-}
-
 function getMarketPayAuthenticateService() {
     let authString;
     let encodedAuthString;
@@ -332,8 +295,7 @@ function createPayment(checkoutSessionId, paymentMethodId, onInitiatePaymentURL)
 module.exports = {
     getTokenAndSessionId: getTokenAndSessionId,
     getPaymentMethods: getPaymentMethods,
-    createPayment: createPayment,
-    fetchNewAuthToken: fetchNewAuthToken
+    createPayment: createPayment
 };
 
 
