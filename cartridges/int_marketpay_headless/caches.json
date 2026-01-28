@@ -1,0 +1,8 @@
+{
+    "caches": [
+        {
+            "id": "marketPayRestOauthToken",
+            "expireAfterSeconds": 3500
+        }
+    ]
+}
