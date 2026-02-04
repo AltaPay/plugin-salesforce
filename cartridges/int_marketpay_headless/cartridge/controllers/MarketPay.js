@@ -74,26 +74,13 @@ function handlePayment(req, res, args) {
 }
 
 server.post('CallbackForm', server.middleware.https, function (req, res, next) {
-    var shop_orderid = req.form.shop_orderid;
     var amount = req.form.amount;
-    var currencyCode = req.form.currency;
     var languageCode = req.form.language;
     var formTemplateClass = req.form.form_template;
 
     res.render('marketPay/callbackform', {
-        shopName: "shopname",
-        shopOrderId: shop_orderid,
-        totalAmount: amount,
-        isoCode: currencyCode,
-        symbol: "",
         languageCode: languageCode,
-        //mediaUrl: "logo.png",
         title: "Payment Form Title",
-        orderNumberSnippet: "snippet",
-        totalPriceSnippet: "233",
-        surchargeLabel: "lable",
-        context: "contet",
-        order: "order",
         formTemplateClass: formTemplateClass
     });
 

@@ -8,7 +8,7 @@ function getFormattedDataForMarketPaySession(basket) {
     const Locale = require('dw/util/Locale');
     const URLUtils = require('dw/web/URLUtils');
     var currentLocale = Locale.getLocale(request.locale);
-    var countryCode = currentLocale.country;    
+    var countryCode = currentLocale.country;
 
     // Initialize the order data object
     var orderData = {
