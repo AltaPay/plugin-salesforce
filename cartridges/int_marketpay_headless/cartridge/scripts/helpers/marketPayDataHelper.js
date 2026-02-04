@@ -3,8 +3,6 @@
 const Site = require('dw/system/Site');
 const Logger = require('dw/system/Logger');
 
-
-
 function getFormattedDataForMarketPaySession(basket) {
 
     const Locale = require('dw/util/Locale');

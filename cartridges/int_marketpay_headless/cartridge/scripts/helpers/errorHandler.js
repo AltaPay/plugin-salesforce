@@ -3,39 +3,6 @@ var Logger 	    = require('dw/system/Logger').getLogger('MarketPay', 'MarketPay'
 var Transaction = require('dw/system/Transaction');
 
 /**
- * Log error and sends email to stakeholders about the error
- * @param {Object} res - Response Object
- * @param {Object} error - Oject containing error related information
- * @param {string} error.logErrorMessage - Message written to the error log
- */
-/*
-exports.handleErrorEvent = function(res, error){
-	var URLUtils = require('dw/web/URLUtils');
-	
-	if(!empty(error.logErrorMessage)) {
-		Logger.error(error.logErrorMessage);
-	}
-	
-	//Make redirect back to last checkout step before payment 
-	if(error.redirect) {
-		try {
-			//Assign valitor error values on session object which can be used to show error message to the customer.
-			if (!error.cancelledByUser){
-				session.custom.valitor_placeOrderError = true;
-				session.custom.valitor_customerErrorMessage = error.customerErrorMessage;
-			}
-	
-			res.redirect(URLUtils.https('Checkout-Begin', 'stage', 'payment'));
-
-		} catch (e) {
-			Logger.error('Valitor - errorHandler.js - Error when trying to redirect! Error message: ' + e.message);
-			res.redirect(URLUtils.https('Cart-Show'));
-		}
-	}
-}
-*/
-
-/**
  * Fail current order
  * @param {Object} order - current order that must be failed 
  */

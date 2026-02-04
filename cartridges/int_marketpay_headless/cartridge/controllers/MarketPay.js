@@ -102,9 +102,6 @@ server.get(
 );
 
 server.post('CallbackForm', server.middleware.https, function (req, res, next) {
-
-    Logger.info("************MarketPay CallBackFrom called *********************");
-
     var shop_orderid = req.form.shop_orderid;
     var amount = req.form.amount;
     var currencyCode = req.form.currency;
@@ -136,10 +133,6 @@ server.post('CallbackForm', server.middleware.https, function (req, res, next) {
  * Validate payment success response from Valitor and handle payment
  */
 server.post('PaymentSuccess', server.middleware.https, function (req, res, next) {
-
-
-    Logger.info("************MarketPay PaymentSuccess called *********************");
-
     const Site = require('dw/system/Site');
     var orderNo;
     var args;
@@ -196,9 +189,6 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
  * Controller for failed payments.
  */
 server.post('PaymentFail', server.middleware.https, function (req, res, next) {
-
-    Logger.info("************MarketPay PaymentFail called *********************");
-
     const Site = require('dw/system/Site');
     var orderNo;
 
@@ -260,9 +250,6 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
  * This controller is for asynchronous payments, when the aquier returns an answer for payment request.
  */
 server.post('PaymentNotification', server.middleware.https, function (req, res, next) {
-
-    Logger.info("************MarketPay PaymentNotification called *********************")
-
     var OrderMgr = require('dw/order/OrderMgr'),
         XMLString = req.form.xml,
         orderId = null,
