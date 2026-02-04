@@ -11,10 +11,7 @@ var Site = require('dw/system/Site');
 var Template = require('dw/util/Template');
 var Transaction = require('dw/system/Transaction');
 var Logger = require('dw/system/Logger');
-//var formErrors = require('*/cartridge/scripts/formErrors');
-
 // static functions needed for Checkout Controller logic
-
 
 /**
  * Validate billing form
@@ -23,7 +20,6 @@ var Logger = require('dw/system/Logger');
  */
 
 function validateFields(form) {
-	//return formErrors.getFormErrors(form);
 	return null;
 }
 
@@ -46,7 +42,6 @@ function validateBillingForm(form) {
 function validateBasketStatus(currentBasket) {
 	return HookMgr.callHook('app.validate.basket', 'validateBasket', currentBasket, false);
 }
-
 
 /**
  * Sets the payment transaction amount

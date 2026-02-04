@@ -45,9 +45,7 @@ function handlePayment(req, res, args) {
                 // @todo update order attributes
 
             } else {
-
                 Logger.error("MarketPay - handlePayment - General error due to exception. Error message");
-
                 var failedURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentFailedURL');
                 res.redirect(failedURL + '?orderno=' + args.OrderNo);
 
@@ -62,7 +60,6 @@ function handlePayment(req, res, args) {
         res.redirect(successURL + '?orderno=' + args.OrderNo);
 
         return;
-
     } catch (e) {
 
         Logger.error("MarketPay - handlePayment - General error due to exception. Error message: " + e.message);
@@ -75,31 +72,6 @@ function handlePayment(req, res, args) {
         return;
     }
 }
-
-/**
- * Account-Show : The Account-Show endpoint will render the shopper's account page. Once a shopper logs in they will see is a dashboard that displays profile, address, payment and order information.
- * @name Base/Account-Show
- * @function
- * @memberof Account
- * @param {middleware} - server.middleware.https
- * @param {middleware} - userLoggedIn.validateLoggedIn
- * @param {middleware} - consentTracking.consent
- * @param {querystringparameter} - registration - A flag determining whether or not this is a newly registered account
- * @param {category} - senstive
- * @param {renders} - isml
- * @param {serverfunction} - get
- */
-server.get(
-    'Show',
-    server.middleware.https,
-    function (req, res, next) {
-
-
-        res.render('hello', {
-        });
-        next();
-    }
-);
 
 server.post('CallbackForm', server.middleware.https, function (req, res, next) {
     var shop_orderid = req.form.shop_orderid;
@@ -126,7 +98,6 @@ server.post('CallbackForm', server.middleware.https, function (req, res, next) {
     });
 
     return next();
-
 });
 
 /**
@@ -182,8 +153,6 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
         return next();
     }
 });
-
-
 
 /**
  * Controller for failed payments.
@@ -261,7 +230,6 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
     // @todo Find order ID from Valitor request body    
 
     try {
-
         var xml_obj = new XML(args.XMLString);
         orderId = encodeURIComponent(xml_obj.Body.Transactions.Transaction.ShopOrderId);
 
@@ -277,11 +245,9 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
         return next();
     }
 
-
     var order = OrderMgr.getOrder(orderId);
 
     if (order == null) {
-
         res.setStatusCode(400);
         res.json({ message: 'Order not found in the CMS' });
     }
@@ -292,6 +258,5 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
 
     return next();
 });
-
 
 module.exports = server.exports();
