@@ -3,11 +3,14 @@
 const Site = require('dw/system/Site');
 const Logger = require('dw/system/Logger');
 
+
+
 function getFormattedDataForMarketPaySession(basket) {
 
-    var Locale = require('dw/util/Locale');
+    const Locale = require('dw/util/Locale');
+    const URLUtils = require('dw/web/URLUtils');
     var currentLocale = Locale.getLocale(request.locale);
-    var countryCode = currentLocale.country;
+    var countryCode = currentLocale.country;    
 
     // Initialize the order data object
     var orderData = {
@@ -20,6 +23,19 @@ function getFormattedDataForMarketPaySession(basket) {
             orderLines: [],
             customer: null,
             transactionInfo: {}
+        },
+        callbacks: {
+            formStyling: URLUtils.https('MarketPay-CallbackForm').toString(),
+            success: {
+                type: "URL",
+                value: URLUtils.https('MarketPay-PaymentSuccess').toString()
+            },
+            failure: {
+                type: "URL",
+                value: URLUtils.https('MarketPay-PaymentFail').toString()
+            },
+            redirect: URLUtils.https('MarketPay-Redirect').toString()
+            //notification: URLUtils.https('MarketPay-PaymentNotification').toString()
         },
         configuration: {
             paymentType: "PAYMENT",
@@ -91,8 +107,6 @@ function getFormattedDataForMarketPaySession(basket) {
             };
         }
     }
-
-    Logger.info("SessionBody: "+ JSON.stringify(orderData));
 
     return orderData;
 }
