@@ -64,13 +64,6 @@ function fetchNewToken() {
 function getService(serviceType, method, url) {
     return LocalServiceRegistry.createService('marketpay.http.service', {
         createRequest: function (svc, payload) {
-
-            var log = Logger.getLogger("marketpay");
-
-            log.info("GetService Marketing _url:" + svc.getURL() + '/' + serviceType);
-            log.info("GetService token:" + getAuthToken());
-            log.info("GetService body:" + JSON.stringify(payload.requestBody));
-
             if (url == null)
                 svc.setURL(svc.getURL() + '/' + serviceType);
             else
