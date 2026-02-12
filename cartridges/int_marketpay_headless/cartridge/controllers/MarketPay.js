@@ -88,7 +88,7 @@ server.post('CallbackForm', server.middleware.https, function (req, res, next) {
 });
 
 /**
- * Validate payment success response from Valitor and handle payment
+ * Validate payment success response from MarketPay and handle payment
  */
 server.post('PaymentSuccess', server.middleware.https, function (req, res, next) {
     const Site = require('dw/system/Site');
@@ -165,7 +165,7 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
         if (order != null) {
 
             // @todo Validate MarketPay IP as referrer            
-            // @todo Update order with error information from Valitor
+            // @todo Update order with error information from MarketPay
             // @todo If the order is not already failed then fail the order            
 
             if (order.getStatus() != dw.order.Order.ORDER_STATUS_FAILED) {
@@ -206,6 +206,7 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
  * This controller is for asynchronous payments, when the aquier returns an answer for payment request.
  */
 server.post('PaymentNotification', server.middleware.https, function (req, res, next) {
+
     var OrderMgr = require('dw/order/OrderMgr'),
         XMLString = req.form.xml,
         orderId = null,
@@ -214,7 +215,7 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
             XMLString: XMLString
         };
 
-    // @todo Find order ID from Valitor request body    
+    // @todo Find order ID from MarketPay request body    
 
     try {
         var xml_obj = new XML(args.XMLString);

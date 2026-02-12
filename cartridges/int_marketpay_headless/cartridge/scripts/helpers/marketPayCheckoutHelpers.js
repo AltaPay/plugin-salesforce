@@ -15,13 +15,13 @@ function placeOrder(order) {
 		Transaction.begin();
 		var placeOrderStatus = OrderMgr.placeOrder(order);
 		if (placeOrderStatus === Status.ERROR) {
-			Logger.getLogger('Valitor').error('CheckoutHelpers.PlaceOrder failed for orderNo: {0}', order.orderNo);
+			Logger.getLogger('MarketPay').error('CheckoutHelpers.PlaceOrder failed for orderNo: {0}', order.orderNo);
 			return new Status(Status.ERROR);
 		}
 
 		Transaction.commit();
 	} catch (e) {
-		Logger.getLogger('Valitor').error('CheckoutHelpers.PlaceOrder failed for orderNo: {0}. Error message: {1}' , order.orderNo, e.message);
+		Logger.getLogger('MarketPay').error('CheckoutHelpers.PlaceOrder failed for orderNo: {0}. Error message: {1}' , order.orderNo, e.message);
 		Transaction.rollback();
 
 		return new Status(Status.ERROR);
