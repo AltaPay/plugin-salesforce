@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<iscomment>AltaPay Payment Gateway Template</iscomment>
+<html lang="${pdict.languageCode}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${pdict.title}</title>
+  <link rel="stylesheet" href="${URLUtils.staticURL('/css/callbackform.css')}" />
+</head>
+<body class="${pdict.formTemplateClass}">
+  <div class="content-wrapper">
+    <div class="payment-form-wrapper">
+      <form id="PensioPaymentForm">
+        <iscomment>All content in here will be replaced by the actual payment form</iscomment>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
