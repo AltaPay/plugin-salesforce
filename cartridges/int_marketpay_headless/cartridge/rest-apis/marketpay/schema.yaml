@@ -30,6 +30,12 @@ paths:
             type: string
             minLength: 1
         - in: query
+          name: c_customerId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - in: query
           name: locale
           required: false
           schema:
@@ -44,6 +50,7 @@ paths:
               required:
                 - order
                 - configuration
+                - callbacks
               properties:
                 order:
                   type: object
@@ -121,6 +128,8 @@ paths:
                     transactionInfo:
                       type: object
                       additionalProperties: true
+                callbacks:
+                  type: object
                 configuration:
                   type: object
                   required:

@@ -1,6 +1,6 @@
 'use strict';
 
-var Logger = require('dw/system/Logger');
+var Logger = require('dw/system/Logger').getLogger('MarketPay', 'MarketPay');
 var BasketMgr = require('dw/order/BasketMgr');
 
 /**
@@ -17,8 +17,7 @@ exports.createOrderNo = function () {
     
     try {
 
-        var basket = BasketMgr.getCurrentBasket();
-        Logger.info("createOrderNo Hook called, basket is null: " + (basket == null));
+        var basket = BasketMgr.getCurrentBasket();        
 
         Transaction.begin();
         orderNo = basket.custom.marketPayUsedOrderNo;

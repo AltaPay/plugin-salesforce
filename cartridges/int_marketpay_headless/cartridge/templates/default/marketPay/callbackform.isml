@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<iscomment>AltaPay Payment Gateway Template</iscomment>
+<html lang="${pdict.languageCode}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${pdict.title}</title>
+  <link rel="stylesheet" href="${URLUtils.staticURL('/css/callbackform.css')}" />
+</head>
+
+<body class="${pdict.formTemplateClass}">
+  <isif condition="${!empty(pdict.media)}">
+    <header class="header-minimal">
+      <isif condition="${pdict.mediaUrl != null}">
+        <div class="header-minimal-logo">
+          <img src="${pdict.mediaUrl}"
+               alt="logo"
+               class="header-logo-main-img">
+        </div>
+      <iselse/>
+        <div class="header-minimal-headline">
+          <h1>${pdict.shopName}</h1>
+        </div>
+      </isif>
+    </header>
+  </isif>
+
+  <div class="content-wrapper">
+    <div class="payment-form-wrapper">
+      <div class="heading-wrapper">
+        <h2 class="heading-title">${pdict.title}</h2>
+      </div>
+
+      <div class="info-wrapper">
+        <p class="custom-label">
+          <span class="pensio_payment_form_label_cell">${pdict.orderNumberSnippet}</span> ${pdict.shopOrderId}
+        </p>
+
+        <p class="custom-label">
+          <span class="pensio_payment_form_label_cell">${pdict.totalPriceSnippet}</span> ${pdict.symbol} <span id="PensioTotal">${pdict.totalAmount}</span>
+        </p>
+
+        <p class="custom-label surcharge-amount">
+          <span class="pensio_payment_form_label_cell">${pdict.surchargeLabel}</span> ${pdict.symbol} <span id="PensioSurcharge"></span>
+        </p>
+      </div>
+
+      <form id="PensioPaymentForm">
+        <iscomment>All content in here will be replaced by the actual payment form</iscomment>
+      </form>
+
+    </div>
+  </div>
+</body>
+</html>
