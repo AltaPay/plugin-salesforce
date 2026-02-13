@@ -32,8 +32,8 @@ function getFormattedDataForMarketPaySession(basket) {
                 type: "URL",
                 value: URLUtils.https('MarketPay-PaymentFail').toString()
             },
-            redirect: URLUtils.https('MarketPay-Redirect').toString()
-            //notification: URLUtils.https('MarketPay-PaymentNotification').toString()
+            redirect: URLUtils.https('MarketPay-Redirect').toString(),
+            notification: URLUtils.https('MarketPay-PaymentNotification').toString()
         },
         configuration: {
             paymentType: "PAYMENT",

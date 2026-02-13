@@ -3,7 +3,7 @@
 const LocalServiceRegistry = require('dw/svc/LocalServiceRegistry');
 const Encoding = require('dw/crypto/Encoding');
 const Bytes = require('dw/util/Bytes');
-const Logger = require('dw/system/Logger');
+const Logger = require('dw/system/Logger').getLogger('MarketPay', 'MarketPay');
 var CacheMgr = require('dw/system/CacheMgr');
 
 const CACHE_ID = 'marketPayRestOauthToken';
@@ -22,6 +22,7 @@ const CACHE_KEY = 'oauth_token';
  * @returns {dw.svc.HTTPService}
  * A configured MarketPay authentication service instance.
  */
+
 
 function fetchNewToken() {
 
@@ -61,9 +62,47 @@ function fetchNewToken() {
     throw new Error("Failed to get token: " + (result.errorMessage || 'Unknown error'));
 }
 
+function getService_v2(serviceType, method, url) {
+    return LocalServiceRegistry.createService('marketpay.http.service', {
+        createRequest: function (svc, payload) {            
+
+            if (url == null)
+                svc.setURL(svc.getURL() + '/' + serviceType);
+            else
+                svc.setURL(url);
+
+            svc.setRequestMethod(method);
+            svc.addHeader('Content-Type', 'application/json');
+            svc.addHeader('Authorization', 'Bearer ' + payload.token);
+
+            return JSON.stringify(payload.requestBody);
+        },
+
+        parseResponse: function (svc, client) {
+            try {
+                return JSON.parse(client.text);
+            } catch (e) {
+                throw new Error('Failed to parse session response: ' + e.message);
+            }
+        },
+
+        filterLogMessage: function (msg) {
+            return msg; // Mask if needed
+        },
+
+        mockCall: function () {
+            return {
+                status: 'SUCCESS',
+                sessionId: 'mock-session-id'
+            };
+        }
+    });
+}
+
 function getService(serviceType, method, url) {
     return LocalServiceRegistry.createService('marketpay.http.service', {
-        createRequest: function (svc, payload) {
+        createRequest: function (svc, payload) {            
+
             if (url == null)
                 svc.setURL(svc.getURL() + '/' + serviceType);
             else
@@ -196,7 +235,7 @@ function getAuthToken() {
  *  - sessionId: The created MarketPay session ID
  */
 function getTokenAndSessionId(requestBody) {
-    const token = getAuthToken();    
+    const token = fetchNewToken();
 
     const sessionService = getMarketPaySessionService();
     const result = sessionService.call({
@@ -215,6 +254,21 @@ function getTokenAndSessionId(requestBody) {
     };
 }
 
+function getPaymentMethods_v2(token, checkoutSessionId) {
+    const service = getService_v2(`session/${checkoutSessionId}/payment-methods`, 'GET');
+    const result = service.call({ 
+        token: token,       
+        requestBody: {}
+    });
+
+    if (!result.ok) {
+        Logger.error('MarketPay PaymentMethods API error', result.errorMessage);
+        throw new Error('Failed to retrieve MarketPay Payment Methods');
+    }
+
+    return result.object;
+}
+
 function getPaymentMethods(checkoutSessionId) {
 
     const service = getService(`session/${checkoutSessionId}/payment-methods`, 'GET');
@@ -225,6 +279,25 @@ function getPaymentMethods(checkoutSessionId) {
     if (!result.ok) {
         Logger.error('MarketPay PaymentMethods API error', result.errorMessage);
         throw new Error('Failed to retrieve MarketPay Payment Methods');
+    }
+
+    return result.object;
+}
+
+function createPayment_v2(token, checkoutSessionId, paymentMethodId, onInitiatePaymentURL) {
+
+    const service = getService_v2(`payment`, 'POST', onInitiatePaymentURL);
+    const result = service.call({        
+        token: token,
+        requestBody: {            
+            paymentMethodId: paymentMethodId,
+            sessionId: checkoutSessionId
+        }
+    });
+
+    if (!result.ok || !result.object) {
+        Logger.error('MarketPay createPayment API error', result.errorMessage);
+        throw new Error('Failed to create MarketPay session ID');
     }
 
     return result.object;
@@ -251,5 +324,7 @@ function createPayment(checkoutSessionId, paymentMethodId, onInitiatePaymentURL)
 module.exports = {
     getTokenAndSessionId: getTokenAndSessionId,
     getPaymentMethods: getPaymentMethods,
+    getPaymentMethods_v2: getPaymentMethods_v2,
+    createPayment_v2: createPayment_v2,
     createPayment: createPayment
 };

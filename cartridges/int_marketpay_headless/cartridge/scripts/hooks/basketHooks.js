@@ -1,6 +1,6 @@
 'use strict';
 
-const Logger = require('dw/system/Logger');
+const Logger = require('dw/system/Logger').getLogger('MarketPay', 'MarketPay');
 
 exports.afterPOST = function (basketId) {
 
@@ -8,7 +8,6 @@ exports.afterPOST = function (basketId) {
 
     if (HookMgr.hasHook('dw.order.createOrderNo')) {
         var orderNo = HookMgr.callHook('dw.order.createOrderNo', 'createOrderNo');
-        Logger.info("MarketPayOrderNo Created via hook: " + orderNo);
     } else {
         Logger.error("dw.order.createOrderNo hook not found");
     }
