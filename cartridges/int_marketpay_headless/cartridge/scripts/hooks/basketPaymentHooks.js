@@ -26,14 +26,13 @@ function getOnInitiatePaymentURL(selectedPaymentMethod, marketPayPaymentMethods)
 
 exports.modifyGETResponse_v2 = function (basket, paymentMethodResultResponse) {
 
-    Logger.info("*********** Market Pay modifyGETResponse_v2");
-
     const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
     const site = require('*/cartridge/scripts/helpers/site.js');
 
     var result = SCAPIService.createMarketPaySession(basket.customer.ID, marketPayDataHelper.getFormattedDataForMarketPaySession(basket));
 
     if (!result) {
+
         return new dw.system.Status(dw.system.Status.ERROR, 'MarketPay: Unable to create Payment Session');
     }
 
@@ -137,45 +136,11 @@ exports.modifyGETResponse_v2 = function (basket, paymentMethodResultResponse) {
 };
 
 
-exports.afterGET = function (basket, paymentMethods) {
-
-
-    Logger.info("*********** Market Pay AFterGet");
-
-    /*
-     // Store sessionId and userid in Custom Object MarketPayData
-        var CustomObjectMgr = require('dw/object/CustomObjectMgr');
-        var userid = basket.customer.ID;
-
-    Logger.info("********** Market Pay AfterGET: "+ userid);
-
-        try {
-            Transaction.wrap(function () {
-                var marketPayDataObj = CustomObjectMgr.getCustomObject('MarketPayData', userid);
-                if (!marketPayDataObj) {
-                    marketPayDataObj = CustomObjectMgr.createCustomObject('MarketPayData', userid);
-                }
-                marketPayDataObj.custom.SessionID = "Hello";
-                marketPayDataObj.custom.UserID = userid;
-            });
-            Logger.info("********** Market Pay AfterGET: Custom Object created/updated for user: " + userid);
-        } catch (e) {
-            Logger.error("********** Market Pay AfterGET Transaction FAILED: " + e.message);
-            Logger.error("********** Stack: " + e.stack);
-        }
-    */
-};
-
 exports.afterPOST = function (basket, paymentInstrument) {
 
     var paymentInstrumentRequest = paymentInstrument;
     var basketResponse = basket;
-
-    Logger.info("*************PaymentInstrument afterPOST");
-
-    //var paymentInstrumentRequest = paymentInstrument;
     const marketPayService = require('*/cartridge/scripts/services/marketPay');
-    const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
 
     if (paymentInstrumentRequest.c_marketPayPaymentMethodID) {
 
@@ -189,18 +154,12 @@ exports.afterPOST = function (basket, paymentInstrument) {
 
         if (!marketPayDataObj || !marketPaySessionId || !marketPayPaymentMethods || !onInitiatePaymentURL) {
             Logger.error('MarketPay: No Active Payment Session found for the user');
-            /*
-            basketResponse.c_marketPayError = {
-                error: true,
-                message: 'MarketPay Payment Session not found for user'
-            };
-            */
             return new dw.system.Status(dw.system.Status.ERROR, 'MarketPay: No Active Payment Session found for the user');
         }
 
         try {
 
-            var mpPayment = marketPayService.createPayment_v2(
+            var mpPayment = marketPayService.createPayment(
                 marketPayToken,
                 marketPaySessionId,
                 paymentInstrumentRequest.c_marketPayPaymentMethodID,
@@ -232,21 +191,6 @@ exports.afterPOST = function (basket, paymentInstrument) {
 
         Logger.error("MarketPay: Missing required fields: " + missingFields.join(', '));
 
-        /*
-        Logger.error("MarketPay: Missing required fields: " + missingFields.join(', '));
-        
-        basketResponse.c_marketPayError = {
-            error: true,
-            message: "Missing required MarketPay fields: " + missingFields.join(', ')
-        };
-        */
-
         return new dw.system.Status(dw.system.Status.ERROR, 'MarketPay: Missing required fields:' + missingFields.join(', '));
     }
-}
-
-
-exports.modifyPOSTResponse = function (basket, basketResponse, paymentInstrumentRequest) {
-
-    Logger.info("*************PaymentInstrument modefiedPOSTResponse");    
-}
+};

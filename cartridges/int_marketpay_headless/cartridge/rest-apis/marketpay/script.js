@@ -11,7 +11,7 @@ exports.createCheckoutSession = function () {
         var requestBody = request.httpParameterMap.requestBodyAsString;
         var requestData = JSON.parse(requestBody);
         var result = marketPay.getTokenAndSessionId(requestData);
-        var paymentMethods = marketPay.getPaymentMethods_v2(result.token, result.sessionId);
+        var paymentMethods = marketPay.getPaymentMethods(result.token, result.sessionId);
 
         const Transaction = require('dw/system/Transaction');
         var CustomObjectMgr = require('dw/object/CustomObjectMgr');
