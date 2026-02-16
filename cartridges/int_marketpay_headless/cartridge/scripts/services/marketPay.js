@@ -180,6 +180,23 @@ function getTokenAndSessionId(requestBody) {
     };
 }
 
+function updateSession(token, checkoutSessionId, requestBody) {
+
+    const service = getService(`session/${checkoutSessionId}`, 'PUT');
+    const result = service.call({
+        token: token,
+        requestBody: requestBody
+    });
+
+    if (!result.ok) {
+        Logger.error('MarketPay updateSession API error', result.errorMessage);
+        throw new Error('Failed to update MarketPay session');
+    }
+
+    return result.ok;
+    
+}
+
 function getPaymentMethods(token, checkoutSessionId) {
     const service = getService(`session/${checkoutSessionId}/payment-methods`, 'GET');
     const result = service.call({
@@ -217,6 +234,7 @@ function createPayment(token, checkoutSessionId, paymentMethodId, onInitiatePaym
 
 module.exports = {
     getTokenAndSessionId: getTokenAndSessionId,
+    updateSession: updateSession,
     getPaymentMethods: getPaymentMethods,
     createPayment: createPayment
 };

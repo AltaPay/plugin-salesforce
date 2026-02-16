@@ -6,24 +6,6 @@ const Transaction = require('dw/system/Transaction');
 const SCAPIService = require('*/cartridge/scripts/services/scapiService');
 
 
-function getOnInitiatePaymentURL(selectedPaymentMethod, marketPayPaymentMethods) {
-
-    marketPayPaymentMethods = JSON.parse(marketPayPaymentMethods);
-
-    if (!selectedPaymentMethod || !marketPayPaymentMethods || !marketPayPaymentMethods.methods) {
-        return null;
-    }
-
-    for (var i = 0; i < marketPayPaymentMethods.methods.length; i++) {
-        var method = marketPayPaymentMethods.methods[i];
-        if (method.id === selectedPaymentMethod) {
-            return method.onInitiatePayment && method.onInitiatePayment.value ? method.onInitiatePayment.value : null;
-        }
-    }
-
-    return null;
-}
-
 exports.modifyGETResponse_v2 = function (basket, paymentMethodResultResponse) {
 
     const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
@@ -140,7 +122,7 @@ exports.afterPOST = function (basket, paymentInstrument) {
 
     var paymentInstrumentRequest = paymentInstrument;
     var basketResponse = basket;
-    const marketPayService = require('*/cartridge/scripts/services/marketPay');
+    const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
 
     if (paymentInstrumentRequest.c_marketPayPaymentMethodID) {
 
@@ -150,39 +132,27 @@ exports.afterPOST = function (basket, paymentInstrument) {
         var marketPayToken = marketPayDataObj ? marketPayDataObj.custom.token : null;
         var marketPaySessionId = marketPayDataObj ? marketPayDataObj.custom.sessionID : null;
         var marketPayPaymentMethods = marketPayDataObj ? marketPayDataObj.custom.paymentMethods : null;
-        var onInitiatePaymentURL = getOnInitiatePaymentURL(paymentInstrumentRequest.c_marketPayPaymentMethodID, marketPayPaymentMethods);
+        var onInitiatePaymentURL = marketPayDataHelper.getOnInitiatePaymentURL(paymentInstrumentRequest.c_marketPayPaymentMethodID, marketPayPaymentMethods);
 
         if (!marketPayDataObj || !marketPaySessionId || !marketPayPaymentMethods || !onInitiatePaymentURL) {
             Logger.error('MarketPay: No Active Payment Session found for the user');
             return new dw.system.Status(dw.system.Status.ERROR, 'MarketPay: No Active Payment Session found for the user');
         }
 
-        try {
 
-            var mpPayment = marketPayService.createPayment(
-                marketPayToken,
-                marketPaySessionId,
-                paymentInstrumentRequest.c_marketPayPaymentMethodID,
-                onInitiatePaymentURL);
-
-            if (basketResponse.paymentInstruments && basketResponse.paymentInstruments.length > 0) {
-                for (var i = 0; i < basketResponse.paymentInstruments.length; i++) {
-                    var paymentInstrument = basketResponse.paymentInstruments[i];
-                    if (paymentInstrument.paymentMethod === paymentInstrumentRequest.paymentMethodId) {
-                        Transaction.wrap(function () {
-                            paymentInstrument.custom.marketPayPaymentURL = mpPayment.url;
-                            //paymentInstrument.custom.marketPayURLType = mpPayment.type;
-                        });
-                        break;
-                    }
+        if (basketResponse.paymentInstruments && basketResponse.paymentInstruments.length > 0) {
+            for (var i = 0; i < basketResponse.paymentInstruments.length; i++) {
+                var paymentInstrument = basketResponse.paymentInstruments[i];
+                if (paymentInstrument.paymentMethod === paymentInstrumentRequest.paymentMethodId) {
+                    Transaction.wrap(function () {
+                        paymentInstrument.custom.marketPayPaymentMethodID = paymentInstrumentRequest.c_marketPayPaymentMethodID;
+                        //paymentInstrument.custom.marketPayURLType = mpPayment.type;
+                    });
+                    break;
                 }
             }
         }
-        catch (e) {
-            Logger.error('MarketPay: Error creating payment' + e.message);
-            return new dw.system.Status(dw.system.Status.ERROR, 'MarketPay: Error creating payment' + e.message);
-        }
-
+        
     } else {
         var missingFields = [];
         if (!paymentInstrumentRequest.c_marketPayPaymentMethodID) {
