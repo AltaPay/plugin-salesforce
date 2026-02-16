@@ -6,7 +6,6 @@ var Site = require('dw/system/Site');
 var Encoding = require('dw/crypto/Encoding');
 var Bytes = require('dw/util/Bytes');
 
-
 /**
  * Get SLAS credentials from site preferences
  */
@@ -88,8 +87,6 @@ function getGuestAccessToken() {
     }
 }
 
-
-
 /**
  * Generate Basic Auth header
  */
@@ -100,7 +97,6 @@ function getBasicAuthHeader(clientId, clientSecret) {
     return 'Basic ' + encodedCredentials;
 }
 
-
 /**
  * Create checkout session via custom SCAPI
  * @param {Object} orderData - Order data
@@ -108,7 +104,6 @@ function getBasicAuthHeader(clientId, clientSecret) {
  * @param {Object} customParams - Custom query parameters
  * @returns {Object} Service result
  */
-//function createCheckoutSession(orderData, configuration, customParams) {
 function createMarketPaySession(customerID, requestBody) {
     var service = LocalServiceRegistry.createService('int.marketpay.custom', {
         createRequest: function (svc, params) {
@@ -175,7 +170,6 @@ function createMarketPaySession(customerID, requestBody) {
         return false;
     }
 }
-
 
 module.exports = {
     getGuestAccessToken: getGuestAccessToken,

@@ -19,7 +19,6 @@ const Logger = require('dw/system/Logger').getLogger('MarketPay', 'MarketPay');
  * A configured MarketPay authentication service instance.
  */
 
-
 function fetchNewToken() {
     const tokenService = LocalServiceRegistry.createService("int.marketpay.auth", {
         createRequest: function (service, params) {
@@ -88,7 +87,6 @@ function getService(serviceType, method, url) {
     });
 }
 
-
 /**
  * Creates and returns a LocalServiceRegistry service for creating a MarketPay session.
  *
@@ -102,7 +100,6 @@ function getService(serviceType, method, url) {
  * @returns {dw.svc.HTTPService}
  * A configured MarketPay session service instance.
  */
-
 
 function getMarketPaySessionService() {
     return LocalServiceRegistry.createService('int.marketpay.session', {
@@ -157,6 +154,7 @@ function getMarketPaySessionService() {
  *  - token: The MarketPay authentication token
  *  - sessionId: The created MarketPay session ID
  */
+
 function getTokenAndSessionId(requestBody) {
     const token = fetchNewToken();
     const sessionService = getMarketPaySessionService();
@@ -224,7 +222,6 @@ function createPayment(token, checkoutSessionId, paymentMethodId, onInitiatePaym
 
     return result.object;
 }
-
 
 module.exports = {
     getTokenAndSessionId: getTokenAndSessionId,
