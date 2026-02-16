@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<payment-settings xmlns="http://www.demandware.com/xml/impex/paymentsettings/2009-09-15">
+
+    <payment-method method-id="MARKETPAY_CREDITCARD">
+        <name xml:lang="x-default">Credit Card</name>
+        <enabled-flag>true</enabled-flag>
+        <processor-id>MARKETPAY</processor-id>
+    </payment-method>
+
+    <payment-method method-id="MARKETPAY_MOBILEPAY">
+        <name xml:lang="x-default">MobilePay</name>
+        <enabled-flag>true</enabled-flag>
+        <processor-id>MARKETPAY</processor-id>
+    </payment-method>
+
+    <payment-method method-id="MARKETPAY_PAYPAL">
+        <name xml:lang="x-default">PayPal</name>
+        <enabled-flag>false</enabled-flag>
+        <processor-id>MARKETPAY</processor-id>
+    </payment-method>
+
+    <payment-method method-id="MARKETPAY_KLARNA">
+        <name xml:lang="x-default">Klarna</name>
+        <enabled-flag>true</enabled-flag>
+        <processor-id>MARKETPAY</processor-id>
+    </payment-method>
+
+    <payment-method method-id="MARKETPAY_SOFORT">
+        <name xml:lang="x-default">Sofort</name>
+        <enabled-flag>true</enabled-flag>
+        <processor-id>MARKETPAY</processor-id>
+    </payment-method>
+
+    <payment-method method-id="MARKETPAY_IDEAL">
+        <name xml:lang="x-default">iDEAL</name>
+        <enabled-flag>true</enabled-flag>
+        <processor-id>MARKETPAY</processor-id>
+    </payment-method>
+
+    <payment-method method-id="MARKETPAY_INVOICE">
+        <name xml:lang="x-default">Invoice</name>
+        <enabled-flag>true</enabled-flag>
+        <processor-id>MARKETPAY</processor-id>
+    </payment-method>
+</payment-settings>

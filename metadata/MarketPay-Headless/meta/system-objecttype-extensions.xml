@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata xmlns="http://www.demandware.com/xml/impex/metadata/2006-10-31">
+    
+    <type-extension type-id="OrderPaymentInstrument">        
+        <custom-attribute-definitions>
+            <attribute-definition attribute-id="marketPayPaymentMethodID">
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="marketPayPaymentURL">
+                <display-name xml:lang="x-default">MarketPay Payment Redirect URL</display-name>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>            
+    </type-extension>
+
+    <type-extension type-id="SitePreferences">
+        <custom-attribute-definitions>            
+            <attribute-definition attribute-id="marketPayOrganizationID">
+                <display-name xml:lang="x-default">Organization ID</display-name>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="marketPayOrganizationShortCode">
+                <display-name xml:lang="x-default">Organization ShortCode</display-name>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="marketPayPaymentFailedURL">
+                <display-name xml:lang="x-default">URL where MarketPay Redirects After Failed Payment</display-name>
+                <type>string</type>
+                <mandatory-flag>true</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="marketPayPaymentSuccessURL">
+                <display-name xml:lang="x-default">URL where MarketPay Redirects After Successful Payment</display-name>
+                <type>string</type>
+                <mandatory-flag>true</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="marketPayTerminals">
+                <display-name xml:lang="x-default">MarketPay Terminals</display-name>
+                <type>text</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            
+        </custom-attribute-definitions>
+        <group-definitions>            
+            <attribute-group group-id="MarketPay">
+                <display-name xml:lang="x-default">MarketPay</display-name>
+                <attribute attribute-id="marketPayTerminals"/>                
+                <attribute attribute-id="marketPayPaymentFailedURL"/>
+                <attribute attribute-id="marketPayPaymentSuccessURL"/>
+                <attribute attribute-id="marketPayOrganizationID"/>
+                <attribute attribute-id="marketPayOrganizationShortCode"/>
+            </attribute-group>            
+        </group-definitions>
+    </type-extension>
+</metadata>
