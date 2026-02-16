@@ -139,20 +139,18 @@ exports.afterPOST = function (basket, paymentInstrument) {
             return new dw.system.Status(dw.system.Status.ERROR, 'MarketPay: No Active Payment Session found for the user');
         }
 
-
         if (basketResponse.paymentInstruments && basketResponse.paymentInstruments.length > 0) {
             for (var i = 0; i < basketResponse.paymentInstruments.length; i++) {
                 var paymentInstrument = basketResponse.paymentInstruments[i];
                 if (paymentInstrument.paymentMethod === paymentInstrumentRequest.paymentMethodId) {
                     Transaction.wrap(function () {
-                        paymentInstrument.custom.marketPayPaymentMethodID = paymentInstrumentRequest.c_marketPayPaymentMethodID;
-                        //paymentInstrument.custom.marketPayURLType = mpPayment.type;
+                        paymentInstrument.custom.marketPayPaymentMethodID = paymentInstrumentRequest.c_marketPayPaymentMethodID;                        
                     });
                     break;
                 }
             }
         }
-        
+
     } else {
         var missingFields = [];
         if (!paymentInstrumentRequest.c_marketPayPaymentMethodID) {
@@ -160,7 +158,6 @@ exports.afterPOST = function (basket, paymentInstrument) {
         }
 
         Logger.error("MarketPay: Missing required fields: " + missingFields.join(', '));
-
         return new dw.system.Status(dw.system.Status.ERROR, 'MarketPay: Missing required fields:' + missingFields.join(', '));
     }
 };
