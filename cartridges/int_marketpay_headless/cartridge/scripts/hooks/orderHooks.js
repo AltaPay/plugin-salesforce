@@ -35,18 +35,14 @@ exports.afterPOST = function (order) {
 
         const Transaction = require('dw/system/Transaction');
 
-
         Transaction.wrap(function () {
             order.paymentInstrument.custom.marketPayPaymentURL = mpPayment.url;
         });
 
         // clean up 
-
         Transaction.wrap(function () {
             CustomObjectMgr.remove(marketPayDataObj);
         });
-
-        Logger.info('MarketPay: Successfully cleaned up MarketPayData custom object for customer ' + order.customer.ID);
         
     } catch (e) {
         Logger.error("MarketPay: Error updating session: " + e.message);
