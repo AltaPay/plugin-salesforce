@@ -1,10 +1,8 @@
 'use strict';
 
 const Site = require('dw/system/Site');
-const Logger = require('dw/system/Logger');
 
 function getFormattedDataForMarketPaySession(basket) {
-
     const Locale = require('dw/util/Locale');
     const URLUtils = require('dw/web/URLUtils');
     var currentLocale = Locale.getLocale(request.locale);
@@ -41,7 +39,7 @@ function getFormattedDataForMarketPaySession(basket) {
             autoCapture: false,
             paymentDisplayType: "REDIRECT",
             // country: countryCode, @todo Get the country from basket or customer profile
-            language: Site.getCurrent().getDefaultLocale().split('_')[0] || "en"
+            language: Site.getCurrent().getDefaultLocale().split('_')[0] || 'en_US'
         }
     };
 
@@ -51,7 +49,7 @@ function getFormattedDataForMarketPaySession(basket) {
         for (var i = 0; i < productLineItems.length; i++) {
             var lineItem = productLineItems[i];
             orderData.order.orderLines.push({
-                itemId: lineItem.getProductID() || lineItem.getUUID(),
+                itemId: lineItem.getProductID(),
                 description: lineItem.getProductName() || '',
                 quantity: lineItem.getQuantityValue(),
                 unitPrice: lineItem.getAdjustedPrice().getValue()
@@ -110,7 +108,6 @@ function getFormattedDataForMarketPaySession(basket) {
 }
 
 function getDataForUpdateSession(order) {
-
     const Locale = require('dw/util/Locale');
     const URLUtils = require('dw/web/URLUtils');
     var currentLocale = Locale.getLocale(request.locale);
@@ -144,7 +141,7 @@ function getDataForUpdateSession(order) {
             bodyFormat: "JSON",
             autoCapture: false,
             paymentDisplayType: "REDIRECT",
-            language: Site.getCurrent().getDefaultLocale().split('_')[0] || "en"
+            language: Site.getCurrent().getDefaultLocale().split('_')[0] || 'en_US'
         }
     };
 
@@ -154,7 +151,7 @@ function getDataForUpdateSession(order) {
         for (var i = 0; i < productLineItems.length; i++) {
             var lineItem = productLineItems[i];
             orderData.order.orderLines.push({
-                itemId: lineItem.getProductID() || lineItem.getUUID(),
+                itemId: lineItem.getProductID(),
                 description: lineItem.getProductName() || '',
                 quantity: lineItem.getQuantityValue(),
                 unitPrice: lineItem.getAdjustedPrice().getValue()
@@ -209,7 +206,6 @@ function getDataForUpdateSession(order) {
 }
 
 function getOnInitiatePaymentURL(selectedPaymentMethod, marketPayPaymentMethods) {
-
     marketPayPaymentMethods = JSON.parse(marketPayPaymentMethods);
 
     if (!selectedPaymentMethod || !marketPayPaymentMethods || !marketPayPaymentMethods.methods) {

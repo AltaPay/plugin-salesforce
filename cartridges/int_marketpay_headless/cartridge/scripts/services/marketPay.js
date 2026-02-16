@@ -21,7 +21,6 @@ const Logger = require('dw/system/Logger').getLogger('MarketPay', 'MarketPay');
 
 
 function fetchNewToken() {
-
     const tokenService = LocalServiceRegistry.createService("int.marketpay.auth", {
         createRequest: function (service, params) {
             service.setRequestMethod("POST");
@@ -48,7 +47,6 @@ function fetchNewToken() {
             
         return result.object.token;
     }
-
 
     throw new Error("Failed to get token: " + (result.errorMessage || 'Unknown error'));
 }
@@ -110,7 +108,6 @@ function getMarketPaySessionService() {
     return LocalServiceRegistry.createService('int.marketpay.session', {
         createRequest: function (svc, payload) {
 
-
             svc.setRequestMethod('POST');
             svc.addHeader('Content-Type', 'application/json');
             svc.addHeader('Authorization', 'Bearer ' + payload.token);
@@ -162,7 +159,6 @@ function getMarketPaySessionService() {
  */
 function getTokenAndSessionId(requestBody) {
     const token = fetchNewToken();
-
     const sessionService = getMarketPaySessionService();
     const result = sessionService.call({
         token: token,
@@ -194,7 +190,6 @@ function updateSession(token, checkoutSessionId, requestBody) {
     }
 
     return result.ok;
-    
 }
 
 function getPaymentMethods(token, checkoutSessionId) {
@@ -213,7 +208,6 @@ function getPaymentMethods(token, checkoutSessionId) {
 }
 
 function createPayment(token, checkoutSessionId, paymentMethodId, onInitiatePaymentURL) {
-
     const service = getService(`payment`, 'POST', onInitiatePaymentURL);
     const result = service.call({
         token: token,
