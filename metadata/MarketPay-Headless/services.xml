@@ -4,32 +4,32 @@
 
     <service-credential service-credential-id="int.maketpay.auth">
         <url>https://testgateway.altapaysecure.com/checkout/v1/api/authenticate</url>
-        <user-id>shahbaz_sf</user-id>
-        <password encrypted="true" encryption-type="common.export">o0LeaKeui/w7K9mA358Yj+TnKzx359O5JBOzyyipEVmjyV+qPcgYaJq7OT0DxYAA</password>
+        <user-id></user-id>
+        <password encrypted="true" encryption-type="common.export"></password>
     </service-credential>
 
     <service-credential service-credential-id="int.marketpay.custom.credential">
         <url>https://{shortcode}.api.commercecloud.salesforce.com/custom/marketpay/v1/organizations/{orgId}/checkoutsession</url>
         <user-id/>
-        <password encrypted="true" encryption-type="common.export">Yzo6Us0q+naKa/ahftjaONlItrCnYqgpW0jQMVDrtYQ=</password>
+        <password encrypted="true" encryption-type="common.export"></password>
     </service-credential>
 
     <service-credential service-credential-id="int.marketpay.session">
         <url>https://testgateway.altapaysecure.com/checkout/v1/api/session</url>
         <user-id/>
-        <password encrypted="true" encryption-type="common.export">8zwBlYCty8rLJZvTtlQI6pLkKuPPVHqmejbOILHCsCw=</password>
+        <password encrypted="true" encryption-type="common.export"></password>
     </service-credential>
 
     <service-credential service-credential-id="int.marketpay.slas.credentials">
         <url>https://{shortcode}.api.commercecloud.salesforce.com/shopper/auth/v1/organizations/{orgId}/oauth2/token</url>
-        <user-id>f583c7de-fead-4284-aa90-facd606775df</user-id>
-        <password encrypted="true" encryption-type="common.export">2DVwh1IYaJ1+bfgqSZk7yjEGmQoPEAmhZC5EzugMmWjMu1DwbGKrRkX7EKUGwmrXlsHXs5f3e43bp+e14ykQIZRyc23a09bkq+5VG/WQkiU=</password>
+        <user-id></user-id>
+        <password encrypted="true" encryption-type="common.export"></password>
     </service-credential>
 
     <service-credential service-credential-id="marketpay.credentials">
         <url>https://testgateway.altapaysecure.com/checkout/v1/api</url>
         <user-id/>
-        <password encrypted="true" encryption-type="common.export">pnZznUu6yeZsiTCSVbr+oUTsazQi0AUt4Gae1A04jg8=</password>
+        <password encrypted="true" encryption-type="common.export"></password>
     </service-credential>
 
     <service-profile service-profile-id="int.maketpay.auth">
