@@ -61,6 +61,18 @@
         <processor-id>MARKETPAY</processor-id>
     </payment-method>
 
+    <payment-method method-id="MARKETPAY_TRUSTLY">
+        <name xml:lang="x-default">Trustly</name>
+        <enabled-flag>true</enabled-flag>
+        <processor-id>MARKETPAY</processor-id>
+    </payment-method>
+
+    <payment-method method-id="MARKETPAY_PRZELEWY24">
+        <name xml:lang="x-default">Przelewy24</name>
+        <enabled-flag>true</enabled-flag>
+        <processor-id>MARKETPAY</processor-id>
+    </payment-method>
+
     <payment-method method-id="MARKETPAY_PAYPAL">
         <name xml:lang="x-default">PayPal</name>
         <enabled-flag>true</enabled-flag>
