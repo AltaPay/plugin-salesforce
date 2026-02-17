@@ -13,20 +13,14 @@
         <processor-id>MARKETPAY</processor-id>
     </payment-method>
 
-    <payment-method method-id="MARKETPAY_PAYPAL">
-        <name xml:lang="x-default">PayPal</name>
-        <enabled-flag>false</enabled-flag>
+    <payment-method method-id="MARKETPAY_VIPPS">
+        <name xml:lang="x-default">Vipps</name>
+        <enabled-flag>true</enabled-flag>
         <processor-id>MARKETPAY</processor-id>
     </payment-method>
 
     <payment-method method-id="MARKETPAY_KLARNA">
         <name xml:lang="x-default">Klarna</name>
-        <enabled-flag>true</enabled-flag>
-        <processor-id>MARKETPAY</processor-id>
-    </payment-method>
-
-    <payment-method method-id="MARKETPAY_SOFORT">
-        <name xml:lang="x-default">Sofort</name>
         <enabled-flag>true</enabled-flag>
         <processor-id>MARKETPAY</processor-id>
     </payment-method>
@@ -37,9 +31,41 @@
         <processor-id>MARKETPAY</processor-id>
     </payment-method>
 
-    <payment-method method-id="MARKETPAY_INVOICE">
-        <name xml:lang="x-default">Invoice</name>
+    <payment-method method-id="MARKETPAY_VIABILL">
+        <name xml:lang="x-default">ViaBill</name>
         <enabled-flag>true</enabled-flag>
         <processor-id>MARKETPAY</processor-id>
     </payment-method>
+
+    <payment-method method-id="MARKETPAY_SWISH">
+        <name xml:lang="x-default">Swish</name>
+        <enabled-flag>true</enabled-flag>
+        <processor-id>MARKETPAY</processor-id>
+    </payment-method>
+
+    <payment-method method-id="MARKETPAY_BANCONTACT">
+        <name xml:lang="x-default">Bancontact</name>
+        <enabled-flag>true</enabled-flag>
+        <processor-id>MARKETPAY</processor-id>
+    </payment-method>
+
+    <payment-method method-id="MARKETPAY_BANKPAYMENT">
+        <name xml:lang="x-default">Bank Payment</name>
+        <enabled-flag>true</enabled-flag>
+        <processor-id>MARKETPAY</processor-id>
+    </payment-method>
+
+    <payment-method method-id="MARKETPAY_TWINT">
+        <name xml:lang="x-default">Twint</name>
+        <enabled-flag>true</enabled-flag>
+        <processor-id>MARKETPAY</processor-id>
+    </payment-method>
+
+    <payment-method method-id="MARKETPAY_PAYPAL">
+        <name xml:lang="x-default">PayPal</name>
+        <enabled-flag>true</enabled-flag>
+        <processor-id>MARKETPAY</processor-id>
+    </payment-method>
+
+
 </payment-settings>
