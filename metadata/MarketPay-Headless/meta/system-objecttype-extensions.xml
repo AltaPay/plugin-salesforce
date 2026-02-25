@@ -34,6 +34,20 @@
                 <externally-managed-flag>false</externally-managed-flag>
                 <min-length>0</min-length>
             </attribute-definition>
+            <attribute-definition attribute-id="marketPayPaymentFailedAppURL">
+                <display-name xml:lang="x-default">Payment Failed Mobile App DeepLink URL</display-name>
+                <type>string</type>
+                <mandatory-flag>true</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="marketPayPaymentSuccessAppURL">
+                <display-name xml:lang="x-default">Payment Success Mobile App DeepLink URL</display-name>
+                <type>string</type>
+                <mandatory-flag>true</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
             <attribute-definition attribute-id="marketPayPaymentFailedURL">
                 <display-name xml:lang="x-default">URL where MarketPay Redirects After Failed Payment</display-name>
                 <type>string</type>
@@ -62,6 +76,8 @@
                 <attribute attribute-id="marketPayTerminals"/>                
                 <attribute attribute-id="marketPayPaymentFailedURL"/>
                 <attribute attribute-id="marketPayPaymentSuccessURL"/>
+                <attribute attribute-id="marketPayPaymentFailedAppURL"/>
+                <attribute attribute-id="marketPayPaymentSuccessAppURL"/>
                 <attribute attribute-id="marketPayOrganizationID"/>
                 <attribute attribute-id="marketPayOrganizationShortCode"/>
             </attribute-group>            
