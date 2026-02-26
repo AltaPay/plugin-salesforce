@@ -127,7 +127,7 @@ function createMarketPaySession(customerID, requestBody) {
             // Build query parameters
             var queryParams = [];
             queryParams.push('siteId=' + encodeURIComponent(params.siteId));
-            queryParams.push('c_customerId=' + params.customerID);
+            queryParams.push('c_customerId=' + encodeURIComponent(params.customerID));
 
             var urlWithParams = url + '?' + queryParams.join('&');
             svc.setURL(urlWithParams);
