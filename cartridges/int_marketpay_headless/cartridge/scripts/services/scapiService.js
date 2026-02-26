@@ -115,8 +115,6 @@ function createMarketPaySession(customerID, requestBody) {
             if (!token) {
                 throw new Error('Unable to obtain access token');
             }
-
-            Logger.info("access Token: " + token.access_token);
             // Add authorization header
             svc.addHeader('Authorization', 'Bearer ' + token.access_token);
 
