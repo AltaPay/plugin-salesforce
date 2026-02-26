@@ -59,9 +59,9 @@ exports.modifyGETResponse_v2 = function (basket, paymentMethodResultResponse) {
         // Convert ArrayList to JavaScript array, then filter
         var filteredMethods = paymentMethods.toArray().filter(function (method) {
 
-            // Only process MarketPay payment methods
+            // Only process MarketPay payment methods, pass through all others
             if (marketPayMethods.indexOf(method.id) === -1) {
-                return false;
+                return true;
             }
 
             // Check if terminals exist for the default currency
