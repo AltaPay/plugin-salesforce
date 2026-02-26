@@ -68,7 +68,10 @@ function getGuestAccessToken() {
         filterLogMessage: function (msg) {
             // Remove sensitive data from logs
             return msg.replace(/Authorization: Basic [^\s]+/g, 'Authorization: Basic ***')
-                .replace(/client_secret=[^&]+/g, 'client_secret=***');
+                .replace(/client_secret=[^&]+/g, 'client_secret=***')
+                .replace(/"access_token"\s*:\s*"[^"]+"/g, '"access_token":"***"')
+                .replace(/"refresh_token"\s*:\s*"[^"]+"/g, '"refresh_token":"***"')
+                .replace(/"enc_user_id"\s*:\s*"[^"]+"/g, '"enc_user_id":"***"');
         }
     });
 
