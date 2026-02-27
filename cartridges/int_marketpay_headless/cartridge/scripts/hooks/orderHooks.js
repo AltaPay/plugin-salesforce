@@ -1,54 +1,54 @@
 'use strict';
 
-var Logger = require('dw/system/Logger');
-var BasketMgr = require('dw/order/BasketMgr');
+var Logger = require('dw/system/Logger').getLogger('MarketPay', 'MarketPay');
 
-/**
- * Hook to provide custom order number when creating an order
- * Uses the pre-generated order number stored in basket.custom.marketPayUsedOrderNo
- * @returns {string|null} - Custom order number or null to use default
- */
-exports.createOrderNo = function () {
-    var orderNo;
-    var isOrderExist;
+exports.afterPOST = function (order) {
 
-    const OrderMgr = require('dw/order/OrderMgr');
-    const Transaction = require('dw/system/Transaction');
-    
+    Logger.info("AfterPost order ");
+
     try {
+        var CustomObjectMgr = require('dw/object/CustomObjectMgr');
+        var marketPayDataObj = CustomObjectMgr.getCustomObject('MarketPayData', order.customer.ID);
 
-        var basket = BasketMgr.getCurrentBasket();
-        Logger.info("createOrderNo Hook called, basket is null: " + (basket == null));
-
-        Transaction.begin();
-        orderNo = basket.custom.marketPayUsedOrderNo;
-
-        if (!orderNo) {
-            orderNo = OrderMgr.createOrderSequenceNo();
-            basket.custom.marketPayUsedOrderNo = orderNo;
-        } else {
-            try {
-                isOrderExist = !empty(OrderMgr.getOrder(orderNo));
-
-                if (isOrderExist) {
-                    orderNo = OrderMgr.createOrderSequenceNo();
-                    basket.custom.marketPayUsedOrderNo = orderNo;
-                }
-            } catch (error) {
-                Logger.error("Error in createOrderNo: " + error.message);
-                orderNo = OrderMgr.createOrderSequenceNo();
-                basket.custom.marketPayUsedOrderNo = orderNo;
-            }
+        if (!marketPayDataObj.custom.paymentMethods || !marketPayDataObj.custom.token || !marketPayDataObj.custom.sessionID) {
+            Logger.error('MarketPay: No Active Payment Session found for the user');
+            return;
         }
 
-        Transaction.commit();
+        var marketPayToken = marketPayDataObj.custom.token;
+        var marketPaySessionId = marketPayDataObj.custom.sessionID;
+
+        const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
+        const marketPayService = require('*/cartridge/scripts/services/marketPay');
+        var data = marketPayDataHelper.getDataForUpdateSession(order);
+
+        marketPayService.updateSession(marketPayToken, marketPaySessionId, data);
+
+        var onInitiatePaymentURL = marketPayDataHelper.getOnInitiatePaymentURL(
+            order.paymentInstrument.custom.marketPayPaymentMethodID,
+            marketPayDataObj.custom.paymentMethods);
+
+        var mpPayment = marketPayService.createPayment(marketPayToken,
+            marketPaySessionId,
+            order.paymentInstrument.custom.marketPayPaymentMethodID,
+            onInitiatePaymentURL);
+
+        const Transaction = require('dw/system/Transaction');
+
+        Transaction.wrap(function () {
+            order.paymentInstrument.custom.marketPayPaymentURL = mpPayment.url;
+        });
+
+        // clean up 
+        Transaction.wrap(function () {
+            CustomObjectMgr.remove(marketPayDataObj);
+        });
+        
     } catch (e) {
-        Transaction.rollback();
-        Logger.error("Transaction error in createOrderNo: " + e.message);
-        throw e;
+        Logger.error("MarketPay: Error updating session: " + e.message);
     }
-
-    Logger.info("createOrderNo Hook called, OrderNo: " + orderNo);
-
-    return orderNo;
 };
+
+
+
+
