@@ -68,10 +68,7 @@ function getGuestAccessToken() {
         filterLogMessage: function (msg) {
             // Remove sensitive data from logs
             return msg.replace(/Authorization: Basic [^\s]+/g, 'Authorization: Basic ***')
-                .replace(/client_secret=[^&]+/g, 'client_secret=***')
-                .replace(/"access_token"\s*:\s*"[^"]+"/g, '"access_token":"***"')
-                .replace(/"refresh_token"\s*:\s*"[^"]+"/g, '"refresh_token":"***"')
-                .replace(/"enc_user_id"\s*:\s*"[^"]+"/g, '"enc_user_id":"***"');
+                .replace(/client_secret=[^&]+/g, 'client_secret=***');
         }
     });
 
@@ -118,6 +115,8 @@ function createMarketPaySession(customerID, requestBody) {
             if (!token) {
                 throw new Error('Unable to obtain access token');
             }
+
+            Logger.info("access Token: " + token.access_token);
             // Add authorization header
             svc.addHeader('Authorization', 'Bearer ' + token.access_token);
 
@@ -130,7 +129,7 @@ function createMarketPaySession(customerID, requestBody) {
             // Build query parameters
             var queryParams = [];
             queryParams.push('siteId=' + encodeURIComponent(params.siteId));
-            queryParams.push('c_customerId=' + encodeURIComponent(params.customerID));
+            queryParams.push('c_customerId=' + params.customerID);
 
             var urlWithParams = url + '?' + queryParams.join('&');
             svc.setURL(urlWithParams);

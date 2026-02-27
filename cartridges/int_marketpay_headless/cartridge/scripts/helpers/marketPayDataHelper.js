@@ -1,14 +1,6 @@
 'use strict';
 
 const Site = require('dw/system/Site');
-const CALLBACK_TYPE = { URL: 'URL', FUNCTION: 'FUNCTION' };
-const ROUTES = {
-    CALLBACK_FORM: 'MarketPay-CallbackForm',
-    SUCCESS: 'MarketPay-PaymentSuccess',
-    FAILURE: 'MarketPay-PaymentFail',
-    REDIRECT: 'MarketPay-Redirect',
-    NOTIFICATION: 'MarketPay-PaymentNotification'
-};
 
 function getFormattedDataForMarketPaySession(basket) {
     const Locale = require('dw/util/Locale');
@@ -29,11 +21,17 @@ function getFormattedDataForMarketPaySession(basket) {
             transactionInfo: {}
         },
         callbacks: {
-            formStyling: URLUtils.https(ROUTES.CALLBACK_FORM).toString(),
-            success: { type: CALLBACK_TYPE.URL, value: URLUtils.https(ROUTES.SUCCESS).toString() },
-            failure: { type: CALLBACK_TYPE.URL, value: URLUtils.https(ROUTES.FAILURE).toString() },
-            redirect: URLUtils.https(ROUTES.REDIRECT).toString(),
-            notification: URLUtils.https(ROUTES.NOTIFICATION).toString()
+            formStyling: URLUtils.https('MarketPay-CallbackForm').toString(),
+            success: {
+                type: "URL",
+                value: URLUtils.https('MarketPay-PaymentSuccess').toString()
+            },
+            failure: {
+                type: "URL",
+                value: URLUtils.https('MarketPay-PaymentFail').toString()
+            },
+            redirect: URLUtils.https('MarketPay-Redirect').toString(),
+            notification: URLUtils.https('MarketPay-PaymentNotification').toString()
         },
         configuration: {
             paymentType: "PAYMENT",
@@ -126,11 +124,17 @@ function getDataForUpdateSession(order) {
             transactionInfo: {}
         },
         callbacks: {
-            formStyling: URLUtils.https(ROUTES.CALLBACK_FORM).toString(),
-            success: { type: CALLBACK_TYPE.URL, value: URLUtils.https(ROUTES.SUCCESS).toString() },
-            failure: { type: CALLBACK_TYPE.URL, value: URLUtils.https(ROUTES.FAILURE).toString() },
-            redirect: URLUtils.https(ROUTES.REDIRECT).toString(),
-            notification: URLUtils.https(ROUTES.NOTIFICATION).toString()
+            formStyling: URLUtils.https('MarketPay-CallbackForm').toString(),
+            success: {
+                type: "URL",
+                value: URLUtils.https('MarketPay-PaymentSuccess').toString()
+            },
+            failure: {
+                type: "URL",
+                value: URLUtils.https('MarketPay-PaymentFail').toString()
+            },
+            redirect: URLUtils.https('MarketPay-Redirect').toString(),
+            notification: URLUtils.https('MarketPay-PaymentNotification').toString()
         },
         configuration: {
             paymentType: "PAYMENT",

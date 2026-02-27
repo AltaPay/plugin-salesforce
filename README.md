@@ -40,10 +40,6 @@ AltaPay has made it easier for merchants and developers to accept secure payment
 - Salesforce Commerce Cloud 18.10
 - SFRA v3.2.0
 
-## Changelog
-
-See [Changelog](CHANGELOG.md) for all the release notes.
-
 ## License
 
 Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
