@@ -27,6 +27,36 @@ function getOrder(orderNo) {
  * @param {string} args.OrderNo - Order No of the current order
  * @param {boolean} args.OrderConfirmed - Payment confirmed or not
  */
+function onSuccessRedirect(req, res, orderNo) {
+    const Site = require('dw/system/Site');
+
+    var userAgent = req.httpHeaders.get('user-agent');
+    var isMobile = /android|iphone|ipad|ipod/.test(userAgent);
+    var successURL = null;
+
+    if (isMobile)
+        successURL = Site.current.getCustomPreferenceValue('marketPayPaymentSuccessAppURL');
+    else 
+        successURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentSuccessURL');
+
+    res.redirect(successURL + '/' + orderNo);
+}
+
+function onFailtureRedirect(req, res, orderNo) {
+    const Site = require('dw/system/Site');
+
+    var userAgent = req.httpHeaders.get('user-agent');
+    var isMobile = /android|iphone|ipad|ipod/.test(userAgent);
+    var failedURL = null;
+
+    if (isMobile)
+        failedURL = Site.current.getCustomPreferenceValue('marketPayPaymentFailedAppURL');
+    else 
+        failedURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentFailedURL');
+
+    res.redirect(failedURL + '/' + orderNo);
+}
+
 function handlePayment(req, res, args) {
 
     const Site = require('dw/system/Site');
@@ -46,8 +76,7 @@ function handlePayment(req, res, args) {
 
             } else {
                 Logger.error("MarketPay - handlePayment - General error due to exception. Error message");
-                var failedURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentFailedURL');
-                res.redirect(failedURL + '?orderno=' + args.OrderNo);
+                onFailtureRedirect(req, res, args.OrderNo);
 
                 //@todo Recover the basket, so the user can try to checkout again                
                 return;
@@ -56,8 +85,7 @@ function handlePayment(req, res, args) {
 
         // Redirect to order confirmation
         // ===============================================================
-        var successURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentSuccessURL');
-        res.redirect(successURL + '?orderno=' + args.OrderNo);
+        onSuccessRedirect(req, res, args.OrderNo);
 
         return;
     } catch (e) {
@@ -66,8 +94,7 @@ function handlePayment(req, res, args) {
 
         // @todo Recover the basket, so the user can try to checkout again        
 
-        var failedURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentFailedURL');
-        res.redirect(failedURL + '?orderno=' + args.OrderNo);
+        onFailtureRedirect(req, res, args.OrderNo);
 
         return;
     }
@@ -122,8 +149,7 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
 
             Logger.error('MarketPay - PaymentSuccess - Order with ID: ' + orderNo + 'not found in SFCC!');
 
-            var failedURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentFailedURL');
-            res.redirect(failedURL + '?orderno=' + orderNo);
+            onFailtureRedirect(req, res, orderNo);
         }
 
         return next();
@@ -134,8 +160,7 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
 
         Logger.error('MarketPay - PaymentSuccess - General Error due to exception. Error message: ' + e.message);
 
-        var failedURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentFailedURL');
-        res.redirect(failedURL + '?orderno=' + orderNo);
+        onFailtureRedirect(req, res, orderNo);
 
         return next();
     }
@@ -172,8 +197,7 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
 
                 Logger.error('MarketPay - PaymentFailed - General Error due to exception.');
 
-                var failedURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentFailedURL');
-                res.redirect(failedURL + '?orderno=' + orderNo);
+                onFailtureRedirect(req, res, orderNo);
             }
 
             // @todo Handle error event
@@ -183,9 +207,7 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
             // Handle error event            
 
             Logger.error('MarketPay - PaymentFail - Order with ID: ' + orderNo + 'not found in SFCC!');
-
-            var failedURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentFailedURL');
-            res.redirect(failedURL + '?orderno=' + orderNo);
+            onFailtureRedirect(req, res, orderNo);
         }
 
         return next();
@@ -194,8 +216,7 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
         // Fail the order and handle error event    
         Logger.error('MarketPay - PaymentFail - General Error due to exception. Error message: ' + e.message);
 
-        var failedURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentFailedURL');
-        res.redirect(failedURL + '?orderno=' + orderNo);
+        onFailtureRedirect(req, res, orderNo);
 
         //@todo Recover the basket, so the user can try to checkout again        
         return next();
@@ -216,6 +237,12 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
         };
 
     // @todo Find order ID from MarketPay request body    
+
+    if (req.form.xml == null) {
+        Logger.error("MarketPay: Order XML is Null");
+        res.setStatusCode(200);
+        res.json({ message: 'Acknowledged' });
+    }
 
     try {
         var xml_obj = new XML(args.XMLString);
