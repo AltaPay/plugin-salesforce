@@ -85,6 +85,7 @@ exports.modifyGETResponse_v2 = function (basket, paymentMethodResultResponse) {
             // If mapping exists, add terminal info to the method
             if (terminalMapping !== null) {
 
+                var returnVal = false;
                 // Match terminalMapping.name with marketPayPaymentMethods metadata.terminalName
                 if (marketPayPaymentMethods && marketPayPaymentMethods.methods && marketPayPaymentMethods.methods.length > 0) {
                     for (var k = 0; k < marketPayPaymentMethods.methods.length; k++) {
@@ -94,14 +95,14 @@ exports.modifyGETResponse_v2 = function (basket, paymentMethodResultResponse) {
                             delete paymentMethod.onInitiatePayment;
 
                             method.c_marketPay = {
-                                //sessionId: marketPayTokenAndSession.sessionId,                            
                                 paymentMethod: paymentMethod
                             }
+                            returnVal = true;
                             break;
                         }
                     }
                 }
-                return true;
+                return returnVal;
             }
             return false;
         });
@@ -129,7 +130,6 @@ exports.afterPOST = function (basket, paymentInstrument) {
         // Get sessionId from Custom Object MarketPayData for this user
         var CustomObjectMgr = require('dw/object/CustomObjectMgr');
         var marketPayDataObj = CustomObjectMgr.getCustomObject('MarketPayData', basket.customer.ID);
-        var marketPayToken = marketPayDataObj ? marketPayDataObj.custom.token : null;
         var marketPaySessionId = marketPayDataObj ? marketPayDataObj.custom.sessionID : null;
         var marketPayPaymentMethods = marketPayDataObj ? marketPayDataObj.custom.paymentMethods : null;
         var onInitiatePaymentURL = marketPayDataHelper.getOnInitiatePaymentURL(paymentInstrumentRequest.c_marketPayPaymentMethodID, marketPayPaymentMethods);
