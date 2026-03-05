@@ -27,7 +27,8 @@ function getFormattedDataForMarketPaySession(basket) {
             orderLines: [],
             customer: null,
             transactionInfo: {
-                ecomPluginName: "MarketPay-SalesforceCommerceCloud",
+                ecomPlatform: "Salesforce",
+                ecomPluginName: "int_marketpay_headless",
                 ecomPluginVersion: "2.0.1"
             }
         },
@@ -131,7 +132,8 @@ function getDataForUpdateSession(order) {
             orderLines: [],
             customer: null,
             transactionInfo: {
-                ecomPluginName: "MarketPay-SalesforceCommerceCloud",
+                ecomPlatform: "Salesforce",
+                ecomPluginName: "int_marketpay_headless",
                 ecomPluginVersion: "2.0.1"
             }
         },
