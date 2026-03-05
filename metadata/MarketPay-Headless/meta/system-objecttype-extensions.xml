@@ -1,6 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata xmlns="http://www.demandware.com/xml/impex/metadata/2006-10-31">
-    
+
+    <type-extension type-id="Order">
+        <custom-attribute-definitions>
+            <attribute-definition attribute-id="marketPayTransactionId">
+                <display-name xml:lang="x-default">MarketPay Transaction ID</display-name>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="marketPayPaymentId">
+                <display-name xml:lang="x-default">MarketPay Payment ID</display-name>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="marketPayReservedAmount">
+                <display-name xml:lang="x-default">MarketPay Reserved Amount</display-name>
+                <type>double</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="marketPayCapturedAmount">
+                <display-name xml:lang="x-default">MarketPay Captured Amount</display-name>
+                <type>double</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="marketPayRefundedAmount">
+                <display-name xml:lang="x-default">MarketPay Refunded Amount</display-name>
+                <type>double</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+        </custom-attribute-definitions>
+        <group-definitions>            
+            <attribute-group group-id="MarketPay">
+                <display-name xml:lang="x-default">MarketPay</display-name>
+                <attribute attribute-id="marketPayTransactionId"/>                
+                <attribute attribute-id="marketPayPaymentId"/>
+                <attribute attribute-id="marketPayReservedAmount"/>
+                <attribute attribute-id="marketPayCapturedAmount"/>
+                <attribute attribute-id="marketPayRefundedAmount"/>
+            </attribute-group>            
+        </group-definitions>
+    </type-extension>
+
     <type-extension type-id="OrderPaymentInstrument">        
         <custom-attribute-definitions>
             <attribute-definition attribute-id="marketPayPaymentMethodID">
@@ -15,7 +60,8 @@
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
                 <min-length>0</min-length>
-            </attribute-definition>            
+            </attribute-definition>
+        </custom-attribute-definitions>           
     </type-extension>
 
     <type-extension type-id="SitePreferences">

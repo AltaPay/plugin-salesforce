@@ -11,7 +11,11 @@
         {
             "name": "dw.ocapi.shop.order.afterPOST",
             "script": "./cartridge/scripts/hooks/orderHooks.js"
-        }         
+        }, 
+        {
+            "name": "dw.ocapi.shop.order.beforeGET",
+            "script": "./cartridge/scripts/hooks/orderHooks.js"
+        }        
     ]
 
 }

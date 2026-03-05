@@ -20,23 +20,30 @@ const Logger = require('dw/system/Logger').getLogger('MarketPay', 'MarketPay');
  */
 
 function fetchNewToken() {
-    const tokenService = LocalServiceRegistry.createService("int.marketpay.auth", {
-        createRequest: function (service, params) {
-            service.setRequestMethod("POST");
-            service.addHeader("Content-Type", "application/x-www-form-urlencoded");
+    const tokenService = LocalServiceRegistry.createService("int.marketpay.service", {
+        createRequest: function (svc, params) {
 
-            const credentials = service.getConfiguration().getCredential();
+            svc.setURL(svc.getURL() + '/checkout/v1/api/authenticate');
+            svc.setRequestMethod("POST");
+            svc.addHeader("Content-Type", "application/x-www-form-urlencoded");
+
+            const credentials = svc.getConfiguration().getCredential();
             const clientId = credentials.getUser();
             const clientSecret = credentials.getPassword();
 
             const authString = clientId + ":" + clientSecret;
             const base64Auth = Encoding.toBase64(new Bytes(authString));
-            service.addHeader("Authorization", "Basic " + base64Auth);
+            svc.addHeader("Authorization", "Basic " + base64Auth);
 
             return JSON.stringify({});
         },
         parseResponse: function (service, response) {
             return JSON.parse(response.text);
+        },
+        filterLogMessage: function (msg) {
+            // Remove token from logs
+            return msg.replace(/"token"\s*:\s*"[^"]+"/g, '"token":"***"')
+            
         }
     });
 
@@ -50,8 +57,39 @@ function fetchNewToken() {
     throw new Error("Failed to get token: " + (result.errorMessage || 'Unknown error'));
 }
 
+
+function getMerchantService(serviceType, method, url) {
+    return LocalServiceRegistry.createService('int.marketpay.service', {
+        createRequest: function (svc, payload) {
+            svc.setURL(svc.getURL() + '/' + serviceType);
+            svc.setRequestMethod("GET");
+            svc.addHeader("Content-Type", "application/x-www-form-urlencoded");
+
+            const credentials = svc.getConfiguration().getCredential();
+            const clientId = credentials.getUser();
+            const clientSecret = credentials.getPassword();
+
+            const authString = clientId + ":" + clientSecret;
+            const base64Auth = Encoding.toBase64(new Bytes(authString));
+            svc.addHeader("Authorization", "Basic " + base64Auth);
+
+            return JSON.stringify({});
+        },
+        parseResponse: function (svc, client) {
+            try {
+                return client.text;
+            } catch (e) {
+                throw new Error('Failed to parse session response: ' + e.message);
+            }
+        },
+        filterLogMessage: function (msg) {
+            return msg;
+        }
+    });
+}
+
 function getService(serviceType, method, url) {
-    return LocalServiceRegistry.createService('marketpay.http.service', {
+    return LocalServiceRegistry.createService('int.marketpay.service', {
         createRequest: function (svc, payload) {
 
             if (url == null)
@@ -76,13 +114,6 @@ function getService(serviceType, method, url) {
 
         filterLogMessage: function (msg) {
             return msg; // Mask if needed
-        },
-
-        mockCall: function () {
-            return {
-                status: 'SUCCESS',
-                sessionId: 'mock-session-id'
-            };
         }
     });
 }
@@ -102,9 +133,10 @@ function getService(serviceType, method, url) {
  */
 
 function getMarketPaySessionService() {
-    return LocalServiceRegistry.createService('int.marketpay.session', {
+    return LocalServiceRegistry.createService('int.marketpay.service', {
         createRequest: function (svc, payload) {
 
+            svc.setURL(svc.getURL() + '/checkout/v1/api/session');
             svc.setRequestMethod('POST');
             svc.addHeader('Content-Type', 'application/json');
             svc.addHeader('Authorization', 'Bearer ' + payload.token);
@@ -119,16 +151,10 @@ function getMarketPaySessionService() {
                 throw new Error('Failed to parse session response: ' + e.message);
             }
         },
-
         filterLogMessage: function (msg) {
-            return msg; // Mask if needed
-        },
+            // Remove token from logs
+            return msg.replace(/"sessionId"\s*:\s*"[^"]+"/g, '"sessionId":"***"')
 
-        mockCall: function () {
-            return {
-                status: 'SUCCESS',
-                sessionId: 'mock-session-id'
-            };
         }
     });
 }
@@ -176,7 +202,7 @@ function getTokenAndSessionId(requestBody) {
 
 function updateSession(token, checkoutSessionId, requestBody) {
 
-    const service = getService(`session/${checkoutSessionId}`, 'PUT');
+    const service = getService(`checkout/v1/api/session/${checkoutSessionId}`, 'PUT');
     const result = service.call({
         token: token,
         requestBody: requestBody
@@ -191,7 +217,7 @@ function updateSession(token, checkoutSessionId, requestBody) {
 }
 
 function getPaymentMethods(token, checkoutSessionId) {
-    const service = getService(`session/${checkoutSessionId}/payment-methods`, 'GET');
+    const service = getService(`checkout/v1/api/session/${checkoutSessionId}/payment-methods`, 'GET');
     const result = service.call({
         token: token,
         requestBody: {}
@@ -206,7 +232,7 @@ function getPaymentMethods(token, checkoutSessionId) {
 }
 
 function createPayment(token, checkoutSessionId, paymentMethodId, onInitiatePaymentURL) {
-    const service = getService(`payment`, 'POST', onInitiatePaymentURL);
+    const service = getService(`checkout/v1/api/payment`, 'POST', onInitiatePaymentURL);
     const result = service.call({
         token: token,
         requestBody: {
@@ -223,9 +249,24 @@ function createPayment(token, checkoutSessionId, paymentMethodId, onInitiatePaym
     return result.object;
 }
 
+function getPaymentStatus(sfccOrderId) {
+    const service = getMerchantService(`merchant/API/payments?shop_orderid=${sfccOrderId}`, 'GET');
+    const result = service.call({
+        requestBody: {}
+    });
+
+    if (!result.ok) {
+        Logger.error('MarketPay getPaymentStatus API error', result.errorMessage);
+        throw new Error('Failed to retrieve MarketPay payment status');
+    }
+
+    return new XML(result.object);
+}
+
 module.exports = {
     getTokenAndSessionId: getTokenAndSessionId,
     updateSession: updateSession,
     getPaymentMethods: getPaymentMethods,
-    createPayment: createPayment
+    createPayment: createPayment,
+    getPaymentStatus: getPaymentStatus
 };

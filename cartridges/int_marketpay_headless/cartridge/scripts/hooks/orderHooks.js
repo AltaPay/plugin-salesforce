@@ -1,6 +1,20 @@
 'use strict';
 
 var Logger = require('dw/system/Logger').getLogger('MarketPay', 'MarketPay');
+const SCAPIService = require('*/cartridge/scripts/services/scapiService');
+
+exports.beforeGET = function (orderNo) {
+    try {
+        var result = SCAPIService.fetchAndUpdatePaymentStatus(orderNo);
+
+        if (!result) {
+            Logger.error('MarketPay: Unable to fetch order payment status for order ' + orderNo);
+            return;
+        }
+    } catch (e) {
+        Logger.error('MarketPay: Error in beforeGET: ' + e.message);
+    }
+}
 
 exports.afterPOST = function (order) {
 
@@ -23,20 +37,21 @@ exports.afterPOST = function (order) {
         var data = marketPayDataHelper.getDataForUpdateSession(order);
 
         marketPayService.updateSession(marketPayToken, marketPaySessionId, data);
+        var paymentInstrument = order.getPaymentInstruments()[0];
 
         var onInitiatePaymentURL = marketPayDataHelper.getOnInitiatePaymentURL(
-            order.paymentInstrument.custom.marketPayPaymentMethodID,
+            paymentInstrument.custom.marketPayPaymentMethodID,
             marketPayDataObj.custom.paymentMethods);
 
         var mpPayment = marketPayService.createPayment(marketPayToken,
             marketPaySessionId,
-            order.paymentInstrument.custom.marketPayPaymentMethodID,
+            paymentInstrument.custom.marketPayPaymentMethodID,
             onInitiatePaymentURL);
 
         const Transaction = require('dw/system/Transaction');
 
         Transaction.wrap(function () {
-            order.paymentInstrument.custom.marketPayPaymentURL = mpPayment.url;
+            paymentInstrument.custom.marketPayPaymentURL = mpPayment.url;
         });
 
         // clean up 

@@ -22,11 +22,14 @@ function getFormattedDataForMarketPaySession(basket) {
             orderId: basket.getUUID(),
             amount: {
                 value: basket.getTotalGrossPrice().getValue(),
-                currency: basket.getCurrencyCode()
+                currency: basket.currencyCode
             },
             orderLines: [],
             customer: null,
-            transactionInfo: {}
+            transactionInfo: {
+                ecomPluginName: "MarketPay-SalesforceCommerceCloud",
+                ecomPluginVersion: "2.0.1"
+            }
         },
         callbacks: {
             formStyling: URLUtils.https(ROUTES.CALLBACK_FORM).toString(),
@@ -64,6 +67,10 @@ function getFormattedDataForMarketPaySession(basket) {
     var billingAddress = basket.getBillingAddress();
     var defaultShipment = basket.getDefaultShipment();
     var shippingAddress = defaultShipment ? defaultShipment.getShippingAddress() : null;
+
+    if(!billingAddress) {
+        billingAddress = shippingAddress;
+    }
 
     if (customer || billingAddress || shippingAddress) {
         orderData.order.customer = {};
@@ -119,11 +126,14 @@ function getDataForUpdateSession(order) {
             orderId: order.getOrderNo(),
             amount: {
                 value: order.getTotalGrossPrice().getValue(),
-                currency: order.getCurrencyCode()
+                currency: order.currencyCode
             },
             orderLines: [],
             customer: null,
-            transactionInfo: {}
+            transactionInfo: {
+                ecomPluginName: "MarketPay-SalesforceCommerceCloud",
+                ecomPluginVersion: "2.0.1"
+            }
         },
         callbacks: {
             formStyling: URLUtils.https(ROUTES.CALLBACK_FORM).toString(),
