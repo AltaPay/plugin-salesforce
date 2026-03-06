@@ -31,15 +31,12 @@ function getGuestAccessToken() {
 
     var service = LocalServiceRegistry.createService('int.marketpay.slas', {
         createRequest: function (svc, params) {
-            svc.setRequestMethod('POST');
-
+            const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
             const credentials = svc.getConfiguration().getCredential();
-            const clientId = credentials.getUser();
-            const clientSecret = credentials.getPassword();
-
+            svc.setRequestMethod('POST');
             // Set headers
             svc.addHeader('Content-Type', 'application/x-www-form-urlencoded');
-            svc.addHeader('Authorization', getBasicAuthHeader(clientId, clientSecret));
+            svc.addHeader('Authorization', marketPayDataHelper.getBasicAuthHeader(credentials.getUser(), credentials.getPassword()));
 
             // Replace URL placeholders
             var url = svc.getURL();

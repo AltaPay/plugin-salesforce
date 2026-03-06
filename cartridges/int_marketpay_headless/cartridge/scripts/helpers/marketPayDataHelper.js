@@ -1,6 +1,8 @@
 'use strict';
 
 const Site = require('dw/system/Site');
+const Encoding = require('dw/crypto/Encoding');
+const Bytes = require('dw/util/Bytes');
 const CALLBACK_TYPE = { URL: 'URL', FUNCTION: 'FUNCTION' };
 const ROUTES = {
     CALLBACK_FORM: 'MarketPay-CallbackForm',
@@ -9,6 +11,13 @@ const ROUTES = {
     REDIRECT: 'MarketPay-Redirect',
     NOTIFICATION: 'MarketPay-PaymentNotification'
 };
+
+function getBasicAuthHeader(clientId, clientSecret) {
+    var credentials = clientId + ':' + clientSecret;
+    var credentialsBytes = new Bytes(credentials);
+    var encodedCredentials = Encoding.toBase64(credentialsBytes);
+    return 'Basic ' + encodedCredentials;
+}
 
 function getFormattedDataForMarketPaySession(basket) {
     const Locale = require('dw/util/Locale');
@@ -234,5 +243,6 @@ function getOnInitiatePaymentURL(selectedPaymentMethod, marketPayPaymentMethods)
 module.exports = {
     getFormattedDataForMarketPaySession: getFormattedDataForMarketPaySession,
     getDataForUpdateSession: getDataForUpdateSession, 
-    getOnInitiatePaymentURL: getOnInitiatePaymentURL
+    getOnInitiatePaymentURL: getOnInitiatePaymentURL,
+    getBasicAuthHeader: getBasicAuthHeader
 };

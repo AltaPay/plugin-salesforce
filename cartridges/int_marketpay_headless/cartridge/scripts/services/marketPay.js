@@ -1,8 +1,6 @@
 'use strict';
 
 const LocalServiceRegistry = require('dw/svc/LocalServiceRegistry');
-const Encoding = require('dw/crypto/Encoding');
-const Bytes = require('dw/util/Bytes');
 const Logger = require('dw/system/Logger').getLogger('MarketPay', 'MarketPay');
 
 /**
@@ -27,13 +25,9 @@ function fetchNewToken() {
             svc.setRequestMethod("POST");
             svc.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
+            const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
             const credentials = svc.getConfiguration().getCredential();
-            const clientId = credentials.getUser();
-            const clientSecret = credentials.getPassword();
-
-            const authString = clientId + ":" + clientSecret;
-            const base64Auth = Encoding.toBase64(new Bytes(authString));
-            svc.addHeader("Authorization", "Basic " + base64Auth);
+            svc.addHeader("Authorization", marketPayDataHelper.getBasicAuthHeader(credentials.getUser(), credentials.getPassword()));
 
             return JSON.stringify({});
         },
@@ -64,14 +58,9 @@ function getMerchantService(path) {
             svc.setURL(svc.getURL() + '/' + path);
             svc.setRequestMethod("GET");
             svc.addHeader("Content-Type", "application/x-www-form-urlencoded");
-
+            const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
             const credentials = svc.getConfiguration().getCredential();
-            const clientId = credentials.getUser();
-            const clientSecret = credentials.getPassword();
-
-            const authString = clientId + ":" + clientSecret;
-            const base64Auth = Encoding.toBase64(new Bytes(authString));
-            svc.addHeader("Authorization", "Basic " + base64Auth);
+            svc.addHeader("Authorization", marketPayDataHelper.getBasicAuthHeader(credentials.getUser(), credentials.getPassword()));
 
             return JSON.stringify({});
         },
