@@ -58,10 +58,10 @@ function fetchNewToken() {
 }
 
 
-function getMerchantService(serviceType, method, url) {
+function getMerchantService(path) {
     return LocalServiceRegistry.createService('int.marketpay.service', {
         createRequest: function (svc, payload) {
-            svc.setURL(svc.getURL() + '/' + serviceType);
+            svc.setURL(svc.getURL() + '/' + path);
             svc.setRequestMethod("GET");
             svc.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
@@ -250,7 +250,7 @@ function createPayment(token, checkoutSessionId, paymentMethodId, onInitiatePaym
 }
 
 function getPaymentStatus(sfccOrderId) {
-    const service = getMerchantService(`merchant/API/payments?shop_orderid=${sfccOrderId}`, 'GET');
+    const service = getMerchantService(`merchant/API/payments?shop_orderid=${sfccOrderId}`);
     const result = service.call({
         requestBody: {}
     });
