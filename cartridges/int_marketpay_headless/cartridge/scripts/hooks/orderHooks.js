@@ -12,7 +12,7 @@ exports.beforeGET = function (orderNo) {
             return;
         }
     } catch (e) {
-        Logger.error('MarketPay: Error in beforeGET: ' + e.message);
+        Logger.error('MarketPay: Error in updating the order payment status for order ' + orderNo + ': ' + e.message);
     }
 }
 
