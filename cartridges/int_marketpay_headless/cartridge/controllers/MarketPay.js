@@ -72,7 +72,16 @@ function handlePayment(req, res, args) {
             if (status.getStatus() == dw.system.Status.OK) {
 
                 // @todo update payment instruments 
-                // @todo update order attributes
+                var Transaction = require('dw/system/Transaction');
+                var xml_obj = new XML(args.XMLString);
+                var txn = xml_obj.Body.Transactions.Transaction;
+                Transaction.wrap(function () {
+                    args.Order.custom.marketPayTransactionId = txn.TransactionId.toString();
+                    args.Order.custom.marketPayPaymentId = txn.PaymentId.toString();
+                    args.Order.custom.marketPayReservedAmount = parseFloat(txn.ReservedAmount.toString());
+                    args.Order.custom.marketPayCapturedAmount = parseFloat(txn.CapturedAmount.toString());
+                    args.Order.custom.marketPayRefundedAmount = parseFloat(txn.RefundedAmount.toString());
+                });
 
             } else {
                 Logger.error("MarketPay - handlePayment - General error due to exception. Error message");
@@ -91,8 +100,6 @@ function handlePayment(req, res, args) {
     } catch (e) {
 
         Logger.error("MarketPay - handlePayment - General error due to exception. Error message: " + e.message);
-
-        // @todo Recover the basket, so the user can try to checkout again        
 
         onFailtureRedirect(req, res, args.OrderNo);
 
@@ -231,6 +238,7 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
     var OrderMgr = require('dw/order/OrderMgr'),
         XMLString = req.form.xml,
         orderId = null,
+        xml_obj = null,
         args = {
             CallbackParams: req.form,
             XMLString: XMLString
@@ -245,7 +253,7 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
     }
 
     try {
-        var xml_obj = new XML(args.XMLString);
+        xml_obj = new XML(args.XMLString);
         orderId = encodeURIComponent(xml_obj.Body.Transactions.Transaction.ShopOrderId);
 
         if (!orderId) {
@@ -267,6 +275,15 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
         res.json({ message: 'Order not found in the CMS' });
     }
     else {
+        var Transaction = require('dw/system/Transaction');
+        var txn = xml_obj.Body.Transactions.Transaction;
+        Transaction.wrap(function () {
+            order.custom.marketPayTransactionId = txn.TransactionId.toString();
+            order.custom.marketPayPaymentId = txn.PaymentId.toString();
+            order.custom.marketPayReservedAmount = parseFloat(txn.ReservedAmount.toString());
+            order.custom.marketPayCapturedAmount = parseFloat(txn.CapturedAmount.toString());
+            order.custom.marketPayRefundedAmount = parseFloat(txn.RefundedAmount.toString());
+        });
         res.setStatusCode(200);
         res.json({ message: 'Acknowledged' });
     }
