@@ -238,14 +238,14 @@ function createPayment(token, checkoutSessionId, paymentMethodId, onInitiatePaym
     return result.object;
 }
 
-function getPaymentStatus(sfccOrderId) {
+function getPaymentDetail(sfccOrderId) {
     const service = getMerchantService(`merchant/API/payments?shop_orderid=${sfccOrderId}`);
     const result = service.call({
         requestBody: {}
     });
 
     if (!result.ok) {
-        Logger.error('MarketPay getPaymentStatus API error', result.errorMessage);
+        Logger.error('MarketPay payments API error', result.errorMessage);
         throw new Error('Failed to retrieve MarketPay payment status');
     }
 
@@ -257,5 +257,5 @@ module.exports = {
     updateSession: updateSession,
     getPaymentMethods: getPaymentMethods,
     createPayment: createPayment,
-    getPaymentStatus: getPaymentStatus
+    getPaymentDetail: getPaymentDetail
 };

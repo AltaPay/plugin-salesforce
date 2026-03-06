@@ -51,7 +51,7 @@ exports.createCheckoutSession.public = true;
 exports.paymentStatus = function () {
     var orderId = request.httpParameterMap.c_orderId.stringValue;
     try {
-        var marketPayOrderTransaction = marketPay.getPaymentStatus(orderId);
+        var marketPayOrderTransaction = marketPay.getPaymentDetail(orderId);
 
         if (marketPayOrderTransaction.Body.Transactions.Transaction.length() === 0) {
             RESTResponseMgr
