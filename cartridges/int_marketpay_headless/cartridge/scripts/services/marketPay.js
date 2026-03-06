@@ -88,12 +88,12 @@ function getMerchantService(serviceType, method, url) {
     });
 }
 
-function getService(serviceType, method, url) {
+function getService(path, method, url) {
     return LocalServiceRegistry.createService('int.marketpay.service', {
         createRequest: function (svc, payload) {
 
             if (url == null)
-                svc.setURL(svc.getURL() + '/' + serviceType);
+                svc.setURL(svc.getURL() + '/' + path);
             else
                 svc.setURL(url);
 
