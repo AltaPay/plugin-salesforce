@@ -23,7 +23,6 @@ function getFormattedDataForMarketPaySession(basket) {
     const Locale = require('dw/util/Locale');
     const URLUtils = require('dw/web/URLUtils');
     var currentLocale = Locale.getLocale(request.locale);
-    var countryCode = currentLocale.country;
 
     // Initialize the order data object
     var orderData = {
@@ -53,8 +52,8 @@ function getFormattedDataForMarketPaySession(basket) {
             bodyFormat: "JSON",
             autoCapture: false,
             paymentDisplayType: "REDIRECT",
-            // country: countryCode, @todo Get the country from basket or customer profile
-            language: Site.getCurrent().getDefaultLocale().split('_')[0] || 'en_US'
+            country: null,
+            language: currentLocale.language || Site.getCurrent().getDefaultLocale()
         }
     };
 
@@ -77,6 +76,7 @@ function getFormattedDataForMarketPaySession(basket) {
     var billingAddress = basket.getBillingAddress();
     var defaultShipment = basket.getDefaultShipment();
     var shippingAddress = defaultShipment ? defaultShipment.getShippingAddress() : null;
+    orderData.configuration.country = shippingAddress && shippingAddress.getCountryCode() ? shippingAddress.getCountryCode().getValue() : '';
 
     if(!billingAddress) {
         billingAddress = shippingAddress;
@@ -158,7 +158,8 @@ function getDataForUpdateSession(order) {
             bodyFormat: "JSON",
             autoCapture: false,
             paymentDisplayType: "REDIRECT",
-            language: Site.getCurrent().getDefaultLocale().split('_')[0] || 'en_US'
+            country: null,
+            language: currentLocale.language || Site.getCurrent().getDefaultLocale()
         }
     };
 
@@ -181,6 +182,7 @@ function getDataForUpdateSession(order) {
     var billingAddress = order.getBillingAddress();
     var defaultShipment = order.getDefaultShipment();
     var shippingAddress = defaultShipment ? defaultShipment.getShippingAddress() : null;
+    orderData.configuration.country = shippingAddress && shippingAddress.getCountryCode() ? shippingAddress.getCountryCode().getValue() : '';
 
     if (customer || billingAddress || shippingAddress) {
         orderData.order.customer = {};
