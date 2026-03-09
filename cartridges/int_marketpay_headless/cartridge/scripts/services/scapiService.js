@@ -3,8 +3,6 @@
 var LocalServiceRegistry = require('dw/svc/LocalServiceRegistry');
 var Logger = require('dw/system/Logger').getLogger('MarketPay', 'MarketPay');
 var Site = require('dw/system/Site');
-var Encoding = require('dw/crypto/Encoding');
-var Bytes = require('dw/util/Bytes');
 
 /**
  * Get SLAS credentials from site preferences
@@ -48,7 +46,6 @@ function getGuestAccessToken() {
             var formData = [];
             formData.push('grant_type=client_credentials');
             formData.push('channel_id=' + params.siteId);
-            //formData.push('scope=SALESFORCE_COMMERCE_API:' + params.organizationId + ' sfcc.shopper-baskets-orders sfcc.shopper-customers.login sfcc.shopper-myaccount.baskets sfcc.shopper-myaccount.orders');
 
             return formData.join('&');
         },
@@ -85,16 +82,6 @@ function getGuestAccessToken() {
         Logger.error('SLAS guest login exception: ' + e.message);
         return null;
     }
-}
-
-/**
- * Generate Basic Auth header
- */
-function getBasicAuthHeader(clientId, clientSecret) {
-    var credentials = clientId + ':' + clientSecret;
-    var credentialsBytes = new Bytes(credentials);
-    var encodedCredentials = Encoding.toBase64(credentialsBytes);
-    return 'Basic ' + encodedCredentials;
 }
 
 /**

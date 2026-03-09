@@ -52,10 +52,10 @@ function fetchNewToken() {
 }
 
 
-function getMerchantService(path) {
+function getMerchantService() {
     return LocalServiceRegistry.createService('int.marketpay.service', {
         createRequest: function (svc, payload) {
-            svc.setURL(svc.getURL() + '/' + path);
+            svc.setURL(svc.getURL() + '/' + payload.endPoint);
             svc.setRequestMethod("GET");
             svc.addHeader("Content-Type", "application/x-www-form-urlencoded");
             const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
@@ -77,16 +77,16 @@ function getMerchantService(path) {
     });
 }
 
-function getService(path, method, url) {
+function getService() {
     return LocalServiceRegistry.createService('int.marketpay.service', {
         createRequest: function (svc, payload) {
 
-            if (url == null)
-                svc.setURL(svc.getURL() + '/' + path);
+            if (payload.url == null)
+                svc.setURL(svc.getURL() + '/' + payload.endPoint);
             else
-                svc.setURL(url);
+                svc.setURL(payload.url);
 
-            svc.setRequestMethod(method);
+            svc.setRequestMethod(payload.method);
             svc.addHeader('Content-Type', 'application/json');
             svc.addHeader('Authorization', 'Bearer ' + payload.token);
 
@@ -102,48 +102,7 @@ function getService(path, method, url) {
         },
 
         filterLogMessage: function (msg) {
-            return msg; // Mask if needed
-        }
-    });
-}
-
-/**
- * Creates and returns a LocalServiceRegistry service for creating a MarketPay session.
- *
- * The service:
- *  - Sends a POST request to the MarketPay session endpoint.
- *  - Uses Bearer token authentication.
- *  - Parses the JSON session response.
- *  - Provides a mock response for testing.
- *
- * @function
- * @returns {dw.svc.HTTPService}
- * A configured MarketPay session service instance.
- */
-
-function getMarketPaySessionService() {
-    return LocalServiceRegistry.createService('int.marketpay.service', {
-        createRequest: function (svc, payload) {
-
-            svc.setURL(svc.getURL() + '/checkout/v1/api/session');
-            svc.setRequestMethod('POST');
-            svc.addHeader('Content-Type', 'application/json');
-            svc.addHeader('Authorization', 'Bearer ' + payload.token);
-
-            return JSON.stringify(payload.requestBody);
-        },
-
-        parseResponse: function (svc, client) {
-            try {
-                return JSON.parse(client.text);
-            } catch (e) {
-                throw new Error('Failed to parse session response: ' + e.message);
-            }
-        },
-        filterLogMessage: function (msg) {
-            // Remove token from logs
             return msg.replace(/"sessionId"\s*:\s*"[^"]+"/g, '"sessionId":"***"')
-
         }
     });
 }
@@ -172,9 +131,12 @@ function getMarketPaySessionService() {
 
 function getTokenAndSessionId(requestBody) {
     const token = fetchNewToken();
-    const sessionService = getMarketPaySessionService();
-    const result = sessionService.call({
+    const service = getService();
+
+    const result = service.call({
         token: token,
+        endPoint: `checkout/v1/api/session`,
+        method: 'POST',
         requestBody: requestBody
     });
 
@@ -191,9 +153,11 @@ function getTokenAndSessionId(requestBody) {
 
 function updateSession(token, checkoutSessionId, requestBody) {
 
-    const service = getService(`checkout/v1/api/session/${checkoutSessionId}`, 'PUT');
+    const service = getService();
     const result = service.call({
         token: token,
+        endPoint: `checkout/v1/api/session/${checkoutSessionId}`,
+        method: 'PUT',
         requestBody: requestBody
     });
 
@@ -206,9 +170,11 @@ function updateSession(token, checkoutSessionId, requestBody) {
 }
 
 function getPaymentMethods(token, checkoutSessionId) {
-    const service = getService(`checkout/v1/api/session/${checkoutSessionId}/payment-methods`, 'GET');
+    const service = getService();
     const result = service.call({
         token: token,
+        endPoint: `checkout/v1/api/session/${checkoutSessionId}/payment-methods`,
+        method: "GET", 
         requestBody: {}
     });
 
@@ -221,9 +187,12 @@ function getPaymentMethods(token, checkoutSessionId) {
 }
 
 function createPayment(token, checkoutSessionId, paymentMethodId, onInitiatePaymentURL) {
-    const service = getService(`checkout/v1/api/payment`, 'POST', onInitiatePaymentURL);
+    const service = getService();
     const result = service.call({
         token: token,
+        endPoint: `checkout/v1/api/payment`,
+        url: onInitiatePaymentURL,
+        method: 'POST',
         requestBody: {
             paymentMethodId: paymentMethodId,
             sessionId: checkoutSessionId
@@ -239,8 +208,9 @@ function createPayment(token, checkoutSessionId, paymentMethodId, onInitiatePaym
 }
 
 function getPaymentDetail(sfccOrderId) {
-    const service = getMerchantService(`merchant/API/payments?shop_orderid=${sfccOrderId}`);
+    const service = getMerchantService();
     const result = service.call({
+        endPoint: `merchant/API/payments?shop_orderid=${sfccOrderId}`,
         requestBody: {}
     });
 
