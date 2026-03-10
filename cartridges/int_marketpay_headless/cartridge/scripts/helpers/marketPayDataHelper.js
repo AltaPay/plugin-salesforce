@@ -1,6 +1,8 @@
 'use strict';
 
 const Site = require('dw/system/Site');
+const Encoding = require('dw/crypto/Encoding');
+const Bytes = require('dw/util/Bytes');
 const CALLBACK_TYPE = { URL: 'URL', FUNCTION: 'FUNCTION' };
 const ROUTES = {
     CALLBACK_FORM: 'MarketPay-CallbackForm',
@@ -10,11 +12,17 @@ const ROUTES = {
     NOTIFICATION: 'MarketPay-PaymentNotification'
 };
 
+function getBasicAuthHeader(clientId, clientSecret) {
+    var credentials = clientId + ':' + clientSecret;
+    var credentialsBytes = new Bytes(credentials);
+    var encodedCredentials = Encoding.toBase64(credentialsBytes);
+    return 'Basic ' + encodedCredentials;
+}
+
 function getFormattedDataForMarketPaySession(basket) {
     const Locale = require('dw/util/Locale');
     const URLUtils = require('dw/web/URLUtils');
     var currentLocale = Locale.getLocale(request.locale);
-    var countryCode = currentLocale.country;
 
     // Initialize the order data object
     var orderData = {
@@ -22,11 +30,15 @@ function getFormattedDataForMarketPaySession(basket) {
             orderId: basket.getUUID(),
             amount: {
                 value: basket.getTotalGrossPrice().getValue(),
-                currency: basket.getCurrencyCode()
+                currency: basket.currencyCode
             },
             orderLines: [],
             customer: null,
-            transactionInfo: {}
+            transactionInfo: {
+                ecomPlatform: "Salesforce",
+                ecomPluginName: "int_marketpay_headless",
+                ecomPluginVersion: "2.0.1"
+            }
         },
         callbacks: {
             formStyling: URLUtils.https(ROUTES.CALLBACK_FORM).toString(),
@@ -40,8 +52,8 @@ function getFormattedDataForMarketPaySession(basket) {
             bodyFormat: "JSON",
             autoCapture: false,
             paymentDisplayType: "REDIRECT",
-            // country: countryCode, @todo Get the country from basket or customer profile
-            language: Site.getCurrent().getDefaultLocale().split('_')[0] || 'en_US'
+            country: null,
+            language: currentLocale.language || Site.getCurrent().getDefaultLocale()
         }
     };
 
@@ -64,6 +76,11 @@ function getFormattedDataForMarketPaySession(basket) {
     var billingAddress = basket.getBillingAddress();
     var defaultShipment = basket.getDefaultShipment();
     var shippingAddress = defaultShipment ? defaultShipment.getShippingAddress() : null;
+    orderData.configuration.country = shippingAddress && shippingAddress.getCountryCode() ? shippingAddress.getCountryCode().getValue() : '';
+
+    if(!billingAddress) {
+        billingAddress = shippingAddress;
+    }
 
     if (customer || billingAddress || shippingAddress) {
         orderData.order.customer = {};
@@ -119,11 +136,15 @@ function getDataForUpdateSession(order) {
             orderId: order.getOrderNo(),
             amount: {
                 value: order.getTotalGrossPrice().getValue(),
-                currency: order.getCurrencyCode()
+                currency: order.currencyCode
             },
             orderLines: [],
             customer: null,
-            transactionInfo: {}
+            transactionInfo: {
+                ecomPlatform: "Salesforce",
+                ecomPluginName: "int_marketpay_headless",
+                ecomPluginVersion: "2.0.1"
+            }
         },
         callbacks: {
             formStyling: URLUtils.https(ROUTES.CALLBACK_FORM).toString(),
@@ -137,7 +158,8 @@ function getDataForUpdateSession(order) {
             bodyFormat: "JSON",
             autoCapture: false,
             paymentDisplayType: "REDIRECT",
-            language: Site.getCurrent().getDefaultLocale().split('_')[0] || 'en_US'
+            country: null,
+            language: currentLocale.language || Site.getCurrent().getDefaultLocale()
         }
     };
 
@@ -160,6 +182,7 @@ function getDataForUpdateSession(order) {
     var billingAddress = order.getBillingAddress();
     var defaultShipment = order.getDefaultShipment();
     var shippingAddress = defaultShipment ? defaultShipment.getShippingAddress() : null;
+    orderData.configuration.country = shippingAddress && shippingAddress.getCountryCode() ? shippingAddress.getCountryCode().getValue() : '';
 
     if (customer || billingAddress || shippingAddress) {
         orderData.order.customer = {};
@@ -222,5 +245,6 @@ function getOnInitiatePaymentURL(selectedPaymentMethod, marketPayPaymentMethods)
 module.exports = {
     getFormattedDataForMarketPaySession: getFormattedDataForMarketPaySession,
     getDataForUpdateSession: getDataForUpdateSession, 
-    getOnInitiatePaymentURL: getOnInitiatePaymentURL
+    getOnInitiatePaymentURL: getOnInitiatePaymentURL,
+    getBasicAuthHeader: getBasicAuthHeader
 };

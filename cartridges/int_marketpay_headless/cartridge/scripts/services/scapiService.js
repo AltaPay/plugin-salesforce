@@ -3,8 +3,6 @@
 var LocalServiceRegistry = require('dw/svc/LocalServiceRegistry');
 var Logger = require('dw/system/Logger').getLogger('MarketPay', 'MarketPay');
 var Site = require('dw/system/Site');
-var Encoding = require('dw/crypto/Encoding');
-var Bytes = require('dw/util/Bytes');
 
 /**
  * Get SLAS credentials from site preferences
@@ -22,36 +20,32 @@ function getSLASCredentials() {
  * @returns {Object} { access_token, token_type, expires_in, refresh_token, usid, customer_id, enc_user_id, idp_access_token }
  */
 function getGuestAccessToken() {
-    var credentials = getSLASCredentials();
+    var slasCredentials = getSLASCredentials();
 
-    if (!credentials.organizationId) {
+    if (!slasCredentials.organizationId) {
         Logger.error('SLAS credentials not configured in site preferences');
         return null;
     }
 
     var service = LocalServiceRegistry.createService('int.marketpay.slas', {
         createRequest: function (svc, params) {
-            svc.setRequestMethod('POST');
-
+            const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
             const credentials = svc.getConfiguration().getCredential();
-            const clientId = credentials.getUser();
-            const clientSecret = credentials.getPassword();
-
+            svc.setRequestMethod('POST');
             // Set headers
             svc.addHeader('Content-Type', 'application/x-www-form-urlencoded');
-            svc.addHeader('Authorization', getBasicAuthHeader(clientId, clientSecret));
+            svc.addHeader('Authorization', marketPayDataHelper.getBasicAuthHeader(credentials.getUser(), credentials.getPassword()));
 
             // Replace URL placeholders
             var url = svc.getURL();
             url = url.replace('{shortcode}', params.shortCode);
-            url = url.replace('{orgId}', params.organizationId);
+            url = `${url}/shopper/auth/v1/organizations/${params.organizationId}/oauth2/token`;        
             svc.setURL(url);
 
             // Build form data for guest login
             var formData = [];
             formData.push('grant_type=client_credentials');
             formData.push('channel_id=' + params.siteId);
-            //formData.push('scope=SALESFORCE_COMMERCE_API:' + params.organizationId + ' sfcc.shopper-baskets-orders sfcc.shopper-customers.login sfcc.shopper-myaccount.baskets sfcc.shopper-myaccount.orders');
 
             return formData.join('&');
         },
@@ -76,7 +70,7 @@ function getGuestAccessToken() {
     });
 
     try {
-        var result = service.call(credentials);
+        var result = service.call(slasCredentials);
 
         if (result.ok && result.object) {
             return result.object;
@@ -91,16 +85,6 @@ function getGuestAccessToken() {
 }
 
 /**
- * Generate Basic Auth header
- */
-function getBasicAuthHeader(clientId, clientSecret) {
-    var credentials = clientId + ':' + clientSecret;
-    var credentialsBytes = new Bytes(credentials);
-    var encodedCredentials = Encoding.toBase64(credentialsBytes);
-    return 'Basic ' + encodedCredentials;
-}
-
-/**
  * Create checkout session via custom SCAPI
  * @param {Object} orderData - Order data
  * @param {Object} configuration - Payment configuration
@@ -108,7 +92,7 @@ function getBasicAuthHeader(clientId, clientSecret) {
  * @returns {Object} Service result
  */
 function createMarketPaySession(customerID, requestBody) {
-    var service = LocalServiceRegistry.createService('int.marketpay.custom', {
+    var service = LocalServiceRegistry.createService('int.marketpay.slas', {
         createRequest: function (svc, params) {
             svc.setRequestMethod('POST');
             svc.addHeader('Content-Type', 'application/json');
@@ -125,7 +109,7 @@ function createMarketPaySession(customerID, requestBody) {
             var credentials = getSLASCredentials();
             var url = svc.getURL();
             url = url.replace('{shortcode}', credentials.shortCode);
-            url = url.replace('{orgId}', credentials.organizationId);
+            url = `${url}/custom/marketpay/v1/organizations/${credentials.organizationId}/checkoutsession`;
 
             // Build query parameters
             var queryParams = [];
@@ -137,7 +121,6 @@ function createMarketPaySession(customerID, requestBody) {
 
             return JSON.stringify(params.requestBody);
         },
-
         parseResponse: function (svc, client) {
             if (client.statusCode === 200 || client.statusCode === 201) {
                 return JSON.parse(client.text);
@@ -145,7 +128,6 @@ function createMarketPaySession(customerID, requestBody) {
 
             return null;
         },
-
         filterLogMessage: function (msg) {
             // Remove token from logs
             return msg.replace(/Bearer [^\s]+/g, 'Bearer ***');
@@ -172,7 +154,70 @@ function createMarketPaySession(customerID, requestBody) {
     }
 }
 
+function fetchAndUpdatePaymentStatus(orderId) {
+
+    var service = LocalServiceRegistry.createService('int.marketpay.slas', {
+        createRequest: function (svc, params) {
+            svc.setRequestMethod('POST');
+            svc.addHeader('Content-Type', 'application/json');
+
+            // Get access token
+            var token = getGuestAccessToken();
+            if (!token) {
+                throw new Error('Unable to obtain access token');
+            }
+            // Add authorization header
+            svc.addHeader('Authorization', 'Bearer ' + token.access_token);
+        
+            // Replace URL placeholders
+            var credentials = getSLASCredentials();
+            var url = svc.getURL();
+            url = url.replace('{shortcode}', credentials.shortCode);            
+            url = `${url}/custom/marketpay/v1/organizations/${credentials.organizationId}/paymentstatus`;
+
+            // Build query parameters
+            var queryParams = [];
+            queryParams.push('siteId=' + encodeURIComponent(params.siteId));
+            queryParams.push('c_orderId=' + encodeURIComponent(params.orderId));
+
+            var urlWithParams = url + '?' + queryParams.join('&');
+            svc.setURL(urlWithParams);
+
+            return "";
+        },
+        parseResponse: function (svc, client) {
+            if (client.statusCode === 200 || client.statusCode === 201) {
+                return JSON.parse(client.text);
+            }
+
+            return null;
+        },
+        filterLogMessage: function (msg) {
+            // Remove token from logs
+            return msg.replace(/Bearer [^\s]+/g, 'Bearer ***');
+        }
+    });
+
+    try {
+        var result = service.call({
+            siteId: Site.current.ID,            
+            orderId: orderId            
+        });
+
+        if (result.ok) {
+            return true;
+        } else {
+            Logger.error('No Payment Info founds for the order: ' + result.errorMessage);
+            return false;
+        }
+    } catch (e) {
+        Logger.error('No Payment Info founds for the order: ' + e.message + '\n' + e.stack);
+        return false;
+    }
+}
+
 module.exports = {
     getGuestAccessToken: getGuestAccessToken,
-    createMarketPaySession: createMarketPaySession
+    createMarketPaySession: createMarketPaySession,
+    fetchAndUpdatePaymentStatus: fetchAndUpdatePaymentStatus
 };

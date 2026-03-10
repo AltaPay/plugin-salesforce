@@ -1,5 +1,6 @@
 {
-    "endpoints": [      
-      {"endpoint": "createCheckoutSession", "schema": "schema.yaml", "implementation": "script"}      
+    "endpoints": [
+      {"endpoint": "createCheckoutSession", "schema": "schema.yaml", "implementation": "script"},
+      {"endpoint": "paymentStatus", "schema": "schema.yaml", "implementation": "script"}
     ]
   }

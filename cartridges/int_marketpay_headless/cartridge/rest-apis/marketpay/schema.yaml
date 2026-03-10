@@ -13,10 +13,12 @@ components:
           tokenUrl: https://my-shortcode.api.commercecloud.salesforce.com/shopper/auth/v1/organizations/my-org-id/oauth2/token
           scopes:
             c_checkoutsession_rw: Create and return session and token
+            c_paymentstatus_rw: Retrieve payment status for a customer session
         clientCredentials:
           tokenUrl: https://my-shortcode.api.commercecloud.salesforce.com/shopper/auth/v1/organizations/my-org-id/oauth2/token
           scopes:
             c_checkoutsession_rw: Create and return session and token
+            c_paymentstatus_rw: Retrieve payment status for a customer session
 paths:
   /checkoutsession:
     post:
@@ -151,6 +153,8 @@ paths:
                     language:
                       type: string
                       minLength: 2
+      security:
+        - ShopperToken: ["c_checkoutsession_rw"]
       responses:
         "200":
           description: Returns created Auth Token and Session ID
@@ -180,6 +184,39 @@ paths:
                     {
                       "type": "page not found",
                     }
-security:
-  - ShopperToken: ["c_checkoutsession_rw"]
-
+  /paymentstatus:
+    post:
+      summary: Retrieve the payment status for a customer's active MarketPay session
+      operationId: paymentStatus
+      parameters:
+        - in: query
+          name: siteId
+          required: true
+          schema:
+            type: string
+            minLength: 1        
+        - in: query
+          name: c_orderId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      security:
+        - ShopperToken: ["c_paymentstatus_rw"]
+      responses:
+        "200":
+          description: Returns the payment status for the customer's active session
+          content:
+            application/xml:
+              schema:
+                type: string
+        "404":
+          description: Session not found or status retrieval failed
+          content:
+            application/json:
+              examples:
+                not_found:
+                  value:
+                    {
+                      "type": "session not found",
+                    }

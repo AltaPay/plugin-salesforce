@@ -1,6 +1,15 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.0.1]
+
+### Added
+- Extend `getOrder` endpoint to return MarketPay payment data. See [Get MarketPay Payment Status](https://github.com/AltaPay/plugin-salesforce/wiki/Composable-Storefront#get-marketpay-payment-status) for details.
+- Optimize and reduce number of services.
+- Store MarketPay transaction data in the SFCC order.
+### Fixed
+- If MarketPay data mapping doesn’t exist do not return the SFCC payment method.
+
 ## [2.0.0]
 
 ### Added

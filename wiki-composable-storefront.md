@@ -20,6 +20,8 @@ This plugin enables **AltaPay** as the Payment Service Provider (PSP) for storef
 
 - [Services Configuration](#services-configuration)
 
+- [Get MarketPay Payment Status](#get-marketpay-payment-status)
+
 ## Prerequisites
 
 Before configuring the cartridges, you need the below information. These can
@@ -111,13 +113,17 @@ From the SFCC Business Manager:
 
 1. Navigate to: **Administration** > **Operations** > **Services** > **Service Credentials**
 
-2. Click on **int.marketpay.auth**.
+2. Click on **int.marketpay.service.credential**.
 
 3. Update the URL, replace `https://testgateway.altapaysecure.com` with your gateway URL, and enter Gateway API user and Password and click **Apply** button.
 
 4. Click on **int.marketpay.slas.credentials**.
 
 5. Enter the SLAS User and Password and click **Apply** button.
+
+## Get MarketPay Payment Status
+
+You can use the B2C Commerce API’s [getOrder](https://developer.salesforce.com/docs/commerce/commerce-api/references/orders?meta=getOrder) endpoint to retrieve MarketPay payment data (e.g., transaction ID, captured amount, reserved amount, etc.). All MarketPay-related fields are prefixed with `c_marketPay`.
 
 ## Creating a New API User
 
