@@ -68,7 +68,7 @@ function onSuccessRedirect(req, res, orderNo) {
 
     if (isMobile)
         successURL = Site.current.getCustomPreferenceValue('marketPayPaymentSuccessAppURL');
-    else 
+    else
         successURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentSuccessURL');
 
     res.redirect(successURL + '/' + orderNo);
@@ -83,7 +83,7 @@ function onFailtureRedirect(req, res, orderNo) {
 
     if (isMobile)
         failedURL = Site.current.getCustomPreferenceValue('marketPayPaymentFailedAppURL');
-    else 
+    else
         failedURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentFailedURL');
 
     res.redirect(failedURL + '/' + orderNo);
@@ -126,15 +126,12 @@ function handleDuplicatePayment(req, res, args) {
 }
 
 function handlePayment(req, res, args) {
-
-    const Site = require('dw/system/Site');
-
     try {
         var status;
 
         // Place order
         // ===============================================================
-        if (args.Order.getStatus() != dw.order.Order.ORDER_STATUS_NEW) {
+        if (args.Order.getStatus().value == dw.order.Order.ORDER_STATUS_CREATED) {
             //Order status should change from CREATED to NEW.
             status = placeOrder(args);
             if (status.getStatus() != dw.system.Status.OK) {
@@ -207,26 +204,18 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
                 // Payment success request is valid - Handle payment
                 handlePayment(req, res, args);
             }
-            // @todo Validate MarketPay as referrer                        
-            // @todo Make sure that the order is not failed or cancelled before current request
-            // @todo and stop the proces if that is the case.         
 
         } else {
-            // @todo Release payment reservation and handle error event                        
 
             Logger.error('MarketPay - PaymentSuccess - Order with ID: ' + orderNo + 'not found in SFCC!');
-
             onFailtureRedirect(req, res, orderNo);
         }
 
         return next();
 
     } catch (e) {
-        // @todo Release payment reservation and handle error event 
-        // @todo Recover the basket, so the user can try to checkout again
 
         Logger.error('MarketPay - PaymentSuccess - General Error due to exception. Error message: ' + e.message);
-
         onFailtureRedirect(req, res, orderNo);
 
         return next();
@@ -256,23 +245,14 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
 
         if (order != null) {
 
-            // @todo Validate MarketPay IP as referrer            
-            // @todo Update order with error information from MarketPay
-            // @todo If the order is not already failed then fail the order            
-
-            if (order.getStatus() != dw.order.Order.ORDER_STATUS_FAILED) {
+            if (order.getStatus().value != dw.order.Order.ORDER_STATUS_FAILED) {
 
                 Logger.error('MarketPay - PaymentFailed - General Error due to exception.');
-
                 onFailtureRedirect(req, res, orderNo);
             }
 
-            // @todo Handle error event
-            // @todo Recover the basket, so the user can try to checkout again            
-
         } else {
             // Handle error event            
-
             Logger.error('MarketPay - PaymentFail - Order with ID: ' + orderNo + 'not found in SFCC!');
             onFailtureRedirect(req, res, orderNo);
         }
@@ -282,10 +262,8 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
     } catch (e) {
         // Fail the order and handle error event    
         Logger.error('MarketPay - PaymentFail - General Error due to exception. Error message: ' + e.message);
-
         onFailtureRedirect(req, res, orderNo);
 
-        //@todo Recover the basket, so the user can try to checkout again        
         return next();
     }
 });
@@ -294,8 +272,6 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
  * This controller is for asynchronous payments, when the aquier returns an answer for payment request.
  */
 server.post('PaymentNotification', server.middleware.https, function (req, res, next) {
-    xml_obj = new XML(req.form.xml);
-    Logger.error("PaymentNotification: Order XML is Null", [xml_obj]);
 
     var OrderMgr = require('dw/order/OrderMgr'),
         XMLString = req.form.xml,

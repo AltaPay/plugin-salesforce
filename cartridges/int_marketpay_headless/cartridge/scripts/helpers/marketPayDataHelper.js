@@ -37,7 +37,7 @@ function getFormattedDataForMarketPaySession(basket) {
             transactionInfo: {
                 ecomPlatform: "Salesforce",
                 ecomPluginName: "int_marketpay_headless",
-                ecomPluginVersion: "2.0.1"
+                ecomPluginVersion: "2.0.2"
             }
         },
         callbacks: {
@@ -143,7 +143,7 @@ function getDataForUpdateSession(order) {
             transactionInfo: {
                 ecomPlatform: "Salesforce",
                 ecomPluginName: "int_marketpay_headless",
-                ecomPluginVersion: "2.0.1"
+                ecomPluginVersion: "2.0.2"
             }
         },
         callbacks: {
