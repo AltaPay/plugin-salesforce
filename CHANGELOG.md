@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.0.2]
+
+### Added
+- Handle duplicate payment request against the same order ID.
+### Fixed
+- Fix: Handle multiple transactions conflict on callback.
+- Minor bug fixes.
+
 ## [2.0.1]
 
 ### Added
