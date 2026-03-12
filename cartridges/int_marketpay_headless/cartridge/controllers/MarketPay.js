@@ -27,7 +27,7 @@ function placeOrder(args) {
 
         if (placeOrderStatus === Status.ERROR) {
             Transaction.rollback();
-            Logger.error('CheckoutHelpers.PlaceOrder failed for orderNo: {0}', args.Order.orderNo);
+            Logger.error('PlaceOrder failed for orderNo: {0}', args.Order.orderNo);
             return new Status(Status.ERROR);
         }
 
@@ -42,9 +42,12 @@ function placeOrder(args) {
 
         Transaction.commit();
     } catch (e) {
-        Logger.error('CheckoutHelpers.PlaceOrder failed for orderNo: {0}. Error message: {1}', args.Order.orderNo, e.message);
-        Transaction.rollback();
-
+        try {
+            Transaction.rollback();
+        } catch (rollbackErr) {
+            // Transaction was already rolled back by SFCC (e.g. ORMOptimisticLockingException)
+            Logger.warn('PlaceOrder rollback skipped for orderNo: {0} — already rolled back: {1}', args.Order.orderNo, rollbackErr.message);
+        }
         return new Status(Status.ERROR);
     }
 
@@ -89,32 +92,37 @@ function onFailtureRedirect(req, res, orderNo) {
     res.redirect(failedURL + '/' + orderNo);
 }
 
-function handleDuplicatePayment(req, res, args) {
+function getLatestTransaction(transactions) {
 
-    var marketPay = require('*/cartridge/scripts/services/marketPay');
-    var xml_obj = new XML(args.XMLString);
-    var transactions = xml_obj.Body.Transactions.Transaction;
+    var latestDate = '';
+    var latestTransKey = 0;
 
-    var latestTxn = null;
-    var maxDate = '';
     for (var i = 0; i < transactions.length(); i++) {
-        var t = transactions[i];
-        var createdDate = t.CreatedDate.toString();
-        if (createdDate > maxDate) {
-            maxDate = createdDate;
-            latestTxn = t;
+        var value = transactions[i];
+        var createdDate = value.CreatedDate.toString();
+        var isLatest = (createdDate > latestDate);
+
+        if (isLatest) {
+            latestDate = createdDate;
+            latestTransKey = i;
         }
     }
+
+    return latestTransKey;
+}
+
+function handleDuplicatePayment(req, res, args, isJSONResponse) {
+
+    var marketPay = require('*/cartridge/scripts/services/marketPay');
+    var latestTxn = args.LatestTnx;
 
     if (latestTxn != null) {
         var transactionStatus = latestTxn.TransactionStatus.toString();
         var transactionId = latestTxn.TransactionId.toString();
         var released;
         if (transactionStatus === 'captured' || transactionStatus === 'bank_payment_finalized') {
-            Logger.info("MarketPay... duplicate captured ")
             released = marketPay.refundCapturedReservation(transactionId);
         } else {
-            Logger.info("MarketPay... duplicate reserve ")
             released = marketPay.releaseReservation(transactionId);
         }
         if (!released) {
@@ -122,10 +130,16 @@ function handleDuplicatePayment(req, res, args) {
         }
     }
 
-    onSuccessRedirect(req, res, args.OrderNo);
+    if (isJSONResponse) {
+        res.setStatusCode(200);
+        res.json({ message: 'Acknowledged' });
+    }
+    else {
+        onSuccessRedirect(req, res, args.OrderNo);
+    }
 }
 
-function handlePayment(req, res, args) {
+function handlePayment(req, res, args, isJSONResponse) {
     try {
         var status;
 
@@ -135,23 +149,39 @@ function handlePayment(req, res, args) {
             //Order status should change from CREATED to NEW.
             status = placeOrder(args);
             if (status.getStatus() != dw.system.Status.OK) {
-                Logger.error("MarketPay - handlePayment - General error due to exception. Error message");
-                onFailtureRedirect(req, res, args.OrderNo);
+                // Re-read order status — a concurrent request (PaymentSuccess/PaymentNotification race)
+                // may have already placed the order, causing an optimistic locking failure here.
 
-                return;
+                if (args.Order.getStatus().value == dw.order.Order.ORDER_STATUS_CREATED) {
+                    onFailtureRedirect(req, res, args.OrderNo);
+
+                    return;
+                }              
             }
         }
 
         // Redirect to order confirmation
         // ===============================================================
-        onSuccessRedirect(req, res, args.OrderNo);
+        if (isJSONResponse) {
+            res.setStatusCode(200);
+            res.json({ message: 'Acknowledged' });
+        }
+        else {
+            onSuccessRedirect(req, res, args.OrderNo);
+        }
 
         return;
     } catch (e) {
 
         Logger.error("MarketPay - handlePayment - General error due to exception. Error message: " + e.message);
 
-        onFailtureRedirect(req, res, args.OrderNo);
+        if (isJSONResponse) {
+            res.setStatusCode(200);
+            res.json({ message: 'Acknowledged' });
+        }
+        else {
+            onSuccessRedirect(req, res, args.OrderNo);
+        }
 
         return;
     }
@@ -188,25 +218,31 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
             OrderNo: orderNo,
             CallbackParams: req.form,
             XMLString: req.form.xml,
-            OrderConfirmed: true
+            OrderConfirmed: true,
+            LatestTnx: null
         };
+
+        var xml_obj = new XML(args.XMLString);
+        var transactions = xml_obj.Body.Transactions.Transaction;
+        var latestTxn = transactions[getLatestTransaction(transactions)];
+
+        args.LatestTnx = latestTxn;
 
         if (order != null) {
 
-            if (order.getStatus().value == dw.order.Order.ORDER_STATUS_NEW ||
-                order.getStatus().value == dw.order.Order.ORDER_STATUS_OPEN) {
+            if ((order.getStatus().value == dw.order.Order.ORDER_STATUS_NEW ||
+                order.getStatus().value == dw.order.Order.ORDER_STATUS_OPEN) &&
+                order.custom.marketPayTransactionId != latestTxn.TransactionId) {
 
-                Logger.info("Marketpay duplicate payment for order: " + orderNo);
                 // Duplicate transaction — order already processed, release/refund the new payment
-                handleDuplicatePayment(req, res, args);
+                handleDuplicatePayment(req, res, args, false);
             }
             else {
                 // Payment success request is valid - Handle payment
-                handlePayment(req, res, args);
+                handlePayment(req, res, args, false);
             }
 
         } else {
-
             Logger.error('MarketPay - PaymentSuccess - Order with ID: ' + orderNo + 'not found in SFCC!');
             onFailtureRedirect(req, res, orderNo);
         }
@@ -279,15 +315,15 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
         xml_obj = null,
         args = {
             CallbackParams: req.form,
-            XMLString: XMLString
+            XMLString: XMLString,
+            Order: null,
+            LatestTnx: null
         };
-
-    // @todo Find order ID from MarketPay request body    
 
     if (req.form.xml == null) {
         Logger.error("MarketPay: Order XML is Null");
-        res.setStatusCode(200);
-        res.json({ message: 'Acknowledged' });
+        res.setStatusCode(400);
+        res.json({ message: 'Order XML not found'});
     }
 
     try {
@@ -313,17 +349,28 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
         res.json({ message: 'Order not found in the CMS' });
     }
     else {
-        var Transaction = require('dw/system/Transaction');
-        var txn = xml_obj.Body.Transactions.Transaction;
-        Transaction.wrap(function () {
-            order.custom.marketPayTransactionId = txn.TransactionId.toString();
-            order.custom.marketPayPaymentId = txn.PaymentId.toString();
-            order.custom.marketPayReservedAmount = parseFloat(txn.ReservedAmount.toString()) || 0;
-            order.custom.marketPayCapturedAmount = parseFloat(txn.CapturedAmount.toString()) || 0;
-            order.custom.marketPayRefundedAmount = parseFloat(txn.RefundedAmount.toString()) || 0;
-        });
-        res.setStatusCode(200);
-        res.json({ message: 'Acknowledged' });
+        var transactions = xml_obj.Body.Transactions.Transaction;
+        var latestTxn = transactions[getLatestTransaction(transactions)];
+
+        args.LatestTnx = latestTxn;
+        args.Order = order;
+
+        if (order != null) {
+            if ((order.getStatus().value == dw.order.Order.ORDER_STATUS_NEW ||
+                order.getStatus().value == dw.order.Order.ORDER_STATUS_OPEN) &&
+                order.custom.marketPayTransactionId != latestTxn.TransactionId) {
+                // Duplicate transaction — order already processed, release/refund the new payment
+                handleDuplicatePayment(req, res, args, true);
+            } else {
+                // Payment success request is valid - Handle payment
+                handlePayment(req, res, args, true);
+            }
+        } else {
+            Logger.error('MarketPay - PaymentSuccess - Order with ID: ' + orderId + 'not found in SFCC!');
+            
+            res.setStatusCode(400);
+            res.json({ message: 'Order with ID: ' + orderId + 'not found in SFCC!'});
+        }
     }
 
     return next();
