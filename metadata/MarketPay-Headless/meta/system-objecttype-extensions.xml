@@ -4,34 +4,34 @@
     <type-extension type-id="Order">
         <custom-attribute-definitions>
             <attribute-definition attribute-id="marketPayTransactionId">
-                <display-name xml:lang="x-default">MarketPay Transaction ID</display-name>
+                <display-name xml:lang="x-default">Transaction ID</display-name>
                 <type>string</type>
                 <mandatory-flag>false</mandatory-flag>
-                <externally-managed-flag>false</externally-managed-flag>
+                <externally-managed-flag>true</externally-managed-flag>
             </attribute-definition>
             <attribute-definition attribute-id="marketPayPaymentId">
-                <display-name xml:lang="x-default">MarketPay Payment ID</display-name>
+                <display-name xml:lang="x-default">Payment ID</display-name>
                 <type>string</type>
                 <mandatory-flag>false</mandatory-flag>
-                <externally-managed-flag>false</externally-managed-flag>
+                <externally-managed-flag>true</externally-managed-flag>
             </attribute-definition>
             <attribute-definition attribute-id="marketPayReservedAmount">
-                <display-name xml:lang="x-default">MarketPay Reserved Amount</display-name>
+                <display-name xml:lang="x-default">Reserved Amount</display-name>
                 <type>double</type>
                 <mandatory-flag>false</mandatory-flag>
-                <externally-managed-flag>false</externally-managed-flag>
+                <externally-managed-flag>true</externally-managed-flag>
             </attribute-definition>
             <attribute-definition attribute-id="marketPayCapturedAmount">
-                <display-name xml:lang="x-default">MarketPay Captured Amount</display-name>
+                <display-name xml:lang="x-default">Captured Amount</display-name>
                 <type>double</type>
                 <mandatory-flag>false</mandatory-flag>
-                <externally-managed-flag>false</externally-managed-flag>
+                <externally-managed-flag>true</externally-managed-flag>
             </attribute-definition>
             <attribute-definition attribute-id="marketPayRefundedAmount">
-                <display-name xml:lang="x-default">MarketPay Refunded Amount</display-name>
+                <display-name xml:lang="x-default">Refunded Amount</display-name>
                 <type>double</type>
                 <mandatory-flag>false</mandatory-flag>
-                <externally-managed-flag>false</externally-managed-flag>
+                <externally-managed-flag>true</externally-managed-flag>
             </attribute-definition>
         </custom-attribute-definitions>
         <group-definitions>            
@@ -55,10 +55,17 @@
                 <min-length>0</min-length>
             </attribute-definition>
             <attribute-definition attribute-id="marketPayPaymentURL">
-                <display-name xml:lang="x-default">MarketPay Payment Redirect URL</display-name>
+                <display-name xml:lang="x-default">Payment Redirect URL</display-name>
                 <type>string</type>
                 <mandatory-flag>false</mandatory-flag>
-                <externally-managed-flag>false</externally-managed-flag>
+                <externally-managed-flag>true</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="marketTransactionID">
+                <display-name xml:lang="x-default">Transaction ID</display-name>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>true</externally-managed-flag>
                 <min-length>0</min-length>
             </attribute-definition>
         </custom-attribute-definitions>           
@@ -94,6 +101,20 @@
                 <externally-managed-flag>false</externally-managed-flag>
                 <min-length>0</min-length>
             </attribute-definition>
+            <attribute-definition attribute-id="marketPayPaymentFailedAppURL">
+                <display-name xml:lang="x-default">Payment Failed Mobile App DeepLink URL</display-name>
+                <type>string</type>
+                <mandatory-flag>true</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="marketPayPaymentSuccessAppURL">
+                <display-name xml:lang="x-default">Payment Success Mobile App DeepLink URL</display-name>
+                <type>string</type>
+                <mandatory-flag>true</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
             <attribute-definition attribute-id="marketPayTerminals">
                 <display-name xml:lang="x-default">MarketPay Terminals</display-name>
                 <type>text</type>
@@ -108,6 +129,8 @@
                 <attribute attribute-id="marketPayTerminals"/>                
                 <attribute attribute-id="marketPayPaymentFailedURL"/>
                 <attribute attribute-id="marketPayPaymentSuccessURL"/>
+                <attribute attribute-id="marketPayPaymentFailedAppURL"/>
+                <attribute attribute-id="marketPayPaymentSuccessAppURL"/>
                 <attribute attribute-id="marketPayOrganizationID"/>
                 <attribute attribute-id="marketPayOrganizationShortCode"/>
             </attribute-group>            
