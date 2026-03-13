@@ -33,13 +33,11 @@ function placeOrder(args) {
 
         var xml_obj = new XML(args.XMLString);
         var txn = xml_obj.Body.Transactions.Transaction;
-
         args.Order.custom.marketPayTransactionId = txn.TransactionId.toString();
         args.Order.custom.marketPayPaymentId = txn.PaymentId.toString();
         args.Order.custom.marketPayReservedAmount = parseFloat(txn.ReservedAmount.toString()) || 0;
         args.Order.custom.marketPayCapturedAmount = parseFloat(txn.CapturedAmount.toString()) || 0;
         args.Order.custom.marketPayRefundedAmount = parseFloat(txn.RefundedAmount.toString()) || 0;
-
         Transaction.commit();
     } catch (e) {
         try {
@@ -92,6 +90,54 @@ function onFailtureRedirect(req, res, orderNo) {
     res.redirect(failedURL + '/' + orderNo);
 }
 
+function handlePayment(req, res, args, isJSONResponse) {
+    try {
+        var status;
+
+        // Place order
+        // ===============================================================
+        if (args.Order.getStatus().value == dw.order.Order.ORDER_STATUS_CREATED) {
+            //Order status should change from CREATED to NEW.
+            status = placeOrder(args);
+            if (status.getStatus() != dw.system.Status.OK) {
+                // Re-read order status — a concurrent request (PaymentSuccess/PaymentNotification race)
+                // may have already placed the order, causing an optimistic locking failure here.
+
+                if (args.Order.getStatus().value == dw.order.Order.ORDER_STATUS_CREATED) {
+                    onFailtureRedirect(req, res, args.OrderNo);
+
+                    return;
+                }
+            }
+        }
+
+        // Redirect to order confirmation
+        // ===============================================================
+        if (isJSONResponse) {
+            res.setStatusCode(200);
+            res.json({ message: 'Acknowledged' });
+        }
+        else {
+            onSuccessRedirect(req, res, args.OrderNo);
+        }
+
+        return;
+    } catch (e) {
+
+        Logger.error("MarketPay - handlePayment - General error due to exception. Error message: " + e.message);
+
+        if (isJSONResponse) {
+            res.setStatusCode(200);
+            res.json({ message: 'Acknowledged' });
+        }
+        else {
+            onSuccessRedirect(req, res, args.OrderNo);
+        }
+
+        return;
+    }
+}
+
 function getLatestTransaction(transactions) {
 
     var latestDate = '';
@@ -136,54 +182,6 @@ function handleDuplicatePayment(req, res, args, isJSONResponse) {
     }
     else {
         onSuccessRedirect(req, res, args.OrderNo);
-    }
-}
-
-function handlePayment(req, res, args, isJSONResponse) {
-    try {
-        var status;
-
-        // Place order
-        // ===============================================================
-        if (args.Order.getStatus().value == dw.order.Order.ORDER_STATUS_CREATED) {
-            //Order status should change from CREATED to NEW.
-            status = placeOrder(args);
-            if (status.getStatus() != dw.system.Status.OK) {
-                // Re-read order status — a concurrent request (PaymentSuccess/PaymentNotification race)
-                // may have already placed the order, causing an optimistic locking failure here.
-
-                if (args.Order.getStatus().value == dw.order.Order.ORDER_STATUS_CREATED) {
-                    onFailtureRedirect(req, res, args.OrderNo);
-
-                    return;
-                }              
-            }
-        }
-
-        // Redirect to order confirmation
-        // ===============================================================
-        if (isJSONResponse) {
-            res.setStatusCode(200);
-            res.json({ message: 'Acknowledged' });
-        }
-        else {
-            onSuccessRedirect(req, res, args.OrderNo);
-        }
-
-        return;
-    } catch (e) {
-
-        Logger.error("MarketPay - handlePayment - General error due to exception. Error message: " + e.message);
-
-        if (isJSONResponse) {
-            res.setStatusCode(200);
-            res.json({ message: 'Acknowledged' });
-        }
-        else {
-            onSuccessRedirect(req, res, args.OrderNo);
-        }
-
-        return;
     }
 }
 

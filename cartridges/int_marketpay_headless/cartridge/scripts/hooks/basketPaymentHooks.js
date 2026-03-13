@@ -16,7 +16,6 @@ exports.modifyGETResponse_v2 = function (basket, paymentMethodResultResponse) {
         var result = SCAPIService.createMarketPaySession(basket.customer.ID, marketPayDataHelper.getFormattedDataForMarketPaySession(basket));
 
         if (!result) {
-
             throw new Error('MarketPay: Unable to create Payment Session');
         }
 
