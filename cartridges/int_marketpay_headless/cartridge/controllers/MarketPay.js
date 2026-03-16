@@ -177,7 +177,7 @@ function handleDuplicatePayment(req, res, args, isJSONResponse) {
             released = marketPay.releaseReservation(transactionId);
         }
         if (!released) {
-            Logger.error('MarketPay - PaymentSuccess - Could not release/refund duplicate reservation for transactionId: ' + transactionId);
+            Logger.error('MarketPay - Could not release/refund duplicate reservation for transactionId: ' + transactionId);
         }
     }
 
