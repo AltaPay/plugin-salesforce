@@ -12,6 +12,19 @@ const ROUTES = {
     NOTIFICATION: 'MarketPay-PaymentNotification'
 };
 
+function getLatestPaymentInstrument(order) {
+    var paymentInstruments = order.getPaymentInstruments();
+
+    var latest = paymentInstruments[0];
+    for (var i = 1; i < paymentInstruments.length; i++) {
+        var pi = paymentInstruments[i];
+        if (pi.creationDate > latest.creationDate) {
+            latest = pi;
+        }
+    }
+    return latest;
+}
+
 function getBasicAuthHeader(clientId, clientSecret) {
     var credentials = clientId + ':' + clientSecret;
     var credentialsBytes = new Bytes(credentials);
@@ -246,5 +259,6 @@ module.exports = {
     getFormattedDataForMarketPaySession: getFormattedDataForMarketPaySession,
     getDataForUpdateSession: getDataForUpdateSession, 
     getOnInitiatePaymentURL: getOnInitiatePaymentURL,
-    getBasicAuthHeader: getBasicAuthHeader
+    getBasicAuthHeader: getBasicAuthHeader,
+    getLatestPaymentInstrument: getLatestPaymentInstrument
 };

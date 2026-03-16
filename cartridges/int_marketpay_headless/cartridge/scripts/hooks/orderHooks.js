@@ -37,7 +37,7 @@ exports.afterPOST = function (order) {
         var data = marketPayDataHelper.getDataForUpdateSession(order);
 
         marketPayService.updateSession(marketPayToken, marketPaySessionId, data);
-        var paymentInstrument = order.getPaymentInstruments()[0];
+        var paymentInstrument = marketPayDataHelper.getLatestPaymentInstrument(order);
 
         var onInitiatePaymentURL = marketPayDataHelper.getOnInitiatePaymentURL(
             paymentInstrument.custom.marketPayPaymentMethodID,
