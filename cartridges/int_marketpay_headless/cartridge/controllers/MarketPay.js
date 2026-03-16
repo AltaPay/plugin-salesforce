@@ -145,9 +145,8 @@ function handlePayment(req, res, args, isJSONResponse) {
 }
 
 function getLatestTransaction(transactions) {
-
     var latestDate = '';
-    var latestTransKey = 0;
+    var latestTransaction = null;
 
     for (var i = 0; i < transactions.length(); i++) {
         var value = transactions[i];
@@ -156,11 +155,11 @@ function getLatestTransaction(transactions) {
 
         if (isLatest) {
             latestDate = createdDate;
-            latestTransKey = i;
+            latestTransaction = value;
         }
     }
 
-    return latestTransKey;
+    return latestTransaction;
 }
 
 function handleDuplicatePayment(req, res, args, isJSONResponse) {
@@ -228,7 +227,11 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
 
         var xml_obj = new XML(args.XMLString);
         var transactions = xml_obj.Body.Transactions.Transaction;
-        var latestTxn = transactions[getLatestTransaction(transactions)];
+        var latestTxn = getLatestTransaction(transactions);
+
+        if (latestTxn == null) {
+            throw new Error("No transaction found");
+        }
 
         args.LatestTnx = latestTxn;
 
@@ -354,7 +357,11 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
     }
     else {
         var transactions = xml_obj.Body.Transactions.Transaction;
-        var latestTxn = transactions[getLatestTransaction(transactions)];
+        var latestTxn = getLatestTransaction(transactions);
+
+        if (latestTxn == null) {
+            throw new Error("No transaction found");
+        }
 
         args.LatestTnx = latestTxn;
         args.Order = order;
