@@ -35,15 +35,18 @@ function placeOrder(args) {
 
         var xml_obj = new XML(args.XMLString);
         var txn = xml_obj.Body.Transactions.Transaction;
-        var capturedAmount = parseFloat(txn.CapturedAmount.toString()) || 0;
+
         args.Order.custom.marketPayTransactionId = txn.TransactionId.toString();
         args.Order.custom.marketPayPaymentId = txn.PaymentId.toString();
         args.Order.custom.marketPayReservedAmount = parseFloat(txn.ReservedAmount.toString()) || 0;
-        args.Order.custom.marketPayCapturedAmount = capturedAmount;
+        args.Order.custom.marketPayCapturedAmount = parseFloat(txn.CapturedAmount.toString()) || 0;;
         args.Order.custom.marketPayRefundedAmount = parseFloat(txn.RefundedAmount.toString()) || 0;
+
         var paymentInstrument = marketPayDataHelper.getLatestPaymentInstrument(args.Order);
+
         paymentInstrument.paymentTransaction.transactionID = txn.TransactionId.toString();
-        paymentInstrument.paymentTransaction.type = capturedAmount >= args.Order.totalGrossPrice.value ? PaymentTransaction.TYPE_CAPTURE : PaymentTransaction.TYPE_AUTH;
+        paymentInstrument.paymentTransaction.type = args.Order.custom.marketPayCapturedAmount == args.Order.totalGrossPrice.value ? PaymentTransaction.TYPE_CAPTURE : PaymentTransaction.TYPE_AUTH;
+
         Transaction.commit();
     } catch (e) {
         try {
