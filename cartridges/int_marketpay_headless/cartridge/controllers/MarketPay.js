@@ -105,15 +105,12 @@ function handlePayment(req, res, args, isJSONResponse) {
         if (args.Order.getStatus().value == dw.order.Order.ORDER_STATUS_CREATED) {
             //Order status should change from CREATED to NEW.
             status = placeOrder(args);
-            if (status.getStatus() != dw.system.Status.OK) {
-                // Re-read order status — a concurrent request (PaymentSuccess/PaymentNotification race)
-                // may have already placed the order, causing an optimistic locking failure here.
-
-                if (args.Order.getStatus().value == dw.order.Order.ORDER_STATUS_CREATED) {
-                    onFailtureRedirect(req, res, args.OrderNo);
-
-                    return;
-                }
+            // Re-read order status — a concurrent request (PaymentSuccess/PaymentNotification race)
+            // may have already placed the order, causing an optimistic locking failure here.
+            if (status.getStatus() != dw.system.Status.OK &&
+                args.Order.getStatus().value == dw.order.Order.ORDER_STATUS_CREATED) {
+                onFailtureRedirect(req, res, args.OrderNo);
+                return;
             }
         }
 
