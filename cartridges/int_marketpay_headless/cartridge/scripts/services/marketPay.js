@@ -224,8 +224,8 @@ function releaseReservation(transactionId) {
     });
 
     if (!result.ok) {
-        Logger.error('MarketPay payments API error', result.errorMessage);
-        throw new Error('Failed to retrieve MarketPay payment status');
+        Logger.error('MarketPay - failed to release reservation', result.errorMessage);
+        throw new Error('MarketPay - failed to release reservation');
     }
 
     var xml = new XML(result.object);
@@ -243,8 +243,8 @@ function refundCapturedReservation(transactionId) {
     });
 
     if (!result.ok) {
-        Logger.error('MarketPay payments API error', result.errorMessage);
-        throw new Error('Failed to retrieve MarketPay payment status');
+        Logger.error('MarketPay - failed to refund payment', result.errorMessage);
+        throw new Error('MarketPay - failed to refund payment');
     }
 
     var xml = new XML(result.object);
