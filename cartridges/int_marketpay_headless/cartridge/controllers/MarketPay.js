@@ -331,6 +331,7 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
         Logger.error("MarketPay: Order XML is Null");
         res.setStatusCode(400);
         res.json({ message: 'Order XML not found'});
+        return next();
     }
 
     try {
@@ -341,47 +342,45 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
             throw new Error('Error processing request');
         }
 
+        var order = OrderMgr.getOrder(orderId);
+
+        if (order == null) {
+            res.setStatusCode(400);
+            res.json({ message: 'Order not found in the CMS' });
+        } else {
+            var transactions = xml_obj.Body.Transactions.Transaction;
+            var latestTxn = getLatestTransaction(transactions);
+
+            if (latestTxn == null) {
+                throw new Error("No transaction found");
+            }
+
+            args.LatestTnx = latestTxn;
+            args.Order = order;
+
+            if (order != null) {
+                if ((order.getStatus().value == dw.order.Order.ORDER_STATUS_NEW ||
+                    order.getStatus().value == dw.order.Order.ORDER_STATUS_OPEN) &&
+                    order.custom.marketPayTransactionId != latestTxn.TransactionId) {
+                    // Duplicate transaction — order already processed, release/refund the new payment
+                    handleDuplicatePayment(req, res, args, true);
+                } else {
+                    // Payment success request is valid - Handle payment
+                    handlePayment(req, res, args, true);
+                }
+            } else {
+                Logger.error('MarketPay - PaymentSuccess - Order with ID: ' + orderId + 'not found in SFCC!');
+                res.setStatusCode(400);
+                res.json({ message: 'Order with ID: ' + orderId + 'not found in SFCC!' });
+            }
+        }
+
     } catch (e) {
         Logger.error('MarketPay - findOrder - General error due to exception. Error message: {0}.', e.message);
 
         res.setStatusCode(400);
         res.json({ message: 'Error processing request' });
         return next();
-    }
-
-    var order = OrderMgr.getOrder(orderId);
-
-    if (order == null) {
-        res.setStatusCode(400);
-        res.json({ message: 'Order not found in the CMS' });
-    }
-    else {
-        var transactions = xml_obj.Body.Transactions.Transaction;
-        var latestTxn = getLatestTransaction(transactions);
-
-        if (latestTxn == null) {
-            throw new Error("No transaction found");
-        }
-
-        args.LatestTnx = latestTxn;
-        args.Order = order;
-
-        if (order != null) {
-            if ((order.getStatus().value == dw.order.Order.ORDER_STATUS_NEW ||
-                order.getStatus().value == dw.order.Order.ORDER_STATUS_OPEN) &&
-                order.custom.marketPayTransactionId != latestTxn.TransactionId) {
-                // Duplicate transaction — order already processed, release/refund the new payment
-                handleDuplicatePayment(req, res, args, true);
-            } else {
-                // Payment success request is valid - Handle payment
-                handlePayment(req, res, args, true);
-            }
-        } else {
-            Logger.error('MarketPay - PaymentSuccess - Order with ID: ' + orderId + 'not found in SFCC!');
-            
-            res.setStatusCode(400);
-            res.json({ message: 'Order with ID: ' + orderId + 'not found in SFCC!'});
-        }
     }
 
     return next();
