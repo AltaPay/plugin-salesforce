@@ -2,7 +2,7 @@
 <services xmlns="http://www.demandware.com/xml/impex/services/2014-09-26">
     
 
-    <service-credential service-credential-id="int.marketpay.service.credential">
+    <service-credential service-credential-id="int.marketpay.service.credentials">
         <url>https://testgateway.altapaysecure.com</url>
         <user-id></user-id>
         <password encrypted="true" encryption-type="common.export"></password>
@@ -14,7 +14,7 @@
         <password encrypted="true" encryption-type="common.export"></password>
     </service-credential>
 
-    <service-profile service-profile-id="int.maketpay.service.profile">
+    <service-profile service-profile-id="int.marketpay.service.profile">
         <timeout-millis>3000</timeout-millis>
         <rate-limit-enabled>false</rate-limit-enabled>
         <rate-limit-calls>0</rate-limit-calls>
@@ -52,7 +52,7 @@
         <comm-log-enabled>false</comm-log-enabled>
         <force-prd-enabled>true</force-prd-enabled>
         <mock-mode-enabled>false</mock-mode-enabled>
-        <profile-id>int.maketpay.service.profile</profile-id>
-        <credential-id>int.marketpay.service.credential</credential-id>
+        <profile-id>int.marketpay.service.profile</profile-id>
+        <credential-id>int.marketpay.service.credentials</credential-id>
     </service>
 </services>
