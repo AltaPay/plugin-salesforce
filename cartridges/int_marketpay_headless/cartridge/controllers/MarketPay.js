@@ -133,11 +133,11 @@ function handlePayment(req, res, args, isJSONResponse) {
         Logger.error("MarketPay - handlePayment - General error due to exception. Error message: " + e.message);
 
         if (isJSONResponse) {
-            res.setStatusCode(200);
-            res.json({ message: 'Acknowledged' });
+            res.setStatusCode(400);
+            res.json({ message: "MarketPay - handlePayment - General error due to exception. Error message: " + e.message });
         }
         else {
-            onSuccessRedirect(req, res, args.OrderNo);
+            onFailtureRedirect(req, res, args.OrderNo);
         }
 
         return;
