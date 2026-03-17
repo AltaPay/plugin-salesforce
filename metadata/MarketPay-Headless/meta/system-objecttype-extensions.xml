@@ -33,6 +33,13 @@
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>true</externally-managed-flag>
             </attribute-definition>
+            <attribute-definition attribute-id="marketPayKnownIPProtection">
+                <display-name xml:lang="x-default">Restricts callbacks to known gateway IP addresses. Disable this option if the store is using a firewall or proxy service (such as Cloudflare).</display-name>
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <default-value>false</default-value>
+            </attribute-definition>
         </custom-attribute-definitions>
         <group-definitions>            
             <attribute-group group-id="MarketPay">
@@ -42,6 +49,7 @@
                 <attribute attribute-id="marketPayReservedAmount"/>
                 <attribute attribute-id="marketPayCapturedAmount"/>
                 <attribute attribute-id="marketPayRefundedAmount"/>
+                <attribute attribute-id="marketPayKnownIPProtection"/>
             </attribute-group>            
         </group-definitions>
     </type-extension>
@@ -73,43 +81,57 @@
 
     <type-extension type-id="SitePreferences">
         <custom-attribute-definitions>            
+        <attribute-definition attribute-id="marketPayKnownIPProtection">
+                <display-name xml:lang="x-default">Known IP Protection</display-name>
+                <description xml:lang="x-default">Restricts callbacks to known gateway IP addresses. Disable this option if the store is using a firewall or proxy service (such as Cloudflare)</description>
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <default-value>false</default-value>
+            </attribute-definition>
             <attribute-definition attribute-id="marketPayOrganizationID">
                 <display-name xml:lang="x-default">Organization ID</display-name>
-                <type>string</type>
-                <mandatory-flag>false</mandatory-flag>
-                <externally-managed-flag>false</externally-managed-flag>
-                <min-length>0</min-length>
-            </attribute-definition>
-            <attribute-definition attribute-id="marketPayOrganizationShortCode">
-                <display-name xml:lang="x-default">Organization ShortCode</display-name>
-                <type>string</type>
-                <mandatory-flag>false</mandatory-flag>
-                <externally-managed-flag>false</externally-managed-flag>
-                <min-length>0</min-length>
-            </attribute-definition>
-            <attribute-definition attribute-id="marketPayPaymentFailedURL">
-                <display-name xml:lang="x-default">URL where MarketPay Redirects After Failed Payment</display-name>
+                <description xml:lang="x-default">Organization ID of the your current instance</description>
                 <type>string</type>
                 <mandatory-flag>true</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
                 <min-length>0</min-length>
             </attribute-definition>
-            <attribute-definition attribute-id="marketPayPaymentSuccessURL">
-                <display-name xml:lang="x-default">URL where MarketPay Redirects After Successful Payment</display-name>
+            <attribute-definition attribute-id="marketPayOrganizationShortCode">
+                <display-name xml:lang="x-default">Short Code</display-name>
+                <description xml:lang="x-default">Your Organization's Short Code</description>
                 <type>string</type>
                 <mandatory-flag>true</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
                 <min-length>0</min-length>
             </attribute-definition>
             <attribute-definition attribute-id="marketPayPaymentFailedAppURL">
-                <display-name xml:lang="x-default">Payment Failed Mobile App DeepLink URL</display-name>
+                <display-name xml:lang="x-default">Payment Failed App URL</display-name>
+                <description xml:lang="x-default">Payment Failed Mobile App DeepLink URL</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="marketPayPaymentFailedURL">
+                <display-name xml:lang="x-default">Payment Failed URL</display-name>
+                <description xml:lang="x-default">URL where MarketPay Redirects After Failed Payment</description>
                 <type>string</type>
                 <mandatory-flag>true</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
                 <min-length>0</min-length>
             </attribute-definition>
             <attribute-definition attribute-id="marketPayPaymentSuccessAppURL">
-                <display-name xml:lang="x-default">Payment Success Mobile App DeepLink URL</display-name>
+                <display-name xml:lang="x-default">Payment Success App URL</display-name>
+                <description xml:lang="x-default">Payment Success Mobile App DeepLink URL</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="marketPayPaymentSuccessURL">
+                <display-name xml:lang="x-default">Payment Success URL</display-name>
+                <description xml:lang="x-default">URL where MarketPay Redirects After Successful Payment</description>
                 <type>string</type>
                 <mandatory-flag>true</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
@@ -117,8 +139,9 @@
             </attribute-definition>
             <attribute-definition attribute-id="marketPayTerminals">
                 <display-name xml:lang="x-default">MarketPay Terminals</display-name>
+                <description xml:lang="x-default">Used for mapping of payment methods in Salesforce and terminals in the MarketPay payment gateway</description>
                 <type>text</type>
-                <mandatory-flag>false</mandatory-flag>
+                <mandatory-flag>true</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
             
@@ -133,6 +156,7 @@
                 <attribute attribute-id="marketPayPaymentSuccessAppURL"/>
                 <attribute attribute-id="marketPayOrganizationID"/>
                 <attribute attribute-id="marketPayOrganizationShortCode"/>
+                <attribute attribute-id="marketPayKnownIPProtection"/>
             </attribute-group>            
         </group-definitions>
     </type-extension>
