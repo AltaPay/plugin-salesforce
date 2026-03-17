@@ -11,6 +11,7 @@ const ROUTES = {
     REDIRECT: 'MarketPay-Redirect',
     NOTIFICATION: 'MarketPay-PaymentNotification'
 };
+const MARKETPAY_IP_ADDRESS_SET = ["185.206.120.0/24", "2a10:a200::/29", '185.203.232.129', '185.203.233.129'];        
 
 function getLatestPaymentInstrument(order) {
     var paymentInstruments = order.getPaymentInstruments();
@@ -257,8 +258,9 @@ function getOnInitiatePaymentURL(selectedPaymentMethod, marketPayPaymentMethods)
 
 module.exports = {
     getFormattedDataForMarketPaySession: getFormattedDataForMarketPaySession,
-    getDataForUpdateSession: getDataForUpdateSession, 
+    getDataForUpdateSession: getDataForUpdateSession,
     getOnInitiatePaymentURL: getOnInitiatePaymentURL,
     getBasicAuthHeader: getBasicAuthHeader,
-    getLatestPaymentInstrument: getLatestPaymentInstrument
+    getLatestPaymentInstrument: getLatestPaymentInstrument,
+    MARKETPAY_IP_ADDRESS_SET: MARKETPAY_IP_ADDRESS_SET
 };

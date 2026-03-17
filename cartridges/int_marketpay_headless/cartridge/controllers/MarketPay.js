@@ -21,6 +21,47 @@ function getOrder(orderNo) {
     return OrderMgr.getOrder(orderNo);
 }
 
+function ipToInt(ip) {
+    return ip.split('.').reduce(function (acc, octet) {
+        return (acc * 256) + parseInt(octet, 10);
+    }, 0) >>> 0;
+}
+
+function isIPInCIDR(clientIP, cidr) {
+    var parts = cidr.split('/');
+    var prefix = parseInt(parts[1], 10);
+    var mask = prefix === 0 ? 0 : (~0 << (32 - prefix)) >>> 0;
+    return (ipToInt(clientIP) & mask) === (ipToInt(parts[0]) & mask);
+}
+
+function isKnownIPProtectionEnabled() {
+    var Site = require('dw/system/Site');
+    return Site.getCurrent().getCustomPreferenceValue('marketPayKnownIPProtection');
+}
+
+function isRequestFromKnownIP(req) {
+    var marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
+    var clientIP = req.remoteAddress;
+
+    if (!clientIP) {
+        Logger.warn('MarketPay: Unable to determine client IP address, denying request');
+        return false;
+    }
+
+    var ipSet = marketPayDataHelper.MARKETPAY_IP_ADDRESS_SET;
+
+    for (var i = 0; i < ipSet.length; i++) {
+        var entry = ipSet[i];
+        if (entry.indexOf('/') !== -1) {
+            if (isIPInCIDR(clientIP, entry)) return true;
+        } else if (clientIP === entry) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 function placeOrder(args) {
     try {
         const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
@@ -315,6 +356,12 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
  * This controller is for asynchronous payments, when the aquier returns an answer for payment request.
  */
 server.post('PaymentNotification', server.middleware.https, function (req, res, next) {
+    if (isKnownIPProtectionEnabled() && !isRequestFromKnownIP(req)) {
+        res.setStatusCode(400);
+        res.json({ message: 'Invalid callback request' });
+
+        return next();
+    }
 
     var OrderMgr = require('dw/order/OrderMgr'),
         XMLString = req.form.xml,
