@@ -149,11 +149,11 @@
         <group-definitions>            
             <attribute-group group-id="MarketPay">
                 <display-name xml:lang="x-default">MarketPay</display-name>
-                <attribute attribute-id="marketPayTerminals"/>                
-                <attribute attribute-id="marketPayPaymentFailedURL"/>
+                <attribute attribute-id="marketPayTerminals"/>
                 <attribute attribute-id="marketPayPaymentSuccessURL"/>
-                <attribute attribute-id="marketPayPaymentFailedAppURL"/>
+                <attribute attribute-id="marketPayPaymentFailedURL"/>
                 <attribute attribute-id="marketPayPaymentSuccessAppURL"/>
+                <attribute attribute-id="marketPayPaymentFailedAppURL"/>
                 <attribute attribute-id="marketPayOrganizationID"/>
                 <attribute attribute-id="marketPayOrganizationShortCode"/>
                 <attribute attribute-id="marketPayKnownIPProtection"/>
