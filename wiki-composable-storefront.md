@@ -116,13 +116,17 @@ From the SFCC Business Manager:
 
 1. Navigate to: **Administration** > **Operations** > **Services** > **Service Credentials**
 
-2. Click on **int.marketpay.service.credential**.
+2. Click on **int.marketpay.service.credentials**.
 
 3. Update the URL, replace `https://testgateway.altapaysecure.com` with your gateway URL, and enter Gateway API user and Password and click **Apply** button.
+
+    ![alt text](<docs/headless/service_credentials.png>)
 
 4. Click on **int.marketpay.slas.credentials**.
 
 5. Enter the SLAS User and Password and click **Apply** button.
+
+    ![slas_credentials](docs/headless/slas_credentials.png)
 
 ## Get MarketPay Payment Status
 
