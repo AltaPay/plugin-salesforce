@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 ## [2.0.2]
 
 ### Added
-- Handle duplicate payment request against the same order ID.
+- Handle duplicate payment request against the same order ID.- Support Known IP Protection for callbacks.
 ### Fixed
 - Fix: Handle multiple transactions conflict on callback.
 - Minor bug fixes.
