@@ -5,7 +5,38 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${pdict.title}</title>
-  <link rel="stylesheet" href="${URLUtils.staticURL('/css/callbackform.css')}" />
+  <style>
+    .content-wrapper {
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 20px 50px;
+    }
+    .pensio_payment_form_row {
+      margin-top: 20px;
+    }
+    .pensio_payment_form_input_cell select {
+      width: 40%;
+      padding: 5px 0;
+    }
+    .custom-label {
+      font-size: 13px;
+    }
+    input[type="text"],
+    input[type="tel"],
+    select {
+      border-width: 0 0 1px;
+      border-color: #000;
+      padding-inline: 0;
+    }
+    input[type="text"]:focus-visible,
+    input[type="tel"]:focus-visible,
+    select:focus-visible {
+      outline: none;
+    }
+    .pensio_payment_form_cardholder {
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body class="${pdict.formTemplateClass}">
   <div class="content-wrapper">

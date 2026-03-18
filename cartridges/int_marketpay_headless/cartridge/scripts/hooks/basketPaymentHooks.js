@@ -11,14 +11,14 @@ exports.modifyGETResponse_v2 = function (basket, paymentMethodResultResponse) {
     const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
     const site = require('*/cartridge/scripts/helpers/site.js');
 
-    var result = SCAPIService.createMarketPaySession(basket.customer.ID, marketPayDataHelper.getFormattedDataForMarketPaySession(basket));
-
-    if (!result) {
-
-        return new dw.system.Status(dw.system.Status.ERROR, 'MarketPay: Unable to create Payment Session');
-    }
-
     try {
+
+        var result = SCAPIService.createMarketPaySession(basket.customer.ID, marketPayDataHelper.getFormattedDataForMarketPaySession(basket));
+
+        if (!result) {
+            throw new Error('MarketPay: Unable to create Payment Session');
+        }
+
         var CustomObjectMgr = require('dw/object/CustomObjectMgr');
         var marketPayDataObj = CustomObjectMgr.getCustomObject('MarketPayData', basket.customer.ID);
         var marketPayPaymentMethods = JSON.parse(marketPayDataObj.custom.paymentMethods);
@@ -106,11 +106,11 @@ exports.modifyGETResponse_v2 = function (basket, paymentMethodResultResponse) {
         paymentMethodResultResponse.applicablePaymentMethods = filteredMethods;
 
     } catch (e) {
-        Logger.error("Error in modifyGETResponse_v2: " + e.message);
+        Logger.error("MarketPay error in modifyGETResponse_v2: " + e.message);
         Logger.error("Stack trace: " + e.stack);
-
-        return new dw.system.Status(dw.system.Status.ERROR, 'MarketPay Error:' + e.message);
+        
         // Return original payment methods on error
+        return;
     }
 };
 
@@ -140,7 +140,7 @@ exports.afterPOST = function (basket, paymentInstrument) {
                 var paymentInstrument = basketResponse.paymentInstruments[i];
                 if (paymentInstrument.paymentMethod === paymentInstrumentRequest.paymentMethodId) {
                     Transaction.wrap(function () {
-                        paymentInstrument.custom.marketPayPaymentMethodID = paymentInstrumentRequest.c_marketPayPaymentMethodID;                        
+                        paymentInstrument.custom.marketPayPaymentMethodID = paymentInstrumentRequest.c_marketPayPaymentMethodID;
                     });
                     break;
                 }

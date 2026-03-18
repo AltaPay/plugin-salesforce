@@ -5,9 +5,11 @@
  */
 
 var server = require('server');
-
-var COHelpers = require('~/cartridge/scripts/helpers/marketPayCheckoutHelpers');
 var Logger = require('dw/system/Logger').getLogger('MarketPay', 'MarketPay');
+var OrderMgr = require('dw/order/OrderMgr');
+var Status = require('dw/system/Status');
+var Transaction = require('dw/system/Transaction');
+var PaymentTransaction = require('dw/order/PaymentTransaction');
 
 /**
  * Get current order
@@ -17,6 +19,87 @@ var Logger = require('dw/system/Logger').getLogger('MarketPay', 'MarketPay');
 function getOrder(orderNo) {
     var OrderMgr = require('dw/order/OrderMgr');
     return OrderMgr.getOrder(orderNo);
+}
+
+function ipToInt(ip) {
+    return ip.split('.').reduce(function (acc, octet) {
+        return (acc * 256) + parseInt(octet, 10);
+    }, 0) >>> 0;
+}
+
+function isIPInCIDR(clientIP, cidr) {
+    var parts = cidr.split('/');
+    var prefix = parseInt(parts[1], 10);
+    var mask = prefix === 0 ? 0 : (~0 << (32 - prefix)) >>> 0;
+    return (ipToInt(clientIP) & mask) === (ipToInt(parts[0]) & mask);
+}
+
+function isKnownIPProtectionEnabled() {
+    var Site = require('dw/system/Site');
+    return Site.getCurrent().getCustomPreferenceValue('marketPayKnownIPProtection');
+}
+
+function isRequestFromKnownIP(req) {
+    var marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
+    var clientIP = req.remoteAddress;
+
+    if (!clientIP) {
+        Logger.warn('MarketPay: Unable to determine client IP address, denying request');
+        return false;
+    }
+
+    var ipSet = marketPayDataHelper.MARKETPAY_IP_ADDRESS_SET;
+
+    for (var i = 0; i < ipSet.length; i++) {
+        var entry = ipSet[i];
+        if (entry.indexOf('/') !== -1) {
+            if (isIPInCIDR(clientIP, entry)) return true;
+        } else if (clientIP === entry) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function placeOrder(args) {
+    try {
+        const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
+        Transaction.begin();
+        var placeOrderStatus = OrderMgr.placeOrder(args.Order);
+
+        if (placeOrderStatus === Status.ERROR) {
+            Transaction.rollback();
+            Logger.error('PlaceOrder failed for orderNo: {0}', args.Order.orderNo);
+            return new Status(Status.ERROR);
+        }
+
+        var xml_obj = new XML(args.XMLString);
+        var txn = xml_obj.Body.Transactions.Transaction;
+
+        args.Order.custom.marketPayTransactionId = txn.TransactionId.toString();
+        args.Order.custom.marketPayPaymentId = txn.PaymentId.toString();
+        args.Order.custom.marketPayReservedAmount = parseFloat(txn.ReservedAmount.toString()) || 0;
+        args.Order.custom.marketPayCapturedAmount = parseFloat(txn.CapturedAmount.toString()) || 0;;
+        args.Order.custom.marketPayRefundedAmount = parseFloat(txn.RefundedAmount.toString()) || 0;
+
+        var paymentInstrument = marketPayDataHelper.getLatestPaymentInstrument(args.Order);
+
+        paymentInstrument.paymentTransaction.transactionID = txn.TransactionId.toString();
+        paymentInstrument.paymentTransaction.type = args.Order.custom.marketPayCapturedAmount == args.Order.totalGrossPrice.value ? PaymentTransaction.TYPE_CAPTURE : PaymentTransaction.TYPE_AUTH;
+
+        Transaction.commit();
+    } catch (e) {
+        try {
+            Transaction.rollback();
+        } catch (rollbackErr) {
+            // Transaction was already rolled back by SFCC (e.g. ORMOptimisticLockingException)
+            Logger.warn('PlaceOrder rollback skipped for orderNo: {0} — already rolled back: {1}', args.Order.orderNo, rollbackErr.message);
+        }
+        return new Status(Status.ERROR);
+    }
+
+    return new Status(Status.OK);
 }
 
 /** 
@@ -36,7 +119,7 @@ function onSuccessRedirect(req, res, orderNo) {
 
     if (isMobile)
         successURL = Site.current.getCustomPreferenceValue('marketPayPaymentSuccessAppURL');
-    else 
+    else
         successURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentSuccessURL');
 
     res.redirect(successURL + '/' + orderNo);
@@ -51,59 +134,100 @@ function onFailtureRedirect(req, res, orderNo) {
 
     if (isMobile)
         failedURL = Site.current.getCustomPreferenceValue('marketPayPaymentFailedAppURL');
-    else 
+    else
         failedURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentFailedURL');
 
     res.redirect(failedURL + '/' + orderNo);
 }
 
-function handlePayment(req, res, args) {
-
-    const Site = require('dw/system/Site');
-
+function handlePayment(req, res, args, isJSONResponse) {
     try {
         var status;
 
         // Place order
         // ===============================================================
-        if (args.Order.getStatus() != dw.order.Order.ORDER_STATUS_NEW) {
+        if (args.Order.getStatus().value == dw.order.Order.ORDER_STATUS_CREATED) {
             //Order status should change from CREATED to NEW.
-            status = COHelpers.placeOrder(args.Order);
-            if (status.getStatus() == dw.system.Status.OK) {
-
-                // @todo update payment instruments 
-                var Transaction = require('dw/system/Transaction');
-                var xml_obj = new XML(args.XMLString);
-                var txn = xml_obj.Body.Transactions.Transaction;
-                Transaction.wrap(function () {
-                    args.Order.custom.marketPayTransactionId = txn.TransactionId.toString();
-                    args.Order.custom.marketPayPaymentId = txn.PaymentId.toString();
-                    args.Order.custom.marketPayReservedAmount = parseFloat(txn.ReservedAmount.toString());
-                    args.Order.custom.marketPayCapturedAmount = parseFloat(txn.CapturedAmount.toString());
-                    args.Order.custom.marketPayRefundedAmount = parseFloat(txn.RefundedAmount.toString());
-                });
-
-            } else {
-                Logger.error("MarketPay - handlePayment - General error due to exception. Error message");
+            status = placeOrder(args);
+            // Re-read order status — a concurrent request (PaymentSuccess/PaymentNotification race)
+            // may have already placed the order, causing an optimistic locking failure here.
+            if (status.getStatus() != dw.system.Status.OK &&
+                args.Order.getStatus().value == dw.order.Order.ORDER_STATUS_CREATED) {
                 onFailtureRedirect(req, res, args.OrderNo);
-
-                //@todo Recover the basket, so the user can try to checkout again                
                 return;
             }
         }
 
         // Redirect to order confirmation
         // ===============================================================
-        onSuccessRedirect(req, res, args.OrderNo);
+        if (isJSONResponse) {
+            res.setStatusCode(200);
+            res.json({ message: 'Acknowledged' });
+        }
+        else {
+            onSuccessRedirect(req, res, args.OrderNo);
+        }
 
         return;
     } catch (e) {
 
         Logger.error("MarketPay - handlePayment - General error due to exception. Error message: " + e.message);
 
-        onFailtureRedirect(req, res, args.OrderNo);
+        if (isJSONResponse) {
+            res.setStatusCode(400);
+            res.json({ message: "MarketPay - handlePayment - General error due to exception. Error message: " + e.message });
+        }
+        else {
+            onFailtureRedirect(req, res, args.OrderNo);
+        }
 
         return;
+    }
+}
+
+function getLatestTransaction(transactions) {
+    var latestDate = '';
+    var latestTransaction = null;
+
+    for (var i = 0; i < transactions.length(); i++) {
+        var value = transactions[i];
+        var createdDate = value.CreatedDate.toString();
+        var isLatest = (createdDate > latestDate);
+
+        if (isLatest) {
+            latestDate = createdDate;
+            latestTransaction = value;
+        }
+    }
+
+    return latestTransaction;
+}
+
+function handleDuplicatePayment(req, res, args, isJSONResponse) {
+
+    var marketPay = require('*/cartridge/scripts/services/marketPay');
+    var latestTxn = args.LatestTnx;
+
+    if (latestTxn != null) {
+        var transactionStatus = latestTxn.TransactionStatus.toString();
+        var transactionId = latestTxn.TransactionId.toString();
+        var released;
+        if (transactionStatus === 'captured' || transactionStatus === 'bank_payment_finalized') {
+            released = marketPay.refundCapturedReservation(transactionId);
+        } else {
+            released = marketPay.releaseReservation(transactionId);
+        }
+        if (!released) {
+            Logger.error('MarketPay - Could not release/refund duplicate reservation for transactionId: ' + transactionId);
+        }
+    }
+
+    if (isJSONResponse) {
+        res.setStatusCode(200);
+        res.json({ message: 'Acknowledged' });
+    }
+    else {
+        onSuccessRedirect(req, res, args.OrderNo);
     }
 }
 
@@ -138,35 +262,44 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
             OrderNo: orderNo,
             CallbackParams: req.form,
             XMLString: req.form.xml,
-            OrderConfirmed: true
+            OrderConfirmed: true,
+            LatestTnx: null
         };
+
+        var xml_obj = new XML(args.XMLString);
+        var transactions = xml_obj.Body.Transactions.Transaction;
+        var latestTxn = getLatestTransaction(transactions);
+
+        if (latestTxn == null) {
+            throw new Error("No transaction found");
+        }
+
+        args.LatestTnx = latestTxn;
 
         if (order != null) {
 
-            // @todo Validate MarketPay as referrer                        
-            // @todo Make sure that the order is not failed or cancelled before current request
-            // @todo and stop the proces if that is the case.         
+            if ((order.getStatus().value == dw.order.Order.ORDER_STATUS_NEW ||
+                order.getStatus().value == dw.order.Order.ORDER_STATUS_OPEN) &&
+                order.custom.marketPayTransactionId != latestTxn.TransactionId) {
 
-            // Payment success request is valid - Handle payment
-            // =================================================================
-            handlePayment(req, res, args);
+                // Duplicate transaction — order already processed, release/refund the new payment
+                handleDuplicatePayment(req, res, args, false);
+            }
+            else {
+                // Payment success request is valid - Handle payment
+                handlePayment(req, res, args, false);
+            }
 
         } else {
-            // @todo Release payment reservation and handle error event                        
-
             Logger.error('MarketPay - PaymentSuccess - Order with ID: ' + orderNo + 'not found in SFCC!');
-
             onFailtureRedirect(req, res, orderNo);
         }
 
         return next();
 
     } catch (e) {
-        // @todo Release payment reservation and handle error event 
-        // @todo Recover the basket, so the user can try to checkout again
 
         Logger.error('MarketPay - PaymentSuccess - General Error due to exception. Error message: ' + e.message);
-
         onFailtureRedirect(req, res, orderNo);
 
         return next();
@@ -196,23 +329,14 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
 
         if (order != null) {
 
-            // @todo Validate MarketPay IP as referrer            
-            // @todo Update order with error information from MarketPay
-            // @todo If the order is not already failed then fail the order            
-
-            if (order.getStatus() != dw.order.Order.ORDER_STATUS_FAILED) {
+            if (order.getStatus().value != dw.order.Order.ORDER_STATUS_FAILED) {
 
                 Logger.error('MarketPay - PaymentFailed - General Error due to exception.');
-
                 onFailtureRedirect(req, res, orderNo);
             }
 
-            // @todo Handle error event
-            // @todo Recover the basket, so the user can try to checkout again            
-
         } else {
             // Handle error event            
-
             Logger.error('MarketPay - PaymentFail - Order with ID: ' + orderNo + 'not found in SFCC!');
             onFailtureRedirect(req, res, orderNo);
         }
@@ -222,10 +346,8 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
     } catch (e) {
         // Fail the order and handle error event    
         Logger.error('MarketPay - PaymentFail - General Error due to exception. Error message: ' + e.message);
-
         onFailtureRedirect(req, res, orderNo);
 
-        //@todo Recover the basket, so the user can try to checkout again        
         return next();
     }
 });
@@ -234,6 +356,12 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
  * This controller is for asynchronous payments, when the aquier returns an answer for payment request.
  */
 server.post('PaymentNotification', server.middleware.https, function (req, res, next) {
+    if (isKnownIPProtectionEnabled() && !isRequestFromKnownIP(req)) {
+        res.setStatusCode(400);
+        res.json({ message: 'Invalid callback request' });
+
+        return next();
+    }
 
     var OrderMgr = require('dw/order/OrderMgr'),
         XMLString = req.form.xml,
@@ -241,15 +369,16 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
         xml_obj = null,
         args = {
             CallbackParams: req.form,
-            XMLString: XMLString
+            XMLString: XMLString,
+            Order: null,
+            LatestTnx: null
         };
-
-    // @todo Find order ID from MarketPay request body    
 
     if (req.form.xml == null) {
         Logger.error("MarketPay: Order XML is Null");
-        res.setStatusCode(200);
-        res.json({ message: 'Acknowledged' });
+        res.setStatusCode(400);
+        res.json({ message: 'Order XML not found'});
+        return next();
     }
 
     try {
@@ -260,32 +389,45 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
             throw new Error('Error processing request');
         }
 
+        var order = OrderMgr.getOrder(orderId);
+
+        if (order == null) {
+            res.setStatusCode(400);
+            res.json({ message: 'Order not found in the CMS' });
+        } else {
+            var transactions = xml_obj.Body.Transactions.Transaction;
+            var latestTxn = getLatestTransaction(transactions);
+
+            if (latestTxn == null) {
+                throw new Error("No transaction found");
+            }
+
+            args.LatestTnx = latestTxn;
+            args.Order = order;
+
+            if (order != null) {
+                if ((order.getStatus().value == dw.order.Order.ORDER_STATUS_NEW ||
+                    order.getStatus().value == dw.order.Order.ORDER_STATUS_OPEN) &&
+                    order.custom.marketPayTransactionId != latestTxn.TransactionId) {
+                    // Duplicate transaction — order already processed, release/refund the new payment
+                    handleDuplicatePayment(req, res, args, true);
+                } else {
+                    // Payment success request is valid - Handle payment
+                    handlePayment(req, res, args, true);
+                }
+            } else {
+                Logger.error('MarketPay - PaymentSuccess - Order with ID: ' + orderId + 'not found in SFCC!');
+                res.setStatusCode(400);
+                res.json({ message: 'Order with ID: ' + orderId + 'not found in SFCC!' });
+            }
+        }
+
     } catch (e) {
         Logger.error('MarketPay - findOrder - General error due to exception. Error message: {0}.', e.message);
 
         res.setStatusCode(400);
         res.json({ message: 'Error processing request' });
         return next();
-    }
-
-    var order = OrderMgr.getOrder(orderId);
-
-    if (order == null) {
-        res.setStatusCode(400);
-        res.json({ message: 'Order not found in the CMS' });
-    }
-    else {
-        var Transaction = require('dw/system/Transaction');
-        var txn = xml_obj.Body.Transactions.Transaction;
-        Transaction.wrap(function () {
-            order.custom.marketPayTransactionId = txn.TransactionId.toString();
-            order.custom.marketPayPaymentId = txn.PaymentId.toString();
-            order.custom.marketPayReservedAmount = parseFloat(txn.ReservedAmount.toString());
-            order.custom.marketPayCapturedAmount = parseFloat(txn.CapturedAmount.toString());
-            order.custom.marketPayRefundedAmount = parseFloat(txn.RefundedAmount.toString());
-        });
-        res.setStatusCode(200);
-        res.json({ message: 'Acknowledged' });
     }
 
     return next();

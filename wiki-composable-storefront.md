@@ -99,13 +99,16 @@ From the SFCC Business Manager:
     | **MarketPay Terminals / Payment Methods** | Mapping of payment methods in Salesforce and terminals in the MarketPay payment gateway. <br> A terminal can only contain one payment method and one currency, However, it is possible to use the same terminal for multiple payment methods. By sharing your requirements with MarketPay, we will ensure that the correct configuration and JSON mapping are created to meet your needs. <br> ![terminals.png](docs/headless/terminals.png) <br> The setting must be structured as shown in the screen illustration. <br> The attribute **id** must correspond with the payment method added in: **Merchant Tools** > **Ordering** > **Payment Methods** plus the preferred currency. The attribute **name** is the name and identifier of the MarketPay terminal. The attribute **allowedlocales** defines which locales that can use the terminal. <br><br> **Note:** The JSON file containing the terminal configuration will be provided by AltaPay. This file defines the mapping between Salesforce payment methods and the terminals configured in the MarketPay payment gateway. |
     | **Organization ID** | To find the organization ID in Business Manager, click App Launcher and then select Administration > Site Development > Salesforce Commerce API Settings. Example: `f_ecom_zzdc_001` |
     | **Organization ShortCode** | To find your short code in Business Manager, click App Launcher and then select Administration > Site Development > Salesforce Commerce API Settings. Example: `kv7kzm78` |
+    | **Known IP Protection** | Restricts callbacks to known gateway IP addresses. Disable this option if the store is using a firewall or proxy service (such as Cloudflare) |
 
     ---
 
     | **Preference** | **Description** |
     |----------------|-----------------|
-    | **URL where MarketPay Redirects After Successful Payment** | Any valid URL. |
-    | **URL where MarketPay Redirects After Failed Payment** | Any valid URL. |
+    | **Payment Success URL** | URL where MarketPay Redirects After Successful Payment. |
+    | **Payment Failed URL** | URL where MarketPay Redirects After Failed Payment. |
+    | **Payment Success App URL** | Payment Failed Mobile App DeepLink URL. |
+    | **Payment Failed App URL** | URL where MarketPay Redirects After Successful Payment. |
 
 ### Services Configuration
 
@@ -113,13 +116,17 @@ From the SFCC Business Manager:
 
 1. Navigate to: **Administration** > **Operations** > **Services** > **Service Credentials**
 
-2. Click on **int.marketpay.service.credential**.
+2. Click on **int.marketpay.service.credentials**.
 
 3. Update the URL, replace `https://testgateway.altapaysecure.com` with your gateway URL, and enter Gateway API user and Password and click **Apply** button.
+
+    ![alt text](<docs/headless/service_credentials.png>)
 
 4. Click on **int.marketpay.slas.credentials**.
 
 5. Enter the SLAS User and Password and click **Apply** button.
+
+    ![slas_credentials](docs/headless/slas_credentials.png)
 
 ## Get MarketPay Payment Status
 

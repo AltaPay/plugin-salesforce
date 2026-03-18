@@ -56,11 +56,17 @@ function getMerchantService() {
     return LocalServiceRegistry.createService('int.marketpay.service', {
         createRequest: function (svc, payload) {
             svc.setURL(svc.getURL() + '/' + payload.endPoint);
-            svc.setRequestMethod("GET");
+            svc.setRequestMethod(payload.method);
             svc.addHeader("Content-Type", "application/x-www-form-urlencoded");
             const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
             const credentials = svc.getConfiguration().getCredential();
             svc.addHeader("Authorization", marketPayDataHelper.getBasicAuthHeader(credentials.getUser(), credentials.getPassword()));
+
+            if (payload.requestBody != null) {
+                return Object.keys(payload.requestBody)
+                    .map(function (key) { return encodeURIComponent(key) + '=' + encodeURIComponent(payload.requestBody[key]); })
+                    .join('&');
+            }
 
             return JSON.stringify({});
         },
@@ -207,10 +213,49 @@ function createPayment(token, checkoutSessionId, paymentMethodId, onInitiatePaym
     return result.object;
 }
 
+function releaseReservation(transactionId) {
+    const service = getMerchantService();    
+    const result = service.call({
+        endPoint: `/merchant/API/releaseReservation`,
+        method: 'POST',        
+        requestBody: {
+            transaction_id: transactionId
+        }
+    });
+
+    if (!result.ok) {
+        Logger.error('MarketPay - failed to release reservation', result.errorMessage);
+        throw new Error('MarketPay - failed to release reservation');
+    }
+
+    var xml = new XML(result.object);
+    return xml.Body.Result.toString() === 'Success';
+}
+
+function refundCapturedReservation(transactionId) {
+    const service = getMerchantService();    
+    const result = service.call({
+        endPoint: `/merchant/API/refundCapturedReservation`,
+        method: 'POST',
+        requestBody: {
+            transaction_id: transactionId
+        }
+    });
+
+    if (!result.ok) {
+        Logger.error('MarketPay - failed to refund payment', result.errorMessage);
+        throw new Error('MarketPay - failed to refund payment');
+    }
+
+    var xml = new XML(result.object);
+    return xml.Body.Result.toString() === 'Success';
+}
+
 function getPaymentDetail(sfccOrderId) {
     const service = getMerchantService();
     const result = service.call({
         endPoint: `merchant/API/payments?shop_orderid=${sfccOrderId}`,
+        method: 'GET',
         requestBody: {}
     });
 
@@ -227,5 +272,7 @@ module.exports = {
     updateSession: updateSession,
     getPaymentMethods: getPaymentMethods,
     createPayment: createPayment,
-    getPaymentDetail: getPaymentDetail
+    getPaymentDetail: getPaymentDetail,
+    releaseReservation: releaseReservation,
+    refundCapturedReservation: refundCapturedReservation
 };

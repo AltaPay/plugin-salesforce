@@ -11,6 +11,20 @@ const ROUTES = {
     REDIRECT: 'MarketPay-Redirect',
     NOTIFICATION: 'MarketPay-PaymentNotification'
 };
+const MARKETPAY_IP_ADDRESS_SET = ["185.206.120.0/24", "2a10:a200::/29", '185.203.232.129', '185.203.233.129'];        
+
+function getLatestPaymentInstrument(order) {
+    var paymentInstruments = order.getPaymentInstruments();
+
+    var latest = paymentInstruments[0];
+    for (var i = 1; i < paymentInstruments.length; i++) {
+        var pi = paymentInstruments[i];
+        if (pi.creationDate > latest.creationDate) {
+            latest = pi;
+        }
+    }
+    return latest;
+}
 
 function getBasicAuthHeader(clientId, clientSecret) {
     var credentials = clientId + ':' + clientSecret;
@@ -37,7 +51,7 @@ function getFormattedDataForMarketPaySession(basket) {
             transactionInfo: {
                 ecomPlatform: "Salesforce",
                 ecomPluginName: "int_marketpay_headless",
-                ecomPluginVersion: "2.0.1"
+                ecomPluginVersion: "2.0.2"
             }
         },
         callbacks: {
@@ -143,7 +157,7 @@ function getDataForUpdateSession(order) {
             transactionInfo: {
                 ecomPlatform: "Salesforce",
                 ecomPluginName: "int_marketpay_headless",
-                ecomPluginVersion: "2.0.1"
+                ecomPluginVersion: "2.0.2"
             }
         },
         callbacks: {
@@ -244,7 +258,9 @@ function getOnInitiatePaymentURL(selectedPaymentMethod, marketPayPaymentMethods)
 
 module.exports = {
     getFormattedDataForMarketPaySession: getFormattedDataForMarketPaySession,
-    getDataForUpdateSession: getDataForUpdateSession, 
+    getDataForUpdateSession: getDataForUpdateSession,
     getOnInitiatePaymentURL: getOnInitiatePaymentURL,
-    getBasicAuthHeader: getBasicAuthHeader
+    getBasicAuthHeader: getBasicAuthHeader,
+    getLatestPaymentInstrument: getLatestPaymentInstrument,
+    MARKETPAY_IP_ADDRESS_SET: MARKETPAY_IP_ADDRESS_SET
 };
