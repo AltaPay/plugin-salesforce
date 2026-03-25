@@ -83,7 +83,7 @@ function placeOrder(args) {
         args.Order.custom.marketPayCapturedAmount = parseFloat(txn.CapturedAmount.toString()) || 0;;
         args.Order.custom.marketPayRefundedAmount = parseFloat(txn.RefundedAmount.toString()) || 0;
 
-        var paymentInstrument = marketPayDataHelper.getLatestPaymentInstrument(args.Order);
+        var paymentInstrument = marketPayDataHelper.getLatestPaymentInstrumentFromOrder(args.Order);
 
         paymentInstrument.paymentTransaction.transactionID = txn.TransactionId.toString();
         paymentInstrument.paymentTransaction.type = args.Order.custom.marketPayCapturedAmount == args.Order.totalGrossPrice.value ? PaymentTransaction.TYPE_CAPTURE : PaymentTransaction.TYPE_AUTH;
