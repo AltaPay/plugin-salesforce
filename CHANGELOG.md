@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.0.3]
+
+### Added
+- Support non-market pay payment methods.
+### Fixed
+- Fix: Order amount does not match order lines.
+- Bug fixes.
+
 ## [2.0.2]
 
 ### Added
