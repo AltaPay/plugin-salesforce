@@ -11,7 +11,7 @@ const ROUTES = {
     REDIRECT: 'MarketPay-Redirect',
     NOTIFICATION: 'MarketPay-PaymentNotification'
 };
-const MARKETPAY_IP_ADDRESS_SET = ["185.206.120.0/24", "2a10:a200::/29", '185.203.232.129', '185.203.233.129'];        
+const MARKETPAY_IP_ADDRESS_SET = ["185.206.120.0/24", "2a10:a200::/29", '185.203.232.129', '185.203.233.129'];
 
 function orderLinesDiff(orderLines, total) {
     var orderLinesTotal = 0;
@@ -20,7 +20,7 @@ function orderLinesDiff(orderLines, total) {
             (orderLine.unitPrice * orderLine.quantity) + orderLine.taxAmount;
         orderLinesTotal += orderLinePriceWithTax;
     });
- 
+
     return (Math.round(total * 100) - Math.round(orderLinesTotal * 100)) / 100;
 }
 
@@ -139,7 +139,7 @@ function populateOrderlineItems(marketPayOrderData, productLineItems) {
     }
 }
 
-function populateShippingPrice(marketPayOrderData, shipment, shippingTotalGrossPrice){
+function populateShippingPrice(marketPayOrderData, shipment, shippingTotalGrossPrice) {
     marketPayOrderData.order.orderLines.push({
             itemId: shipment.ID,
             description: shipment.shippingMethod.displayName,
@@ -159,7 +159,7 @@ function populateRoudingDiff(marketPayOrderData, totalAmount) {
             itemId: 'comp-amount',
             description: 'Compensation Amount',
             quantity: 1,
-            unitPrice: roundingDiff, 
+            unitPrice: roundingDiff,
             goodsType: 'handling',
             taxAmount: 0
         });
@@ -168,7 +168,7 @@ function populateRoudingDiff(marketPayOrderData, totalAmount) {
 
 function populateCustomerAndAddresses(marketPayOrderData, customer, customerEmail, billingAddress, defaultShipment) {
     var shippingAddress = defaultShipment ? defaultShipment.getShippingAddress() : null;
-    if(!billingAddress) {
+    if (!billingAddress) {
         billingAddress = shippingAddress;
     }
 
@@ -211,6 +211,15 @@ function populateCustomerAndAddresses(marketPayOrderData, customer, customerEmai
                 zipCode: shippingAddress.getPostalCode() || ''
             };
         }
+
+        var addrForCountry = billingAddress || shippingAddress;
+        if (addrForCountry && addrForCountry.getCountryCode()) {
+            var countryVal = addrForCountry.getCountryCode().getValue();
+            if (countryVal) {
+                marketPayOrderData.configuration.country = countryVal;            
+            }
+        }
+
     }
 }
 
@@ -255,13 +264,7 @@ function getSessionDataModel() {
 }
 
 function getFormattedDataForMarketPaySession(basket) {
-    const Locale = require('dw/util/Locale');
-    const URLUtils = require('dw/web/URLUtils');
-    var currentLocale = Locale.getLocale(request.locale);
-
     var orderData = getSessionDataModel();
-
-    // Format order lines from basket product line items
     populateOrderData(orderData, basket.getUUID(), basket.getTotalGrossPrice().getValue(), basket.currencyCode);
     populateOrderlineItems(orderData, basket.getProductLineItems());
     populateShippingPrice(orderData, basket.defaultShipment, basket.getShippingTotalGrossPrice().getValue());
@@ -305,7 +308,7 @@ module.exports = {
     getDataForUpdateSession: getDataForUpdateSession,
     getOnInitiatePaymentURL: getOnInitiatePaymentURL,
     getBasicAuthHeader: getBasicAuthHeader,
-    MARKETPAY_IP_ADDRESS_SET: MARKETPAY_IP_ADDRESS_SET, 
+    MARKETPAY_IP_ADDRESS_SET: MARKETPAY_IP_ADDRESS_SET,
     getTerminalMapping: getTerminalMapping,
     getMarketPayDataForTerminalName: getMarketPayDataForTerminalName,
     getLatestPaymentInstrumentFromOrder: getLatestPaymentInstrumentFromOrder,
