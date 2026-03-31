@@ -107,6 +107,7 @@ function handleDuplicatePayment(args) {
 module.exports = {
     handleDuplicatePayment: handleDuplicatePayment,
     handlePayments: handlePayments, 
-    getOrder: getOrder
+    getOrder: getOrder, 
+    placeOrder: placeOrder
 };
 
