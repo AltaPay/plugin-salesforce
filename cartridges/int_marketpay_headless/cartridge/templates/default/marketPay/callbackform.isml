@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<isanalyticsoff/>
 <iscomment>AltaPay Payment Gateway Template</iscomment>
 <html lang="${pdict.languageCode}">
 <head>

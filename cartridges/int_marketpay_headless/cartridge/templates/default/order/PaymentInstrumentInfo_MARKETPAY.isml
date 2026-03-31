@@ -1,0 +1,44 @@
+<isset name="pi" value="${pdict.PaymentInstrument}" scope="page"/>
+
+<table class="table01 payment_method_info">
+    <tr>
+        <td class="label">${Resource.msg('order.payment.type', 'order', null)}</td>
+        <td>MarketPay</td>
+    </tr>
+    <isif condition="${pi.paymentTransaction && pi.paymentTransaction.transactionID}">
+    <tr>
+        <td class="label">Transaction ID</td>
+        <td>${pi.paymentTransaction.transactionID}</td>
+    </tr>
+    </isif>
+    <isif condition="${pi.custom.marketPayTransactionId}">
+    <tr>
+        <td class="label">MarketPay Transaction ID</td>
+        <td>${pi.custom.marketPayTransactionId}</td>
+    </tr>
+    </isif>
+    <isif condition="${pi.custom.marketPayPaymentId}">
+    <tr>
+        <td class="label">Payment ID</td>
+        <td>${pi.custom.marketPayPaymentId}</td>
+    </tr>
+    </isif>
+    <isif condition="${pi.custom.marketPayReservedAmount}">
+    <tr>
+        <td class="label">Reserved Amount</td>
+        <td>${pi.custom.marketPayReservedAmount}</td>
+    </tr>
+    </isif>
+    <isif condition="${pi.custom.marketPayCapturedAmount}">
+    <tr>
+        <td class="label">Captured Amount</td>
+        <td>${pi.custom.marketPayCapturedAmount}</td>
+    </tr>
+    </isif>
+    <isif condition="${pi.custom.marketPayRefundedAmount}">
+    <tr>
+        <td class="label">Refunded Amount</td>
+        <td>${pi.custom.marketPayRefundedAmount}</td>
+    </tr>
+    </isif>
+</table>
