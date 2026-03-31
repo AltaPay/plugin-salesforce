@@ -12,65 +12,6 @@ var ipHelpers = require('*/cartridge/scripts/helpers/ipHelpers');
 
 
 
-
-/** 
- * Handle successful and open payments.
- * @param {Object} req - request object 
- * @param {Object} res - response object
- * @param {Object} args - Object holding information trough the current request 
- * @param {string} args.OrderNo - Order No of the current order
- * @param {boolean} args.OrderConfirmed - Payment confirmed or not
- */
-function onSuccessRedirect(req, res, orderNo) {
-    const Site = require('dw/system/Site');
-
-    var userAgent = req.httpHeaders.get('user-agent');
-    var isMobile = /android|iphone|ipad|ipod/.test(userAgent);
-    var successURL = null;
-
-    if (isMobile)
-        successURL = Site.current.getCustomPreferenceValue('marketPayPaymentSuccessAppURL');
-    else
-        successURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentSuccessURL');
-
-    res.redirect(successURL + '/' + orderNo);
-}
-
-function onFailtureRedirect(req, res, orderNo) {
-    const Site = require('dw/system/Site');
-
-    var userAgent = req.httpHeaders.get('user-agent');
-    var isMobile = /android|iphone|ipad|ipod/.test(userAgent);
-    var failedURL = null;
-
-    if (isMobile)
-        failedURL = Site.current.getCustomPreferenceValue('marketPayPaymentFailedAppURL');
-    else
-        failedURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentFailedURL');
-
-    res.redirect(failedURL + '/' + orderNo);
-}
-
-
-function getLatestTransaction(transactions) {
-    var latestDate = '';
-    var latestTransaction = null;
-
-    for (var i = 0; i < transactions.length(); i++) {
-        var value = transactions[i];
-        var createdDate = value.CreatedDate.toString();
-        var isLatest = (createdDate > latestDate);
-
-        if (isLatest) {
-            latestDate = createdDate;
-            latestTransaction = value;
-        }
-    }
-
-    return latestTransaction;
-}
-
-
 server.post('CallbackForm', server.middleware.https, function (req, res, next) {
     var amount = req.form.amount;
     var languageCode = req.form.language;
@@ -89,6 +30,8 @@ server.post('CallbackForm', server.middleware.https, function (req, res, next) {
  * Validate payment success response from MarketPay and handle payment
  */
 server.post('PaymentSuccess', server.middleware.https, function (req, res, next) {
+    const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
+    const marketPayRedirectHelpers = require('*/cartridge/scripts/helpers/marketPayRedirectHelpers');
     const Site = require('dw/system/Site');
     var orderNo;
     var args;
@@ -108,7 +51,7 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
 
         var xml_obj = new XML(args.XMLString);
         var transactions = xml_obj.Body.Transactions.Transaction;
-        var latestTxn = getLatestTransaction(transactions);
+        var latestTxn = marketPayDataHelper.getLatestTransaction(transactions);
 
         if (latestTxn == null) {
             throw new Error("No transaction found");
@@ -131,7 +74,7 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
                     throw new Error("Unable to handle payment");
             }
 
-            onSuccessRedirect(req, res, orderNo);
+            marketPayRedirectHelpers.onSuccessRedirect(req, res, orderNo);
         } else {
             Logger.error('MarketPay - PaymentSuccess - Order with ID: ' + orderNo + 'not found in SFCC!');            
             throw new Error('Order with ID: ' + orderNo + 'not found in SFCC!');
@@ -140,7 +83,7 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
     } catch (e) {
 
         Logger.error('MarketPay - PaymentSuccess - General Error due to exception. Error message: ' + e.message);
-        onFailtureRedirect(req, res, orderNo);
+        marketPayRedirectHelpers.onFailtureRedirect(req, res, orderNo);
     }
 
     return next();
@@ -150,6 +93,7 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
  * Controller for failed payments.
  */
 server.post('PaymentFail', server.middleware.https, function (req, res, next) {
+    const marketPayRedirectHelpers = require('*/cartridge/scripts/helpers/marketPayRedirectHelpers');
     const Site = require('dw/system/Site');
     var orderNo;
 
@@ -172,13 +116,13 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
             if (order.getStatus().value != dw.order.Order.ORDER_STATUS_FAILED) {
 
                 Logger.error('MarketPay - PaymentFailed - General Error due to exception.');
-                onFailtureRedirect(req, res, orderNo);
+                marketPayRedirectHelpers.onFailtureRedirect(req, res, orderNo);
             }
 
         } else {
             // Handle error event            
             Logger.error('MarketPay - PaymentFail - Order with ID: ' + orderNo + 'not found in SFCC!');
-            onFailtureRedirect(req, res, orderNo);
+            marketPayRedirectHelpers.onFailtureRedirect(req, res, orderNo);
         }
 
         return next();
@@ -186,7 +130,7 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
     } catch (e) {
         // Fail the order and handle error event    
         Logger.error('MarketPay - PaymentFail - General Error due to exception. Error message: ' + e.message);
-        onFailtureRedirect(req, res, orderNo);
+        marketPayRedirectHelpers.onFailtureRedirect(req, res, orderNo);
 
         return next();
     }
@@ -203,6 +147,7 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
         return next();
     }
 
+    const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
     var XMLString = req.form.xml,
         orderId = null,
         xml_obj = null,
@@ -235,7 +180,7 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
             res.json({ message: 'Order not found in the CMS' });
         } else {
             var transactions = xml_obj.Body.Transactions.Transaction;
-            var latestTxn = getLatestTransaction(transactions);
+            var latestTxn = marketPayDataHelper.getLatestTransaction(transactions);
 
             if (latestTxn == null) {
                 throw new Error("No transaction found");
