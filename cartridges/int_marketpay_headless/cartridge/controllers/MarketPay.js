@@ -32,7 +32,6 @@ server.post('CallbackForm', server.middleware.https, function (req, res, next) {
 server.post('PaymentSuccess', server.middleware.https, function (req, res, next) {
     const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
     const marketPayRedirectHelpers = require('*/cartridge/scripts/helpers/marketPayRedirectHelpers');
-    const Site = require('dw/system/Site');
     var orderNo;
     var args;
 
@@ -60,29 +59,27 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
         args.LatestTnx = latestTxn;
 
         if (order != null) {
-
             if ((order.getStatus().value == dw.order.Order.ORDER_STATUS_NEW ||
                 order.getStatus().value == dw.order.Order.ORDER_STATUS_OPEN) &&
                 order.custom.marketPayTransactionId != latestTxn.TransactionId) {
                 // Duplicate transaction — order already processed, release/refund the new payment
                 COHelpers.handleDuplicatePayment(args);
-            }
-            else {
+            } else {
                 // Payment success request is valid - Handle payment
                 var status = COHelpers.handlePayments(args);
-                if (status.getStatus() == Status.ERROR)
+                if (status.getStatus() == Status.ERROR) {
                     throw new Error("Unable to handle payment");
+                }
             }
 
             marketPayRedirectHelpers.onSuccessRedirect(req, res, orderNo);
         } else {
-            Logger.error('MarketPay - PaymentSuccess - Order with ID: ' + orderNo + 'not found in SFCC!');            
-            throw new Error('Order with ID: ' + orderNo + 'not found in SFCC!');
+            Logger.error('MarketPay - Payment failed - Order with ID: ' + orderNo + ' not found in SFCC!');
+            throw new Error('Order with ID: ' + orderNo + ' not found in SFCC!');
         }
 
     } catch (e) {
-
-        Logger.error('MarketPay - PaymentSuccess - General Error due to exception. Error message: ' + e.message);
+        Logger.error('MarketPay - Payment failed - General Error due to exception. Error message: ' + e.message);
         marketPayRedirectHelpers.onFailtureRedirect(req, res, orderNo);
     }
 
@@ -94,35 +91,14 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
  */
 server.post('PaymentFail', server.middleware.https, function (req, res, next) {
     const marketPayRedirectHelpers = require('*/cartridge/scripts/helpers/marketPayRedirectHelpers');
-    const Site = require('dw/system/Site');
-    var orderNo;
+    const orderNo = req.form.shop_orderid;
 
     try {
-
-        orderNo = req.form.shop_orderid;
-
-        var order = COHelpers.getOrder(orderNo),
-            args = {
-                Order: order,
-                OrderNo: orderNo,
-                CallbackParams: req.form,
-                XMLString: req.form.xml,
-                MerchantErrorMsg: req.form.merchant_error_message,
-            },
-            status;
-
-        if (order != null) {
-
-            if (order.getStatus().value != dw.order.Order.ORDER_STATUS_FAILED) {
-
-                Logger.error('MarketPay - PaymentFailed - General Error due to exception.');
-                marketPayRedirectHelpers.onFailtureRedirect(req, res, orderNo);
-            }
-
-        } else {
-            // Handle error event            
-            Logger.error('MarketPay - PaymentFail - Order with ID: ' + orderNo + 'not found in SFCC!');
-            marketPayRedirectHelpers.onFailtureRedirect(req, res, orderNo);
+        const order = COHelpers.getOrder(orderNo);
+        if (!order) {
+            Logger.error('MarketPay - PaymentFail - Order not found. OrderNo: ' + orderNo);
+        } else if (order.getStatus().value !== dw.order.Order.ORDER_STATUS_FAILED) {
+            Logger.error('MarketPay - PaymentFail - Payment failure callback received. OrderNo: ' + orderNo);
         }
 
         return next();
@@ -130,10 +106,11 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
     } catch (e) {
         // Fail the order and handle error event    
         Logger.error('MarketPay - PaymentFail - General Error due to exception. Error message: ' + e.message);
-        marketPayRedirectHelpers.onFailtureRedirect(req, res, orderNo);
-
-        return next();
     }
+
+    marketPayRedirectHelpers.onFailtureRedirect(req, res, orderNo);
+
+    return next();
 });
 
 /**
@@ -161,7 +138,7 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
     if (req.form.xml == null) {
         Logger.error("MarketPay: Order XML is Null");
         res.setStatusCode(400);
-        res.json({ message: 'Order XML not found'});
+        res.json({ message: 'Order XML not found' });
         return next();
     }
 
@@ -194,7 +171,7 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
                     order.getStatus().value == dw.order.Order.ORDER_STATUS_OPEN) &&
                     order.custom.marketPayTransactionId != latestTxn.TransactionId) {
                     // Duplicate transaction — order already processed, release/refund the new payment
-                    COHelpers.handleDuplicatePayment();
+                    COHelpers.handleDuplicatePayment(args);
                 } else {
                     // Payment success request is valid - Handle payment
                     var status = COHelpers.handlePayments(args);

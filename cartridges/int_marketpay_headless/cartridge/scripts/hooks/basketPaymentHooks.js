@@ -95,10 +95,10 @@ exports.beforePOST = function (basket, paymentInstrument) {
     const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
 
     if (marketPayDataHelper.isMarketPayProcessor(paymentInstrument.paymentMethodId) &&
-        !paymentInstrument.c_marketPayPaymentMethodID) {        
+        !paymentInstrument.c_marketPayPaymentMethodID) {
 
         Logger.error('MarketPay: c_marketPayPaymentMethodID is required for MARKETPAY payment processor');
-        return new Status(Status.ERROR, 'MISSING_MARKETPAY_METHOD_ID', 'c_marketPayPaymentMethodID is required for MarketPay payment methods');        
+        return new Status(Status.ERROR, 'MISSING_MARKETPAY_METHOD_ID', 'c_marketPayPaymentMethodID is required for MarketPay payment methods');
     }
 };
 
@@ -108,34 +108,42 @@ exports.afterPOST = function (basket, paymentInstrument) {
     var basketResponse = basket;
     const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
 
-    if (paymentInstrumentRequest && marketPayDataHelper.isMarketPayProcessor(paymentInstrumentRequest.paymentMethodId)) {
-//check if MarketPay Payment Method is used 
-    if (paymentInstrumentRequest.c_marketPayPaymentMethodID) {
-
-        // Get sessionId from Custom Object MarketPayData for this user
+    if (
+        paymentInstrumentRequest &&
+        marketPayDataHelper.isMarketPayProcessor(paymentInstrumentRequest.paymentMethodId) &&
+        paymentInstrumentRequest.c_marketPayPaymentMethodID
+    ) {
         var CustomObjectMgr = require('dw/object/CustomObjectMgr');
         var marketPayDataObj = CustomObjectMgr.getCustomObject('MarketPayData', basket.customer.ID);
         var marketPaySessionId = marketPayDataObj ? marketPayDataObj.custom.sessionID : null;
         var marketPayPaymentMethods = marketPayDataObj ? marketPayDataObj.custom.paymentMethods : null;
-        var onInitiatePaymentURL = marketPayDataHelper.getOnInitiatePaymentURL(paymentInstrumentRequest.c_marketPayPaymentMethodID, marketPayPaymentMethods);
+        var marketPayPaymentMethodID = paymentInstrumentRequest.c_marketPayPaymentMethodID;
+        var paymentMethodId = paymentInstrumentRequest.paymentMethodId;
+        var onInitiatePaymentURL = marketPayDataHelper.getOnInitiatePaymentURL(
+            marketPayPaymentMethodID,
+            marketPayPaymentMethods
+        );
 
         if (!marketPayDataObj || !marketPaySessionId || !marketPayPaymentMethods || !onInitiatePaymentURL) {
-            Logger.error('MarketPay: No Active Payment Session found for the user');
-            return new dw.system.Status(dw.system.Status.ERROR, 'MarketPay: No Active Payment Session found for the user');
+            Logger.error('MarketPay: No active payment session found for user ' + basket.customer.ID);
+            return new dw.system.Status(dw.system.Status.ERROR, 'No active MarketPay payment session found');
         }
 
-        if (basketResponse.paymentInstruments && basketResponse.paymentInstruments.length > 0) {
-            for (var i = 0; i < basketResponse.paymentInstruments.length; i++) {
-                var paymentInstrument = basketResponse.paymentInstruments[i];
-                if (paymentInstrument.paymentMethod === paymentInstrumentRequest.paymentMethodId) {
-                    Transaction.wrap(function () {
-                        paymentInstrument.custom.marketPayPaymentMethodID = paymentInstrumentRequest.c_marketPayPaymentMethodID;
-                    });
-                    break;
+        var paymentInstruments = basketResponse.paymentInstruments;
+
+        if (paymentInstruments && paymentInstruments.length) {
+            for (var i = 0; i < paymentInstruments.length; i++) {
+                var currentPaymentInstrument = paymentInstruments[i];
+
+                if (currentPaymentInstrument.paymentMethod !== paymentMethodId) {
+                    continue;
                 }
-            }
-        }
 
+                Transaction.wrap(function () {
+                    currentPaymentInstrument.custom.marketPayPaymentMethodID = marketPayPaymentMethodID;
+                });
+                break;
+            }
         }
     }
 };
