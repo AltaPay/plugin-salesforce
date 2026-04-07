@@ -1,6 +1,15 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.0.4]
+
+### Added
+- Add placeOrder to module exports.
+- Move functions from controllers to helper files to improve extensibility.
+- Update payment transaction amount to use transaction captured amount.
+### Fixed
+- Add missing meta fields.
+
 ## [2.0.3]
 
 ### Added

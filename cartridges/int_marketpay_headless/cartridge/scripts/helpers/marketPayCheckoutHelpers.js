@@ -42,6 +42,7 @@ function placeOrder(args) {
 
         paymentInstrument.paymentTransaction.transactionID = txn.TransactionId.toString();
         paymentInstrument.paymentTransaction.type = args.Order.custom.marketPayCapturedAmount == args.Order.totalGrossPrice.value ? PaymentTransaction.TYPE_CAPTURE : PaymentTransaction.TYPE_AUTH;
+        paymentInstrument.paymentTransaction.setAmount(new dw.value.Money(args.Order.custom.marketPayCapturedAmount, args.Order.getCurrencyCode()));
 
         Transaction.commit();
     } catch (e) {
@@ -107,6 +108,7 @@ function handleDuplicatePayment(args) {
 module.exports = {
     handleDuplicatePayment: handleDuplicatePayment,
     handlePayments: handlePayments, 
-    getOrder: getOrder
+    getOrder: getOrder, 
+    placeOrder: placeOrder
 };
 

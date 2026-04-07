@@ -216,7 +216,7 @@ function populateCustomerAndAddresses(marketPayOrderData, customer, customerEmai
         if (addrForCountry && addrForCountry.getCountryCode()) {
             var countryVal = addrForCountry.getCountryCode().getValue();
             if (countryVal) {
-                marketPayOrderData.configuration.country = countryVal;            
+                marketPayOrderData.configuration.country = countryVal;
             }
         }
 
@@ -240,7 +240,7 @@ function getSessionDataModel() {
             transactionInfo: {
                 ecomPlatform: "Salesforce",
                 ecomPluginName: "int_marketpay_headless",
-                ecomPluginVersion: "2.0.3"
+                ecomPluginVersion: "2.0.4"
             }
         },
         callbacks: {
@@ -302,6 +302,24 @@ function getOnInitiatePaymentURL(selectedPaymentMethod, marketPayPaymentMethods)
     return null;
 }
 
+function getLatestTransaction(transactions) {
+    var latestDate = '';
+    var latestTransaction = null;
+
+    for (var i = 0; i < transactions.length(); i++) {
+        var value = transactions[i];
+        var createdDate = value.CreatedDate.toString();
+        var isLatest = (createdDate > latestDate);
+
+        if (isLatest) {
+            latestDate = createdDate;
+            latestTransaction = value;
+        }
+    }
+
+    return latestTransaction;
+}
+
 
 module.exports = {
     getFormattedDataForMarketPaySession: getFormattedDataForMarketPaySession,
@@ -313,5 +331,6 @@ module.exports = {
     getMarketPayDataForTerminalName: getMarketPayDataForTerminalName,
     getLatestPaymentInstrumentFromOrder: getLatestPaymentInstrumentFromOrder,
     getLatestPaymentInstrumentFromBasket: getLatestPaymentInstrumentFromBasket,
-    isMarketPayProcessor: isMarketPayProcessor
+    isMarketPayProcessor: isMarketPayProcessor, 
+    getLatestTransaction: getLatestTransaction
 };
