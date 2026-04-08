@@ -37,6 +37,7 @@ function placeOrder(args) {
         args.Order.custom.marketPayReservedAmount = parseFloat(txn.ReservedAmount.toString()) || 0;
         args.Order.custom.marketPayCapturedAmount = parseFloat(txn.CapturedAmount.toString()) || 0;;
         args.Order.custom.marketPayRefundedAmount = parseFloat(txn.RefundedAmount.toString()) || 0;
+        args.Order.setPaymentStatus(dw.order.Order.PAYMENT_STATUS_PAID);
 
         var paymentInstrument = marketPayDataHelper.getLatestPaymentInstrumentFromOrder(args.Order);
 
