@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.0.5]
+
+### Added
+- Remove the order number and replace it with parameters from the success and fail URLs.
+- Make the payment success and fail URLs localizable.
+- Set the payment status when the order is completed.
+
 ## [2.0.4]
 
 ### Added
