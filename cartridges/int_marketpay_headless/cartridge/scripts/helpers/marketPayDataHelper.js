@@ -320,6 +320,19 @@ function getLatestTransaction(transactions) {
     return latestTransaction;
 }
 
+function getCurrentLocal() {
+    const Locale = require('dw/util/Locale');            
+    var currentLocale = Locale.getLocale(request.locale);
+
+    return currentLocale.language;
+}
+
+function getDefaultLocale() {
+    const Locale = require('dw/util/Locale');
+    var defaultLocale = Site.getCurrent().getDefaultLocale();
+
+    return Locale.getLocale(defaultLocale).language;
+}
 
 module.exports = {
     getFormattedDataForMarketPaySession: getFormattedDataForMarketPaySession,
@@ -332,5 +345,7 @@ module.exports = {
     getLatestPaymentInstrumentFromOrder: getLatestPaymentInstrumentFromOrder,
     getLatestPaymentInstrumentFromBasket: getLatestPaymentInstrumentFromBasket,
     isMarketPayProcessor: isMarketPayProcessor, 
-    getLatestTransaction: getLatestTransaction
+    getLatestTransaction: getLatestTransaction, 
+    getCurrentLocal: getCurrentLocal, 
+    getDefaultLocale: getDefaultLocale
 };

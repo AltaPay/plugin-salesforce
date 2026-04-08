@@ -123,6 +123,7 @@ exports.afterPOST = function (order) {
             if (freshMarketPayDataObj) {
                 CustomObjectMgr.remove(freshMarketPayDataObj);
             }
+            order.custom.marketPayUserLocale = marketPayDataHelper.getCurrentLocal();
         });
         
     } catch (e) {
