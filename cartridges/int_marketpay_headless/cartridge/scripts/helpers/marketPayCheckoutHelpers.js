@@ -17,33 +17,31 @@ function getOrder(orderNo) {
     return OrderMgr.getOrder(orderNo);
 }
 
-function placeOrder(args) {
+function placeOrder(order, marketPayOrderXML) {
     try {
         const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
         Transaction.begin();
-        var placeOrderStatus = OrderMgr.placeOrder(args.Order);
+        var placeOrderStatus = OrderMgr.placeOrder(order);
 
         if (placeOrderStatus === Status.ERROR) {
             Transaction.rollback();
-            Logger.error('PlaceOrder failed for orderNo: {0}', args.Order.orderNo);
+            Logger.error('PlaceOrder failed for orderNo: {0}', order.orderNo);
             return new Status(Status.ERROR);
         }
 
-        var xml_obj = new XML(args.XMLString);
-        var txn = xml_obj.Body.Transactions.Transaction;
+        var txn = marketPayOrderXML.Body.Transactions.Transaction;
 
-        args.Order.custom.marketPayTransactionId = txn.TransactionId.toString();
-        args.Order.custom.marketPayPaymentId = txn.PaymentId.toString();
-        args.Order.custom.marketPayReservedAmount = parseFloat(txn.ReservedAmount.toString()) || 0;
-        args.Order.custom.marketPayCapturedAmount = parseFloat(txn.CapturedAmount.toString()) || 0;;
-        args.Order.custom.marketPayRefundedAmount = parseFloat(txn.RefundedAmount.toString()) || 0;
-        args.Order.setPaymentStatus(dw.order.Order.PAYMENT_STATUS_PAID);
+        order.custom.marketPayTransactionId = txn.TransactionId.toString();
+        order.custom.marketPayPaymentId = txn.PaymentId.toString();
+        order.custom.marketPayReservedAmount = parseFloat(txn.ReservedAmount.toString()) || 0;
+        order.custom.marketPayCapturedAmount = parseFloat(txn.CapturedAmount.toString()) || 0;;
+        order.custom.marketPayRefundedAmount = parseFloat(txn.RefundedAmount.toString()) || 0;
+        order.setPaymentStatus(dw.order.Order.PAYMENT_STATUS_PAID);
 
-        var paymentInstrument = marketPayDataHelper.getLatestPaymentInstrumentFromOrder(args.Order);
+        var paymentInstrument = marketPayDataHelper.getLatestPaymentInstrumentFromOrder(order);
 
         paymentInstrument.paymentTransaction.transactionID = txn.TransactionId.toString();
-        paymentInstrument.paymentTransaction.type = args.Order.custom.marketPayCapturedAmount == args.Order.totalGrossPrice.value ? PaymentTransaction.TYPE_CAPTURE : PaymentTransaction.TYPE_AUTH;
-        paymentInstrument.paymentTransaction.setAmount(new dw.value.Money(args.Order.custom.marketPayCapturedAmount, args.Order.getCurrencyCode()));
+        paymentInstrument.paymentTransaction.type = order.custom.marketPayCapturedAmount == order.totalGrossPrice.value ? PaymentTransaction.TYPE_CAPTURE : PaymentTransaction.TYPE_AUTH;
 
         Transaction.commit();
     } catch (e) {
@@ -51,7 +49,7 @@ function placeOrder(args) {
             Transaction.rollback();
         } catch (rollbackErr) {
             // Transaction was already rolled back by SFCC (e.g. ORMOptimisticLockingException)
-            Logger.warn('PlaceOrder rollback skipped for orderNo: {0} — already rolled back: {1}', args.Order.orderNo, rollbackErr.message);
+            Logger.info('Transaction was already rolled back by SFCC: {0} — already rolled back: {1}', order.orderNo, rollbackErr.message);
         }
         return new Status(Status.ERROR);
     }
@@ -59,19 +57,19 @@ function placeOrder(args) {
     return new Status(Status.OK);
 }
 
-function handlePayments(args) {
+function handlePayments(order, marketPayOrderXML) {
     try {
         var status;
 
         // Place order
         // ===============================================================
-        if (args.Order.getStatus().value == dw.order.Order.ORDER_STATUS_CREATED) {
+        if (order.getStatus().value == dw.order.Order.ORDER_STATUS_CREATED) {
             //Order status should change from CREATED to NEW.
-            status = placeOrder(args);
+            status = placeOrder(order, marketPayOrderXML);
             // Re-read order status — a concurrent request (PaymentSuccess/PaymentNotification race)
             // may have already placed the order, causing an optimistic locking failure here.
             if (status.getStatus() != dw.system.Status.OK &&
-                args.Order.getStatus().value == dw.order.Order.ORDER_STATUS_CREATED) {                
+                order.getStatus().value == dw.order.Order.ORDER_STATUS_CREATED) {                
                 return new Status(Status.ERROR);
             }
         }
@@ -85,10 +83,9 @@ function handlePayments(args) {
     }
 }
 
-function handleDuplicatePayment(args) {
+function handleDuplicatePayment(latestTxn) {
 
     var marketPay = require('*/cartridge/scripts/services/marketPay');
-    var latestTxn = args.LatestTnx;
 
     if (latestTxn != null) {
         var transactionStatus = latestTxn.TransactionStatus.toString();
@@ -104,7 +101,6 @@ function handleDuplicatePayment(args) {
         }
     }
 }
-
 
 module.exports = {
     handleDuplicatePayment: handleDuplicatePayment,

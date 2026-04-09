@@ -219,8 +219,11 @@ function populateCustomerAndAddresses(marketPayOrderData, customer, customerEmai
                 marketPayOrderData.configuration.country = countryVal;
             }
         }
-
     }
+}
+
+function populateConfiguration(marketPayOrderData, isAutoCapture) {
+    marketPayOrderData.configuration.autoCapture = isAutoCapture;
 }
 
 function getSessionDataModel() {
@@ -274,13 +277,14 @@ function getFormattedDataForMarketPaySession(basket) {
     return orderData;
 }
 
-function getDataForUpdateSession(order) {
+function getDataForUpdateSession(order, isAutoCapture) {
     var orderData = getSessionDataModel();
     populateOrderData(orderData, order.getOrderNo(), order.getTotalGrossPrice().getValue(), order.currencyCode);
     populateOrderlineItems(orderData, order.getProductLineItems());
     populateShippingPrice(orderData, order.defaultShipment, order.getShippingTotalGrossPrice().getValue());
     populateRoudingDiff(orderData, order.getTotalGrossPrice().getValue());
     populateCustomerAndAddresses(orderData, order.getCustomer(), order.getCustomerEmail(), order.getBillingAddress(), order.getDefaultShipment());
+    populateConfiguration(orderData, isAutoCapture)
 
     return orderData;
 }
@@ -300,6 +304,24 @@ function getOnInitiatePaymentURL(selectedPaymentMethod, marketPayPaymentMethods)
     }
 
     return null;
+}
+
+function isAutoCapture(paymentMethodID) {
+    var marketPayTerminalsRaw = Site.getCurrent().getCustomPreferenceValue('marketPayTerminals');
+    if (!marketPayTerminalsRaw) {
+        return false;
+    }
+
+    var marketPayTerminalsMapping = typeof marketPayTerminalsRaw === 'string'
+        ? JSON.parse(marketPayTerminalsRaw)
+        : marketPayTerminalsRaw;
+
+    var currentLocale = request.locale;
+    var currencyCode = Site.getCurrent().getDefaultCurrency();
+
+    var terminalMapping = getTerminalMapping(marketPayTerminalsMapping, currentLocale, currencyCode, paymentMethodID);
+
+    return terminalMapping ? terminalMapping.autoCapture === true : false;
 }
 
 function getLatestTransaction(transactions) {
@@ -344,7 +366,8 @@ module.exports = {
     getMarketPayDataForTerminalName: getMarketPayDataForTerminalName,
     getLatestPaymentInstrumentFromOrder: getLatestPaymentInstrumentFromOrder,
     getLatestPaymentInstrumentFromBasket: getLatestPaymentInstrumentFromBasket,
-    isMarketPayProcessor: isMarketPayProcessor, 
+    isMarketPayProcessor: isMarketPayProcessor,
+    isAutoCapture: isAutoCapture,
     getLatestTransaction: getLatestTransaction, 
     getCurrentLocal: getCurrentLocal, 
     getDefaultLocale: getDefaultLocale
