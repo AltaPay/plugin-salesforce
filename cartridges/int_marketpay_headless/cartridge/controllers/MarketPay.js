@@ -61,7 +61,7 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
 
             marketPayRedirectHelpers.onSuccessRedirect(req, res, {
                 OrderNo: orderNo,
-                UserLocale: order.custom.marketPayUserLocale
+                UserLocale: order.custom.marketPayUserLocale ? order.custom.marketPayUserLocale : marketPayDataHelper.getDefaultLocale()
             });
         } else {
             Logger.error('MarketPay - Payment failed - Order with ID: ' + orderNo + ' not found in SFCC!');
