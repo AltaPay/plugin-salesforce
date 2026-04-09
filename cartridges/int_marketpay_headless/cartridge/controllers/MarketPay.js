@@ -123,7 +123,7 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
     }
 
     const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
-    var orderId = null, orderXMLObject = null;
+    var orderNo = null, orderXMLObject = null;
 
     if (req.form.xml == null) {
         Logger.error("MarketPay: Order XML is Null");
@@ -134,13 +134,13 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
 
     try {
         orderXMLObject = new XML(req.form.xml);
-        orderId = encodeURIComponent(orderXMLObject.Body.Transactions.Transaction.ShopOrderId);
+        orderNo = req.form.shop_orderid;
 
-        if (!orderId) {
+        if (!orderNo) {
             throw new Error('Error processing request');
         }
 
-        var order = COHelpers.getOrder(orderId);
+        var order = COHelpers.getOrder(orderNo);
 
         if (order == null) {
             res.setStatusCode(400);
@@ -170,8 +170,8 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
                 res.json({ message: 'Acknowledged' });
 
             } else {
-                Logger.error('MarketPay - PaymentSuccess - Order with ID: ' + orderId + 'not found in SFCC!');
-                throw new Error('Order with ID: ' + orderId + 'not found in SFCC!');
+                Logger.error('MarketPay - PaymentNotification - Order with ID: ' + orderNo + ' not found in SFCC!');
+                throw new Error('Order with ID: ' + orderNo + ' not found in SFCC!');
             }
         }
 
