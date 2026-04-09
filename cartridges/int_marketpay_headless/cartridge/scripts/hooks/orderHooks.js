@@ -47,7 +47,7 @@ exports.beforePOST = function (basket) {
         var marketPayDataObj = CustomObjectMgr.getCustomObject('MarketPayData', basket.customer.ID);
         var cachedMarketPayPaymentMethods = JSON.parse(marketPayDataObj.custom.paymentMethods);
 
-        var currentLocale = Site.getCurrent().defaultLocale;
+        var currentLocale = request.locale;
         var currencyCode = Site.getCurrent().getDefaultCurrency();
         var marketPayTerminalsMapping = JSON.parse(Site.getCurrent().getCustomPreferenceValue('marketPayTerminals'));
         var terminalMapping = marketPayDataHelper.getTerminalMapping(marketPayTerminalsMapping, currentLocale, currencyCode, paymentInstrument.paymentMethod);
@@ -90,13 +90,14 @@ exports.afterPOST = function (order) {
             Logger.error('MarketPay: No Active Payment Session found for the user');
             return new dw.system.Status(dw.system.Status.ERROR, 'MARKETPAY_NO_SESSION', 'MarketPay: No Active Payment Session found for the user');
         }
+        var paymentInstrument = marketPayDataHelper.getLatestPaymentInstrumentFromOrder(order);
+        var isAutoCapture = marketPayDataHelper.isAutoCapture(paymentInstrument.paymentMethod);
 
         var marketPayToken = marketPayDataObj.custom.token;
         var marketPaySessionId = marketPayDataObj.custom.sessionID;
-        var data = marketPayDataHelper.getDataForUpdateSession(order);
+        var data = marketPayDataHelper.getDataForUpdateSession(order, isAutoCapture);
 
         marketPayService.updateSession(marketPayToken, marketPaySessionId, data);
-        var paymentInstrument = marketPayDataHelper.getLatestPaymentInstrumentFromOrder(order);
 
         var onInitiatePaymentURL = marketPayDataHelper.getOnInitiatePaymentURL(
             paymentInstrument.custom.marketPayPaymentMethodID,
@@ -123,6 +124,7 @@ exports.afterPOST = function (order) {
             if (freshMarketPayDataObj) {
                 CustomObjectMgr.remove(freshMarketPayDataObj);
             }
+            order.custom.marketPayUserLocale = marketPayDataHelper.getCurrentLocal();
         });
         
     } catch (e) {

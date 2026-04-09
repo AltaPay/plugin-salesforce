@@ -105,10 +105,10 @@ From the SFCC Business Manager:
 
     | **Preference** | **Description** |
     |----------------|-----------------|
-    | **Payment Success URL** | URL where MarketPay Redirects After Successful Payment. |
-    | **Payment Failed URL** | URL where MarketPay Redirects After Failed Payment. |
-    | **Payment Success App URL** | Payment Failed Mobile App DeepLink URL. |
-    | **Payment Failed App URL** | URL where MarketPay Redirects After Successful Payment. |
+    | **Payment Success URL** | URL where MarketPay redirects after a successful payment. Example: `https://example.com/{LOCALE}/checkout/confirmation`. The `{LOCALE}` variable is replaced with the store's locale (e.g. `de`, `nl`) |
+    | **Payment Failed URL** | URL where MarketPay redirects after a failed payment. Example: `https://example.com/{LOCALE}/checkout/confirmation`. The `{LOCALE}` variable is replaced with the store's locale (e.g. `de`, `nl`) |
+    | **Payment Success App URL** | URL where MarketPay redirects after a successful payment. Example: `exampleapp://{LOCALE}/checkout/confirmation`. The `{LOCALE}` variable is replaced with the store's locale (e.g. `de`, `nl`) |
+    | **Payment Failed App URL** | Payment failed mobile app deep link URL. Example: `exampleapp://{LOCALE}/checkout/confirmation`. The `{LOCALE}` variable is replaced with the store's locale (e.g. `de`, `nl`) |
 
 ### Services Configuration
 

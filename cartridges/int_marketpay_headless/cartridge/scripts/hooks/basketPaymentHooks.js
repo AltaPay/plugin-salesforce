@@ -22,7 +22,7 @@ exports.modifyGETResponse_v2 = function (basket, paymentMethodResultResponse) {
 
         var marketPayTerminalsMapping = Site.getCurrent().getCustomPreferenceValue('marketPayTerminals');
         var paymentMethods = paymentMethodResultResponse.applicablePaymentMethods;
-        var currentLocale = Site.getCurrent().defaultLocale;
+        var currentLocale = request.locale;
         var currencyCode = Site.getCurrent().getDefaultCurrency();
 
         // Parse JSON if it's a string

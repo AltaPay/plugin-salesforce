@@ -1,6 +1,6 @@
 'use strict';
 
-function onSuccessRedirect(req, res, orderNo) {
+function onSuccessRedirect(req, res, args) {
     const Site = require('dw/system/Site');
 
     var userAgent = req.httpHeaders.get('user-agent');
@@ -12,10 +12,24 @@ function onSuccessRedirect(req, res, orderNo) {
     else
         successURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentSuccessURL');
 
-    res.redirect(successURL + '/' + orderNo);
+    if(successURL.indexOf('{LOCALE}') != -1) {
+        successURL =  successURL.replace('{LOCALE}', args.UserLocale);
+    }
+
+    if(!empty(args)) {
+        var queryParts = Object.keys(args).map(function(key) {
+            return encodeURIComponent(key) + '=' + encodeURIComponent(args[key]);
+        });
+
+        if(queryParts.length > 0) {
+            successURL += (successURL.indexOf('?') !== -1 ? '&' : '?') + queryParts.join('&');
+        }
+    }
+    
+    res.redirect(successURL);
 }
 
-function onFailtureRedirect(req, res, orderNo) {
+function onFailtureRedirect(req, res, args) {
     const Site = require('dw/system/Site');
 
     var userAgent = req.httpHeaders.get('user-agent');
@@ -27,7 +41,21 @@ function onFailtureRedirect(req, res, orderNo) {
     else
         failedURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentFailedURL');
 
-    res.redirect(failedURL + '/' + orderNo);
+    if(failedURL.indexOf('{LOCALE}') != -1) {
+        failedURL =  failedURL.replace('{LOCALE}', args.UserLocale);
+    }
+
+    if(!empty(args)) {
+        var queryParts = Object.keys(args).map(function(key) {
+            return encodeURIComponent(key) + '=' + encodeURIComponent(args[key]);
+        });
+
+        if(queryParts.length > 0) {
+            failedURL += (failedURL.indexOf('?') !== -1 ? '&' : '?') + queryParts.join('&');
+        }
+    }
+
+    res.redirect(failedURL);
 }
 
 module.exports = {
