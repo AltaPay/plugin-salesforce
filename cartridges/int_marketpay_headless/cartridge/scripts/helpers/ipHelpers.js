@@ -19,6 +19,7 @@ function isKnownIPProtectionEnabled() {
 }
 
 function isRequestFromKnownIP(req) {
+    var Logger = require('dw/system/Logger').getLogger('MarketPay', 'MarketPay');
     var marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
     var clientIP = req.remoteAddress;
 
