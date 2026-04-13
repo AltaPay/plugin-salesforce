@@ -226,6 +226,10 @@ function populateConfiguration(marketPayOrderData, isAutoCapture) {
     marketPayOrderData.configuration.autoCapture = isAutoCapture;
 }
 
+function populateTransactionInfo(marketPayOrderData, orderToken) {
+    marketPayOrderData.order.transactionInfo.orderToken = orderToken;
+}
+
 function getSessionDataModel() {
     const Locale = require('dw/util/Locale');
     const URLUtils = require('dw/web/URLUtils');
@@ -285,6 +289,7 @@ function getDataForUpdateSession(order, isAutoCapture) {
     populateRoudingDiff(orderData, order.getTotalGrossPrice().getValue());
     populateCustomerAndAddresses(orderData, order.getCustomer(), order.getCustomerEmail(), order.getBillingAddress(), order.getDefaultShipment());
     populateConfiguration(orderData, isAutoCapture)
+    populateTransactionInfo(orderData, order.orderToken);
 
     return orderData;
 }
@@ -342,8 +347,22 @@ function getLatestTransaction(transactions) {
     return latestTransaction;
 }
 
+function getOrderToken(transaction) {
+
+    var orderToken = null;
+    var paymentInfos = transaction.PaymentInfos.PaymentInfo;
+    for (var pi = 0; pi < paymentInfos.length(); pi++) {
+        if (String(paymentInfos[pi].attribute('name')) === 'orderToken') {
+            orderToken = paymentInfos[pi].toString();
+            break;
+        }
+    }
+
+    return orderToken;
+}
+
 function getCurrentLocal() {
-    const Locale = require('dw/util/Locale');            
+    const Locale = require('dw/util/Locale');
     var currentLocale = Locale.getLocale(request.locale);
 
     return currentLocale.language;
@@ -368,7 +387,8 @@ module.exports = {
     getLatestPaymentInstrumentFromBasket: getLatestPaymentInstrumentFromBasket,
     isMarketPayProcessor: isMarketPayProcessor,
     isAutoCapture: isAutoCapture,
-    getLatestTransaction: getLatestTransaction, 
-    getCurrentLocal: getCurrentLocal, 
-    getDefaultLocale: getDefaultLocale
+    getLatestTransaction: getLatestTransaction,
+    getCurrentLocal: getCurrentLocal,
+    getDefaultLocale: getDefaultLocale,
+    getOrderToken: getOrderToken
 };

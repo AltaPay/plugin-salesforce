@@ -32,11 +32,10 @@ server.post('CallbackForm', server.middleware.https, function (req, res, next) {
 server.post('PaymentSuccess', server.middleware.https, function (req, res, next) {
     const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
     const marketPayRedirectHelpers = require('*/cartridge/scripts/helpers/marketPayRedirectHelpers');
-    var orderNo;
+    var orderID;
 
     try {
-        orderNo = req.form.shop_orderid;
-        var order = COHelpers.getOrder(orderNo);
+        orderID = req.form.shop_orderid;        
         var orderXMLObject = new XML(req.form.xml);
         var transactions = orderXMLObject.Body.Transactions.Transaction;
         var latestTxn = marketPayDataHelper.getLatestTransaction(transactions);
@@ -44,6 +43,9 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
         if (latestTxn == null) {
             throw new Error("No transaction found");
         }
+
+        var orderToken = marketPayDataHelper.getOrderToken(latestTxn);
+        var order = COHelpers.getOrder(orderID, orderToken);
 
         if (order != null) {
             if ((order.getStatus().value == dw.order.Order.ORDER_STATUS_NEW ||
@@ -60,19 +62,19 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
             }
 
             marketPayRedirectHelpers.onSuccessRedirect(req, res, {
-                OrderNo: orderNo,
-                UserLocale: order.custom.marketPayUserLocale ? order.custom.marketPayUserLocale : marketPayDataHelper.getDefaultLocale()
+                orderID: orderID,
+                userLocale: order.custom.marketPayUserLocale
             });
         } else {
-            Logger.error('MarketPay - Payment failed - Order with ID: ' + orderNo + ' not found in SFCC!');
-            throw new Error('Order with ID: ' + orderNo + ' not found in SFCC!');
+            Logger.error('MarketPay - Payment failed - Order with ID: ' + orderID + ' not found in SFCC!');
+            throw new Error('Order with ID: ' + orderID + ' not found in SFCC!');
         }
 
     } catch (e) {
         Logger.error('MarketPay - Payment failed - General Error due to exception. Error message: ' + e.message);
         marketPayRedirectHelpers.onFailtureRedirect(req, res, {
-                OrderNo: orderNo,
-                UserLocale: order ? order.custom.marketPayUserLocale : marketPayDataHelper.getDefaultLocale() 
+                orderID: orderID,
+                userLocale: order ? order.custom.marketPayUserLocale : marketPayDataHelper.getDefaultLocale() 
             });
     }
 
@@ -85,18 +87,25 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
 server.post('PaymentFail', server.middleware.https, function (req, res, next) {
     const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
     const marketPayRedirectHelpers = require('*/cartridge/scripts/helpers/marketPayRedirectHelpers');
-    const orderNo = req.form.shop_orderid;
+    const orderID = req.form.shop_orderid;
     var order = null;
 
     try {
-        order = COHelpers.getOrder(orderNo);
-        if (!order) {
-            Logger.error('MarketPay - PaymentFail - Order not found. OrderNo: ' + orderNo);
-        } else if (order.getStatus().value !== dw.order.Order.ORDER_STATUS_FAILED) {
-            Logger.error('MarketPay - PaymentFail - Payment failure callback received. OrderNo: ' + orderNo);
+        var orderXMLObject = new XML(req.form.xml);
+        var transactions = orderXMLObject.Body.Transactions.Transaction;
+        var latestTxn = marketPayDataHelper.getLatestTransaction(transactions);
+        
+        if (latestTxn == null) {
+            throw new Error("No transaction found");
         }
 
-        return next();
+        var orderToken = marketPayDataHelper.getOrderToken(latestTxn);
+        order = COHelpers.getOrder(orderID, orderToken);
+        if (!order) {
+            Logger.error('MarketPay - PaymentFail - Order not found. orderID: ' + orderID);
+        } else if (order.getStatus().value !== dw.order.Order.ORDER_STATUS_FAILED) {
+            Logger.error('MarketPay - PaymentFail - Payment failure callback received. orderID: ' + orderID);
+        }
 
     } catch (e) {
         // Fail the order and handle error event    
@@ -104,9 +113,9 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
     }
 
     marketPayRedirectHelpers.onFailtureRedirect(req, res, {
-        OrderNo: orderNo,
-        UserLocale: order ? order.custom.marketPayUserLocale : marketPayDataHelper.getDefaultLocale()
-    });
+                orderID: orderID,
+                userLocale: order ? order.custom.marketPayUserLocale : marketPayDataHelper.getDefaultLocale() 
+            });
 
     return next();
 });
@@ -123,7 +132,8 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
     }
 
     const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
-    var orderNo = null, orderXMLObject = null;
+    var orderXMLObject = null;
+    const orderID = req.form.shop_orderid;
 
     if (req.form.xml == null) {
         Logger.error("MarketPay: Order XML is Null");
@@ -133,46 +143,40 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
     }
 
     try {
-        orderXMLObject = new XML(req.form.xml);
-        orderNo = req.form.shop_orderid;
 
-        if (!orderNo) {
+        if (!orderID) {
             throw new Error('Error processing request');
         }
 
-        var order = COHelpers.getOrder(orderNo);
+        orderXMLObject = new XML(req.form.xml);
 
-        if (order == null) {
+        var transactions = orderXMLObject.Body.Transactions.Transaction;
+        var latestTxn = marketPayDataHelper.getLatestTransaction(transactions);
+        
+        if (latestTxn == null) {
+            throw new Error("No transaction found");
+        }
+
+        var orderToken = marketPayDataHelper.getOrderToken(latestTxn);
+        var order = COHelpers.getOrder(orderID, orderToken);        
+
+        if (order != null) {
+            if ((order.getStatus().value == dw.order.Order.ORDER_STATUS_NEW ||
+                order.getStatus().value == dw.order.Order.ORDER_STATUS_OPEN) &&
+                order.custom.marketPayTransactionId != latestTxn.TransactionId) {
+                // Duplicate transaction — order already processed, release/refund the new payment
+                COHelpers.handleDuplicatePayment(latestTxn);
+            } else {
+                // Payment success request is valid - Handle payment
+                var status = COHelpers.handlePayments(order, orderXMLObject);
+                if (status.getStatus() == Status.ERROR)
+                    throw new Error("Unable to handle payment");
+            }
+            res.setStatusCode(200);
+            res.json({ message: 'Acknowledged' });
+        } else {
             res.setStatusCode(400);
             res.json({ message: 'Order not found in the CMS' });
-        } else {
-            var transactions = orderXMLObject.Body.Transactions.Transaction;
-            var latestTxn = marketPayDataHelper.getLatestTransaction(transactions);
-
-            if (latestTxn == null) {
-                throw new Error("No transaction found");
-            }
-
-            if (order != null) {
-                if ((order.getStatus().value == dw.order.Order.ORDER_STATUS_NEW ||
-                    order.getStatus().value == dw.order.Order.ORDER_STATUS_OPEN) &&
-                    order.custom.marketPayTransactionId != latestTxn.TransactionId) {
-                    // Duplicate transaction — order already processed, release/refund the new payment
-                    COHelpers.handleDuplicatePayment(latestTxn);
-                } else {
-                    // Payment success request is valid - Handle payment
-                    var status = COHelpers.handlePayments(order, orderXMLObject);
-                    if (status.getStatus() == Status.ERROR)
-                        throw new Error("Unable to handle payment");
-
-                }
-                res.setStatusCode(200);
-                res.json({ message: 'Acknowledged' });
-
-            } else {
-                Logger.error('MarketPay - PaymentNotification - Order with ID: ' + orderNo + ' not found in SFCC!');
-                throw new Error('Order with ID: ' + orderNo + ' not found in SFCC!');
-            }
         }
 
     } catch (e) {

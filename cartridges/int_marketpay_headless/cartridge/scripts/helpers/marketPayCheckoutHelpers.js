@@ -6,15 +6,14 @@ var Transaction = require('dw/system/Transaction');
 var PaymentTransaction = require('dw/order/PaymentTransaction');
 var Logger = require('dw/system/Logger').getLogger('MarketPay', 'MarketPay');
 
-
 /**
  * Get current order
  * @param {string} orderNo - Order no. for requested Order
  * @returns {dw.order.Order} - Order 
  */
-function getOrder(orderNo) {
+function getOrder(orderNo, orderToken) {
     var OrderMgr = require('dw/order/OrderMgr');
-    return OrderMgr.getOrder(orderNo);
+    return OrderMgr.getOrder(orderNo, orderToken);
 }
 
 function placeOrder(order, marketPayOrderXML) {
@@ -42,6 +41,7 @@ function placeOrder(order, marketPayOrderXML) {
 
         paymentInstrument.paymentTransaction.transactionID = txn.TransactionId.toString();
         paymentInstrument.paymentTransaction.type = order.custom.marketPayCapturedAmount == order.totalGrossPrice.value ? PaymentTransaction.TYPE_CAPTURE : PaymentTransaction.TYPE_AUTH;
+        paymentInstrument.paymentTransaction.setAmount(new dw.value.Money(order.custom.marketPayCapturedAmount, order.getCurrencyCode()));
 
         Transaction.commit();
     } catch (e) {
@@ -73,9 +73,7 @@ function handlePayments(order, marketPayOrderXML) {
                 return new Status(Status.ERROR);
             }
         }
-
         return new Status(Status.OK);
-
     } catch (e) {
 
         Logger.error("MarketPay - handlePayment - General error due to exception. Error message: " + e.message);
@@ -84,7 +82,6 @@ function handlePayments(order, marketPayOrderXML) {
 }
 
 function handleDuplicatePayment(latestTxn) {
-
     var marketPay = require('*/cartridge/scripts/services/marketPay');
 
     if (latestTxn != null) {
