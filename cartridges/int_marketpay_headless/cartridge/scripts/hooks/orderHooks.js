@@ -88,7 +88,7 @@ exports.afterPOST = function (order) {
 
         if (!marketPayDataObj || !marketPayDataObj.custom.paymentMethods || !marketPayDataObj.custom.token || !marketPayDataObj.custom.sessionID) {
             Logger.error('MarketPay: No Active Payment Session found for the user');
-            return new dw.system.Status(dw.system.Status.ERROR, 'MARKETPAY_NO_SESSION', 'MarketPay: No Active Payment Session found for the user');
+            throw new Error('MarketPay: No Active Payment Session found for the user');
         }
         var paymentInstrument = marketPayDataHelper.getLatestPaymentInstrumentFromOrder(order);
         var isAutoCapture = marketPayDataHelper.isAutoCapture(paymentInstrument.paymentMethod);
@@ -107,11 +107,6 @@ exports.afterPOST = function (order) {
             marketPaySessionId,
             paymentInstrument.custom.marketPayPaymentMethodID,
             onInitiatePaymentURL);
-
-        if (!mpPayment || !mpPayment.url) {
-            Logger.error('MarketPay: Failed to create payment for order ' + order.orderNo);
-            return new dw.system.Status(dw.system.Status.ERROR, 'MARKETPAY_CREATE_PAYMENT_FAILED', 'MarketPay: Failed to create payment');
-        }
 
         // clean up and set payment URL in a single transaction to avoid partial state
         Transaction.wrap(function () {
