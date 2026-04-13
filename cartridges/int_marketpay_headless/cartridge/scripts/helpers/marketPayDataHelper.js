@@ -64,10 +64,9 @@ function getMarketPayDataForTerminalName(marketPayPaymentMethods, terminalName) 
         for (var k = 0; k < marketPayPaymentMethods.methods.length; k++) {
             var paymentMethod = marketPayPaymentMethods.methods[k];
             if (paymentMethod.metadata && paymentMethod.metadata.terminalName === terminalName) {
-                // Include the matched payment method
-                delete paymentMethod.onInitiatePayment;
-
-                return paymentMethod;
+                return {
+                    id: paymentMethod.id
+                };
             }
         }
     }
