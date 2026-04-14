@@ -55,10 +55,16 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
                 // Duplicate transaction — order already processed, release/refund the new payment
                 COHelpers.handleDuplicatePayment(latestTxn);
             } else {
-                // Payment success request is valid - Handle payment
-                var status = COHelpers.handlePayments(order, orderXMLObject);
-                if (status.getStatus() == Status.ERROR) {
-                    throw new Error("Unable to handle payment");
+                var status = req.form.status;
+                var result = encodeURIComponent(orderXMLObject.Body.Result);
+                var reservedAmount = parseFloat(encodeURIComponent(orderXMLObject.Transactions.Transaction.ReservedAmount));
+                // check order status and the transaction result
+                if(status.equals('succeeded') || result.toLowerCase().equals('success') || reservedAmount > 0) {
+                    // Payment success request is valid - Handle payment
+                    var orderStatus = COHelpers.handlePayments(order, orderXMLObject);
+                    if (orderStatus.getStatus() == Status.ERROR) {
+                        throw new Error("Unable to handle payment");
+                    }
                 }
             }
 
