@@ -8,6 +8,8 @@ All notable changes to this project will be documented in this file.
 - Improved error handling for afterPOST processes
 - Filter out UserLocale query param when appending URL
 - Update payment transaction amount to use transaction captured amount.
+### Fixed
+- On reject payment, PaymentNotification is called that is placing the order.
 
 ## [2.0.5]
 
