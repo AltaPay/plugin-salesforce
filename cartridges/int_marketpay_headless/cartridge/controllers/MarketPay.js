@@ -36,7 +36,7 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
     var orderToken;
 
     try {
-        orderID = req.form.shop_orderid;        
+        orderID = req.form.shop_orderid;
         orderToken = req.form['transaction_info[orderToken]'];
         var orderXMLObject = new XML(req.form.xml);
         var transactions = orderXMLObject.Body.Transactions.Transaction;
