@@ -346,20 +346,6 @@ function getLatestTransaction(transactions) {
     return latestTransaction;
 }
 
-function getOrderToken(transaction) {
-
-    var orderToken = null;
-    var paymentInfos = transaction.PaymentInfos.PaymentInfo;
-    for (var pi = 0; pi < paymentInfos.length(); pi++) {
-        if (String(paymentInfos[pi].attribute('name')) === 'orderToken') {
-            orderToken = paymentInfos[pi].toString();
-            break;
-        }
-    }
-
-    return orderToken;
-}
-
 function getCurrentLocal() {
     const Locale = require('dw/util/Locale');
     var currentLocale = Locale.getLocale(request.locale);
@@ -388,6 +374,5 @@ module.exports = {
     isAutoCapture: isAutoCapture,
     getLatestTransaction: getLatestTransaction,
     getCurrentLocal: getCurrentLocal,
-    getDefaultLocale: getDefaultLocale,
-    getOrderToken: getOrderToken
+    getDefaultLocale: getDefaultLocale
 };
