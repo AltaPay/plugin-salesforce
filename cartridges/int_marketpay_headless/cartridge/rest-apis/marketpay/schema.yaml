@@ -142,9 +142,7 @@ paths:
                   properties:
                     paymentType:
                       type: string
-                      minLength: 1
-                    bodyFormat:
-                      type: string
+                      minLength: 1                    
                     autoCapture:
                       type: boolean
                     paymentDisplayType:

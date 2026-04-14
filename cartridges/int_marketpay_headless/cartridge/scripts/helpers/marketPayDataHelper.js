@@ -257,8 +257,7 @@ function getSessionDataModel() {
             notification: URLUtils.https(ROUTES.NOTIFICATION).toString()
         },
         configuration: {
-            paymentType: "PAYMENT",
-            bodyFormat: "JSON",
+            paymentType: "PAYMENT",            
             autoCapture: false,
             paymentDisplayType: "REDIRECT",
             country: null,
