@@ -1,7 +1,6 @@
 const RESTResponseMgr = require('dw/system/RESTResponseMgr');
 const marketPay = require('*/cartridge/scripts/services/marketPay')
 const Logger = require('dw/system/Logger').getLogger('MarketPay','MarketPay');
-const SCAPIService = require('*/cartridge/scripts/services/scapiService');
 
 exports.createCheckoutSession = function () {
     var customerId = request.httpParameterMap.c_customerId;
@@ -35,14 +34,10 @@ exports.createCheckoutSession = function () {
             .createEmptySuccess(200)
             .render();
     } catch (error) {
-
         Logger.error('Error creating session ' + error.message);
-
         RESTResponseMgr
             .createError(404, 'Session-error', 'Not created', 'please reach out the SFCC developers.')
             .render();
-
-        
     }
 };
 
