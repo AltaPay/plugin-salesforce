@@ -9,6 +9,7 @@ var Logger = require('dw/system/Logger').getLogger('MarketPay', 'MarketPay');
 /**
  * Get current order
  * @param {string} orderNo - Order no. for requested Order
+ * @param {string} orderToken 
  * @returns {dw.order.Order} - Order 
  */
 function getOrder(orderNo, orderToken) {

@@ -86,10 +86,10 @@ function getGuestAccessToken() {
 
 /**
  * Create checkout session via custom SCAPI
- * @param {Object} orderData - Order data
- * @param {Object} configuration - Payment configuration
- * @param {Object} customParams - Custom query parameters
- * @returns {Object} Service result
+ * 
+ * @param {string} customerID 
+ * @param {string} requestBody 
+ * @returns {boolean}
  */
 function createMarketPaySession(customerID, requestBody) {
     var service = LocalServiceRegistry.createService('int.marketpay.slas', {
