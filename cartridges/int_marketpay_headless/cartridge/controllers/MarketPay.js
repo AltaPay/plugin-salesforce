@@ -10,8 +10,6 @@ var Status = require('dw/system/Status');
 var COHelpers = require('*/cartridge/scripts/helpers/marketPayCheckoutHelpers');
 var ipHelpers = require('*/cartridge/scripts/helpers/ipHelpers');
 
-
-
 server.post('CallbackForm', server.middleware.https, function (req, res, next) {
     var languageCode = req.form.language;
     var formTemplateClass = req.form.form_template;
