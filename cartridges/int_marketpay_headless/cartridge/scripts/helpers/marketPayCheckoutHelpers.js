@@ -12,7 +12,6 @@ var Logger = require('dw/system/Logger').getLogger('MarketPay', 'MarketPay');
  * @returns {dw.order.Order} - Order 
  */
 function getOrder(orderNo, orderToken) {
-    var OrderMgr = require('dw/order/OrderMgr');
     return OrderMgr.getOrder(orderNo, orderToken);
 }
 
@@ -22,7 +21,7 @@ function placeOrder(order, marketPayOrderXML) {
         Transaction.begin();
         var placeOrderStatus = OrderMgr.placeOrder(order);
 
-        if (placeOrderStatus === Status.ERROR) {
+        if (placeOrderStatus.getStatus() === Status.ERROR) {
             Transaction.rollback();
             Logger.error('PlaceOrder failed for orderNo: {0}', order.orderNo);
             return new Status(Status.ERROR);

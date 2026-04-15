@@ -137,7 +137,6 @@ function createMarketPaySession(customerID, requestBody) {
     try {
         var result = service.call({
             siteId: Site.current.ID,
-            locale: request.locale || 'default',
             customerID: customerID,
             requestBody: requestBody
         });

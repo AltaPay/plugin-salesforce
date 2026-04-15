@@ -77,9 +77,9 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
     } catch (e) {
         Logger.error('MarketPay - Payment failed - General Error due to exception. Error message: ' + e.message);
         marketPayRedirectHelpers.onFailtureRedirect(req, res, {
-                orderID: orderID,
-                userLocale: order ? order.custom.marketPayUserLocale : marketPayDataHelper.getDefaultLocale() 
-            });
+            orderID: orderID,
+            userLocale: order ? order.custom.marketPayUserLocale : marketPayDataHelper.getDefaultLocale()
+        });
     }
 
     return next();
@@ -96,14 +96,6 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
     var order = null;
 
     try {
-        var orderXMLObject = new XML(req.form.xml);
-        var transactions = orderXMLObject.Body.Transactions.Transaction;
-        var latestTxn = marketPayDataHelper.getLatestTransaction(transactions);
-        
-        if (latestTxn == null) {
-            throw new Error("No transaction found");
-        }
-
         order = COHelpers.getOrder(orderID, orderToken);
         if (!order) {
             Logger.error('MarketPay - PaymentFail - Order not found. orderID: ' + orderID);
@@ -117,9 +109,9 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
     }
 
     marketPayRedirectHelpers.onFailtureRedirect(req, res, {
-                orderID: orderID,
-                userLocale: order ? order.custom.marketPayUserLocale : marketPayDataHelper.getDefaultLocale() 
-            });
+        orderID: orderID,
+        userLocale: order ? order.custom.marketPayUserLocale : marketPayDataHelper.getDefaultLocale()
+    });
 
     return next();
 });
@@ -136,7 +128,6 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
     }
 
     const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
-    var orderXMLObject = null;
     const orderID = req.form.shop_orderid;
     const orderToken = req.form['transaction_info[orderToken]'];
 
@@ -153,11 +144,10 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
             throw new Error('Error processing request');
         }
 
-        orderXMLObject = new XML(req.form.xml);
-
+        var orderXMLObject = new XML(req.form.xml);
         var transactions = orderXMLObject.Body.Transactions.Transaction;
         var latestTxn = marketPayDataHelper.getLatestTransaction(transactions);
-        
+
         if (latestTxn == null) {
             throw new Error("No transaction found");
         }
@@ -176,9 +166,9 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
                 var result = orderXMLObject.Body.Result.toString();
                 var reservedAmount = parseFloat(orderXMLObject.Body.Transactions.Transaction.ReservedAmount.toString());
                 // check order status and the transaction result
-                if(status.equals('succeeded') || result.toLowerCase() === 'success' || reservedAmount > 0) {                    
-                        var orderStatus = COHelpers.handlePayments(order, orderXMLObject);
-                        if (orderStatus.getStatus() == Status.ERROR)
+                if (status.equals('succeeded') || result.toLowerCase().equals('success') || reservedAmount > 0) {
+                    var orderStatus = COHelpers.handlePayments(order, orderXMLObject);
+                    if (orderStatus.getStatus() == Status.ERROR)
                         throw new Error("Unable to handle payment");
                 }
             }

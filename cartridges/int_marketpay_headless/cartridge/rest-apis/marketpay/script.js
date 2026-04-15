@@ -3,12 +3,9 @@ const marketPay = require('*/cartridge/scripts/services/marketPay')
 const Logger = require('dw/system/Logger').getLogger('MarketPay','MarketPay');
 
 exports.createCheckoutSession = function () {
-    var customerId = request.httpParameterMap.c_customerId;
-    var customerIdValue = customerId.stringValue;
-
     try {
-        var requestBody = request.httpParameterMap.requestBodyAsString;
-        var requestData = JSON.parse(requestBody);
+        var customerId = request.httpParameterMap.c_customerId.stringValue;
+        var requestData = JSON.parse(request.httpParameterMap.requestBodyAsString);
         var result = marketPay.getTokenAndSessionId(requestData);
         var paymentMethods = marketPay.getPaymentMethods(result.token, result.sessionId);
 
@@ -20,12 +17,12 @@ exports.createCheckoutSession = function () {
         var CustomObjectMgr = require('dw/object/CustomObjectMgr');
 
         Transaction.wrap(function () {
-            var marketPayDataObj = CustomObjectMgr.getCustomObject('MarketPayData', customerIdValue);
+            var marketPayDataObj = CustomObjectMgr.getCustomObject('MarketPayData', customerId);
             if (!marketPayDataObj) {
-                marketPayDataObj = CustomObjectMgr.createCustomObject('MarketPayData', customerIdValue);
+                marketPayDataObj = CustomObjectMgr.createCustomObject('MarketPayData', customerId);
             }
             marketPayDataObj.custom.sessionID = result.sessionId;
-            marketPayDataObj.custom.customerID = customerIdValue;
+            marketPayDataObj.custom.customerID = customerId;
             marketPayDataObj.custom.token = result.token;
             marketPayDataObj.custom.paymentMethods = JSON.stringify(paymentMethods);
         });        

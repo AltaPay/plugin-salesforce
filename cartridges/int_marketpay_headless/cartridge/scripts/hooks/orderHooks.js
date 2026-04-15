@@ -30,7 +30,7 @@ exports.beforeGET = function (orderNo) {
 exports.beforePOST = function (basket) {
     try {
 
-        if(basket.getPaymentInstruments().length == 0)
+        if (basket.getPaymentInstruments().length == 0)
             throw new Error("No Payment Instrument found on Basket");
 
         const Site = require('dw/system/Site');
@@ -38,7 +38,7 @@ exports.beforePOST = function (basket) {
         const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
 
         var paymentInstrument = marketPayDataHelper.getLatestPaymentInstrumentFromBasket(basket);
-        if (!paymentInstrument || !marketPayDataHelper.isMarketPayProcessor(paymentInstrument.paymentMethod)){ 
+        if (!paymentInstrument || !marketPayDataHelper.isMarketPayProcessor(paymentInstrument.paymentMethod)) {
 
             Logger.info("Order:beforePOST: Not Marketpay PM ");
             return;
@@ -82,7 +82,7 @@ exports.afterPOST = function (order) {
             return;
         }
 
-        const marketPayService = require('*/cartridge/scripts/services/marketPay');        
+        const marketPayService = require('*/cartridge/scripts/services/marketPay');
         var CustomObjectMgr = require('dw/object/CustomObjectMgr');
         var marketPayDataObj = CustomObjectMgr.getCustomObject('MarketPayData', order.customer.ID);
 
@@ -121,7 +121,6 @@ exports.afterPOST = function (order) {
             }
             order.custom.marketPayUserLocale = marketPayDataHelper.getCurrentLocal();
         });
-        
     } catch (e) {
         Logger.error("MarketPay: Error updating session: " + e.message);
         Transaction.wrap(function () {
