@@ -99,10 +99,32 @@ function handleDuplicatePayment(latestTxn) {
     }
 }
 
+function processOrder(status, order, latestTxn, orderXMLObject) {
+    if ((order.getStatus().value == dw.order.Order.ORDER_STATUS_NEW ||
+        order.getStatus().value == dw.order.Order.ORDER_STATUS_OPEN) &&
+        order.custom.marketPayTransactionId != latestTxn.TransactionId) {
+        // Duplicate transaction — order already processed, release/refund the new payment
+        handleDuplicatePayment(latestTxn);
+    } else {
+        //var status = req.form.status ? ;
+        var result = orderXMLObject.Body.Result.toString();
+        var reservedAmount = parseFloat(orderXMLObject.Body.Transactions.Transaction.ReservedAmount.toString());
+        // check order status and the transaction result
+        if (status.toLowerCase().equals('succeeded') || result.toLowerCase().equals('success') || reservedAmount > 0) {
+            // Payment success request is valid - Handle payment
+            var orderStatus = handlePayments(order, orderXMLObject);
+            if (orderStatus.getStatus() == Status.ERROR) {
+                throw new Error("Unable to handle payment");
+            }
+        }
+    }
+}
+
 module.exports = {
     handleDuplicatePayment: handleDuplicatePayment,
     handlePayments: handlePayments, 
     getOrder: getOrder, 
-    placeOrder: placeOrder
+    placeOrder: placeOrder, 
+    processOrder: processOrder
 };
 

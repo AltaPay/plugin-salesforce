@@ -359,6 +359,19 @@ function getDefaultLocale() {
     return Locale.getLocale(defaultLocale).language;
 }
 
+function getOrderToken(transaction) {
+    var orderToken = null;
+    var paymentInfos = transaction.PaymentInfos.PaymentInfo;
+    for (var pi = 0; pi < paymentInfos.length(); pi++) {
+        if (String(paymentInfos[pi].attribute('name')) === 'orderToken') {
+            orderToken = paymentInfos[pi].toString();
+            break;
+        }
+    }
+ 
+    return orderToken;
+}
+
 module.exports = {
     getFormattedDataForMarketPaySession: getFormattedDataForMarketPaySession,
     getDataForUpdateSession: getDataForUpdateSession,
@@ -373,5 +386,6 @@ module.exports = {
     isAutoCapture: isAutoCapture,
     getLatestTransaction: getLatestTransaction,
     getCurrentLocal: getCurrentLocal,
-    getDefaultLocale: getDefaultLocale
+    getDefaultLocale: getDefaultLocale, 
+    getOrderToken: getOrderToken
 };

@@ -34,10 +34,10 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
 
     try {
         orderID = req.form.shop_orderid;
-        orderToken = req.form['transaction_info[orderToken]'];
         var orderXMLObject = new XML(req.form.xml);
         var transactions = orderXMLObject.Body.Transactions.Transaction;
         var latestTxn = marketPayDataHelper.getLatestTransaction(transactions);
+        orderToken = marketPayDataHelper.getOrderToken(latestTxn);
 
         if (latestTxn == null) {
             throw new Error("No transaction found");
@@ -46,24 +46,7 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
         var order = COHelpers.getOrder(orderID, orderToken);
 
         if (order != null) {
-            if ((order.getStatus().value == dw.order.Order.ORDER_STATUS_NEW ||
-                order.getStatus().value == dw.order.Order.ORDER_STATUS_OPEN) &&
-                order.custom.marketPayTransactionId != latestTxn.TransactionId) {
-                // Duplicate transaction — order already processed, release/refund the new payment
-                COHelpers.handleDuplicatePayment(latestTxn);
-            } else {
-                var status = req.form.status;
-                var result = orderXMLObject.Body.Result.toString();
-                var reservedAmount = parseFloat(orderXMLObject.Body.Transactions.Transaction.ReservedAmount.toString());
-                // check order status and the transaction result
-                if (status.equals('succeeded') || result.toLowerCase().equals('success') || reservedAmount > 0) {
-                    // Payment success request is valid - Handle payment
-                    var orderStatus = COHelpers.handlePayments(order, orderXMLObject);
-                    if (orderStatus.getStatus() == Status.ERROR) {
-                        throw new Error("Unable to handle payment");
-                    }
-                }
-            }
+            COHelpers.processOrder(req.form.status ? req.form.status : '', order, latestTxn, orderXMLObject);
 
             marketPayRedirectHelpers.onSuccessRedirect(req, res, {
                 orderID: orderID,
@@ -92,10 +75,18 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
     const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
     const marketPayRedirectHelpers = require('*/cartridge/scripts/helpers/marketPayRedirectHelpers');
     const orderID = req.form.shop_orderid;
-    const orderToken = req.form['transaction_info[orderToken]'];
     var order = null;
 
     try {
+        var orderXMLObject = new XML(req.form.xml);
+        var transactions = orderXMLObject.Body.Transactions.Transaction;
+        var latestTxn = marketPayDataHelper.getLatestTransaction(transactions);
+
+        if (latestTxn == null) {
+            throw new Error("No transaction found");
+        }
+
+        const orderToken = marketPayDataHelper.getOrderToken(latestTxn);
         order = COHelpers.getOrder(orderID, orderToken);
         if (!order) {
             Logger.error('MarketPay - PaymentFail - Order not found. orderID: ' + orderID);
@@ -129,7 +120,6 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
 
     const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
     const orderID = req.form.shop_orderid;
-    const orderToken = req.form['transaction_info[orderToken]'];
 
     if (req.form.xml == null) {
         Logger.error("MarketPay: Order XML is Null");
@@ -139,7 +129,6 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
     }
 
     try {
-
         if (!orderID) {
             throw new Error('Error processing request');
         }
@@ -147,6 +136,7 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
         var orderXMLObject = new XML(req.form.xml);
         var transactions = orderXMLObject.Body.Transactions.Transaction;
         var latestTxn = marketPayDataHelper.getLatestTransaction(transactions);
+        const orderToken = marketPayDataHelper.getOrderToken(latestTxn);
 
         if (latestTxn == null) {
             throw new Error("No transaction found");
@@ -155,23 +145,7 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
         var order = COHelpers.getOrder(orderID, orderToken);
 
         if (order != null) {
-            if ((order.getStatus().value == dw.order.Order.ORDER_STATUS_NEW ||
-                order.getStatus().value == dw.order.Order.ORDER_STATUS_OPEN) &&
-                order.custom.marketPayTransactionId != latestTxn.TransactionId) {
-                // Duplicate transaction — order already processed, release/refund the new payment
-                COHelpers.handleDuplicatePayment(latestTxn);
-            } else {
-                // Payment success request is valid - Handle payment
-                var status = req.form.status;
-                var result = orderXMLObject.Body.Result.toString();
-                var reservedAmount = parseFloat(orderXMLObject.Body.Transactions.Transaction.ReservedAmount.toString());
-                // check order status and the transaction result
-                if (status.equals('succeeded') || result.toLowerCase().equals('success') || reservedAmount > 0) {
-                    var orderStatus = COHelpers.handlePayments(order, orderXMLObject);
-                    if (orderStatus.getStatus() == Status.ERROR)
-                        throw new Error("Unable to handle payment");
-                }
-            }
+            COHelpers.processOrder(req.form.status ? req.form.status : '', order, latestTxn, orderXMLObject);
             res.setStatusCode(200);
             res.json({ message: 'Acknowledged' });
         } else {
