@@ -16,7 +16,7 @@ server.post('CallbackForm', server.middleware.https, function (req, res, next) {
 
     res.render('marketPay/callbackform', {
         languageCode: languageCode,
-        title: "Payment Form Title",
+        title: "Payment",
         formTemplateClass: formTemplateClass
     });
 
