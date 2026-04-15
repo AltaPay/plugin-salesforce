@@ -55,10 +55,10 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
                 COHelpers.handleDuplicatePayment(latestTxn);
             } else {
                 var status = req.form.status;
-                var result = encodeURIComponent(orderXMLObject.Body.Result);
-                var reservedAmount = parseFloat(encodeURIComponent(orderXMLObject.Transactions.Transaction.ReservedAmount));
+                var result = orderXMLObject.Body.Result.toString();
+                var reservedAmount = parseFloat(orderXMLObject.Body.Transactions.Transaction.ReservedAmount.toString());
                 // check order status and the transaction result
-                if(status.equals('succeeded') || result.toLowerCase().equals('success') || reservedAmount > 0) {
+                if (status.equals('succeeded') || result.toLowerCase().equals('success') || reservedAmount > 0) {
                     // Payment success request is valid - Handle payment
                     var orderStatus = COHelpers.handlePayments(order, orderXMLObject);
                     if (orderStatus.getStatus() == Status.ERROR) {
@@ -164,7 +164,7 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
             throw new Error("No transaction found");
         }
 
-        var order = COHelpers.getOrder(orderID, orderToken);        
+        var order = COHelpers.getOrder(orderID, orderToken);
 
         if (order != null) {
             if ((order.getStatus().value == dw.order.Order.ORDER_STATUS_NEW ||
@@ -175,10 +175,10 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
             } else {
                 // Payment success request is valid - Handle payment
                 var status = req.form.status;
-                var result = encodeURIComponent(orderXMLObject.Body.Result);
-                var reservedAmount = parseFloat(encodeURIComponent(orderXMLObject.Transactions.Transaction.ReservedAmount));
-                // check order status and the transaction result 
-                if(status.equals('succeeded') || result.toLowerCase().equals('success') || reservedAmount > 0) {                    
+                var result = orderXMLObject.Body.Result.toString();
+                var reservedAmount = parseFloat(orderXMLObject.Body.Transactions.Transaction.ReservedAmount.toString());
+                // check order status and the transaction result
+                if(status.equals('succeeded') || result.toLowerCase() === 'success' || reservedAmount > 0) {                    
                         var orderStatus = COHelpers.handlePayments(order, orderXMLObject);
                         if (orderStatus.getStatus() == Status.ERROR)
                         throw new Error("Unable to handle payment");
