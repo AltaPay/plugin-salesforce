@@ -13,7 +13,6 @@ var ipHelpers = require('*/cartridge/scripts/helpers/ipHelpers');
 
 
 server.post('CallbackForm', server.middleware.https, function (req, res, next) {
-    var amount = req.form.amount;
     var languageCode = req.form.language;
     var formTemplateClass = req.form.form_template;
 
