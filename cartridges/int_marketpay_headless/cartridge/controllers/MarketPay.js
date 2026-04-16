@@ -111,6 +111,14 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
  * This controller is for asynchronous payments, when the aquier returns an answer for payment request.
  */
 server.post('PaymentNotification', server.middleware.https, function (req, res, next) {
+    // Ignore new status
+    if (req.form.status === 'new') {
+        res.setStatusCode(200);
+        res.json({ message: 'Acknowledged' });
+
+        return next();
+    }
+
     if (ipHelpers.isKnownIPProtectionEnabled() && !ipHelpers.isRequestFromKnownIP(req)) {
         res.setStatusCode(400);
         res.json({ message: 'Invalid callback request' });
