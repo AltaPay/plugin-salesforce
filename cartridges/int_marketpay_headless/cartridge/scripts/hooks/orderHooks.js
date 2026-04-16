@@ -30,7 +30,7 @@ exports.beforeGET = function (orderNo) {
 exports.beforePOST = function (basket) {
     try {
 
-        if(basket.getPaymentInstruments().length == 0)
+        if (basket.getPaymentInstruments().length == 0)
             throw new Error("No Payment Instrument found on Basket");
 
         const Site = require('dw/system/Site');
@@ -38,7 +38,7 @@ exports.beforePOST = function (basket) {
         const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
 
         var paymentInstrument = marketPayDataHelper.getLatestPaymentInstrumentFromBasket(basket);
-        if (!paymentInstrument || !marketPayDataHelper.isMarketPayProcessor(paymentInstrument.paymentMethod)){ 
+        if (!paymentInstrument || !marketPayDataHelper.isMarketPayProcessor(paymentInstrument.paymentMethod)) {
 
             Logger.info("Order:beforePOST: Not Marketpay PM ");
             return;
@@ -82,13 +82,13 @@ exports.afterPOST = function (order) {
             return;
         }
 
-        const marketPayService = require('*/cartridge/scripts/services/marketPay');        
+        const marketPayService = require('*/cartridge/scripts/services/marketPay');
         var CustomObjectMgr = require('dw/object/CustomObjectMgr');
         var marketPayDataObj = CustomObjectMgr.getCustomObject('MarketPayData', order.customer.ID);
 
         if (!marketPayDataObj || !marketPayDataObj.custom.paymentMethods || !marketPayDataObj.custom.token || !marketPayDataObj.custom.sessionID) {
             Logger.error('MarketPay: No Active Payment Session found for the user');
-            return new dw.system.Status(dw.system.Status.ERROR, 'MARKETPAY_NO_SESSION', 'MarketPay: No Active Payment Session found for the user');
+            throw new Error('MarketPay: No Active Payment Session found for the user');
         }
         var paymentInstrument = marketPayDataHelper.getLatestPaymentInstrumentFromOrder(order);
         var isAutoCapture = marketPayDataHelper.isAutoCapture(paymentInstrument.paymentMethod);
@@ -108,11 +108,6 @@ exports.afterPOST = function (order) {
             paymentInstrument.custom.marketPayPaymentMethodID,
             onInitiatePaymentURL);
 
-        if (!mpPayment || !mpPayment.url) {
-            Logger.error('MarketPay: Failed to create payment for order ' + order.orderNo);
-            return new dw.system.Status(dw.system.Status.ERROR, 'MARKETPAY_CREATE_PAYMENT_FAILED', 'MarketPay: Failed to create payment');
-        }
-
         // clean up and set payment URL in a single transaction to avoid partial state
         Transaction.wrap(function () {
             paymentInstrument.custom.marketPayPaymentURL = mpPayment.url;
@@ -126,7 +121,6 @@ exports.afterPOST = function (order) {
             }
             order.custom.marketPayUserLocale = marketPayDataHelper.getCurrentLocal();
         });
-        
     } catch (e) {
         Logger.error("MarketPay: Error updating session: " + e.message);
         Transaction.wrap(function () {
@@ -135,7 +129,3 @@ exports.afterPOST = function (order) {
         });
     }
 };
-
-
-
-

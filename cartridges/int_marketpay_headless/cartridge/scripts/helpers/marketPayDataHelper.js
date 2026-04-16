@@ -64,10 +64,9 @@ function getMarketPayDataForTerminalName(marketPayPaymentMethods, terminalName) 
         for (var k = 0; k < marketPayPaymentMethods.methods.length; k++) {
             var paymentMethod = marketPayPaymentMethods.methods[k];
             if (paymentMethod.metadata && paymentMethod.metadata.terminalName === terminalName) {
-                // Include the matched payment method
-                delete paymentMethod.onInitiatePayment;
-
-                return paymentMethod;
+                return {
+                    id: paymentMethod.id
+                };
             }
         }
     }
@@ -226,6 +225,10 @@ function populateConfiguration(marketPayOrderData, isAutoCapture) {
     marketPayOrderData.configuration.autoCapture = isAutoCapture;
 }
 
+function populateTransactionInfo(marketPayOrderData, orderToken) {
+    marketPayOrderData.order.transactionInfo.orderToken = orderToken;
+}
+
 function getSessionDataModel() {
     const Locale = require('dw/util/Locale');
     const URLUtils = require('dw/web/URLUtils');
@@ -243,7 +246,7 @@ function getSessionDataModel() {
             transactionInfo: {
                 ecomPlatform: "Salesforce",
                 ecomPluginName: "int_marketpay_headless",
-                ecomPluginVersion: "2.0.5"
+                ecomPluginVersion: "2.0.6"
             }
         },
         callbacks: {
@@ -254,8 +257,7 @@ function getSessionDataModel() {
             notification: URLUtils.https(ROUTES.NOTIFICATION).toString()
         },
         configuration: {
-            paymentType: "PAYMENT",
-            bodyFormat: "JSON",
+            paymentType: "PAYMENT",            
             autoCapture: false,
             paymentDisplayType: "REDIRECT",
             country: null,
@@ -285,6 +287,7 @@ function getDataForUpdateSession(order, isAutoCapture) {
     populateRoudingDiff(orderData, order.getTotalGrossPrice().getValue());
     populateCustomerAndAddresses(orderData, order.getCustomer(), order.getCustomerEmail(), order.getBillingAddress(), order.getDefaultShipment());
     populateConfiguration(orderData, isAutoCapture)
+    populateTransactionInfo(orderData, order.orderToken);
 
     return orderData;
 }
@@ -343,7 +346,7 @@ function getLatestTransaction(transactions) {
 }
 
 function getCurrentLocal() {
-    const Locale = require('dw/util/Locale');            
+    const Locale = require('dw/util/Locale');
     var currentLocale = Locale.getLocale(request.locale);
 
     return currentLocale.language;
@@ -354,6 +357,19 @@ function getDefaultLocale() {
     var defaultLocale = Site.getCurrent().getDefaultLocale();
 
     return Locale.getLocale(defaultLocale).language;
+}
+
+function getOrderToken(transaction) {
+    var orderToken = null;
+    var paymentInfos = transaction.PaymentInfos.PaymentInfo;
+    for (var pi = 0; pi < paymentInfos.length(); pi++) {
+        if (String(paymentInfos[pi].attribute('name')) === 'orderToken') {
+            orderToken = paymentInfos[pi].toString();
+            break;
+        }
+    }
+ 
+    return orderToken;
 }
 
 module.exports = {
@@ -368,7 +384,8 @@ module.exports = {
     getLatestPaymentInstrumentFromBasket: getLatestPaymentInstrumentFromBasket,
     isMarketPayProcessor: isMarketPayProcessor,
     isAutoCapture: isAutoCapture,
-    getLatestTransaction: getLatestTransaction, 
-    getCurrentLocal: getCurrentLocal, 
-    getDefaultLocale: getDefaultLocale
+    getLatestTransaction: getLatestTransaction,
+    getCurrentLocal: getCurrentLocal,
+    getDefaultLocale: getDefaultLocale, 
+    getOrderToken: getOrderToken
 };

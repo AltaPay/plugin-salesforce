@@ -1,6 +1,16 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.0.6]
+
+### Added
+- Implemented order token functionality to validate the order.
+- Improved error handling for afterPOST processes
+- Filter out UserLocale query param when appending URL
+- Update payment transaction amount to use transaction captured amount.
+### Fixed
+- On reject payment, PaymentNotification is called that is placing the order.
+
 ## [2.0.5]
 
 ### Added

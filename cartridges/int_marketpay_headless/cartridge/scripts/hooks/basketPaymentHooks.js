@@ -22,7 +22,6 @@ exports.modifyGETResponse_v2 = function (basket, paymentMethodResultResponse) {
 
         var marketPayTerminalsMapping = Site.getCurrent().getCustomPreferenceValue('marketPayTerminals');
         var paymentMethods = paymentMethodResultResponse.applicablePaymentMethods;
-        var currentLocale = request.locale;
         var currencyCode = Site.getCurrent().getDefaultCurrency();
 
         // Parse JSON if it's a string
@@ -66,7 +65,7 @@ exports.modifyGETResponse_v2 = function (basket, paymentMethodResultResponse) {
                 return false;
             }
 
-            var terminalMapping = marketPayDataHelper.getTerminalMapping(marketPayTerminalsMapping, currentLocale, currencyCode, method.id);
+            var terminalMapping = marketPayDataHelper.getTerminalMapping(marketPayTerminalsMapping, request.locale, currencyCode, method.id);
             if (terminalMapping !== null) {
                 var paymentMethod = marketPayDataHelper.getMarketPayDataForTerminalName(marketPayPaymentMethods, terminalMapping.name);
                 if (paymentMethod) {
@@ -103,22 +102,19 @@ exports.beforePOST = function (basket, paymentInstrument) {
 };
 
 exports.afterPOST = function (basket, paymentInstrument) {
-
-    var paymentInstrumentRequest = paymentInstrument;
-    var basketResponse = basket;
     const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
 
     if (
-        paymentInstrumentRequest &&
-        marketPayDataHelper.isMarketPayProcessor(paymentInstrumentRequest.paymentMethodId) &&
-        paymentInstrumentRequest.c_marketPayPaymentMethodID
+        paymentInstrument &&
+        marketPayDataHelper.isMarketPayProcessor(paymentInstrument.paymentMethodId) &&
+        paymentInstrument.c_marketPayPaymentMethodID
     ) {
         var CustomObjectMgr = require('dw/object/CustomObjectMgr');
         var marketPayDataObj = CustomObjectMgr.getCustomObject('MarketPayData', basket.customer.ID);
         var marketPaySessionId = marketPayDataObj ? marketPayDataObj.custom.sessionID : null;
         var marketPayPaymentMethods = marketPayDataObj ? marketPayDataObj.custom.paymentMethods : null;
-        var marketPayPaymentMethodID = paymentInstrumentRequest.c_marketPayPaymentMethodID;
-        var paymentMethodId = paymentInstrumentRequest.paymentMethodId;
+        var marketPayPaymentMethodID = paymentInstrument.c_marketPayPaymentMethodID;
+        var paymentMethodId = paymentInstrument.paymentMethodId;
         var onInitiatePaymentURL = marketPayDataHelper.getOnInitiatePaymentURL(
             marketPayPaymentMethodID,
             marketPayPaymentMethods
@@ -129,7 +125,7 @@ exports.afterPOST = function (basket, paymentInstrument) {
             return new dw.system.Status(dw.system.Status.ERROR, 'No active MarketPay payment session found');
         }
 
-        var paymentInstruments = basketResponse.paymentInstruments;
+        var paymentInstruments = basket.paymentInstruments;
 
         if (paymentInstruments && paymentInstruments.length) {
             for (var i = 0; i < paymentInstruments.length; i++) {

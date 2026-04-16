@@ -2,7 +2,6 @@
 
 function onSuccessRedirect(req, res, args) {
     const Site = require('dw/system/Site');
-
     var userAgent = req.httpHeaders.get('user-agent');
     var isMobile = /android|iphone|ipad|ipod/.test(userAgent);
     var successURL = null;
@@ -11,13 +10,15 @@ function onSuccessRedirect(req, res, args) {
         successURL = Site.current.getCustomPreferenceValue('marketPayPaymentSuccessAppURL');
     else
         successURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentSuccessURL');
-
-    if(successURL.indexOf('{LOCALE}') != -1) {
-        successURL =  successURL.replace('{LOCALE}', args.UserLocale);
+    
+    if(successURL && successURL.indexOf('{LOCALE}') != -1) {
+        successURL =  successURL.replace('{LOCALE}', args.userLocale);
     }
 
     if(!empty(args)) {
-        var queryParts = Object.keys(args).map(function(key) {
+        var queryParts = Object.keys(args).filter(function(key) {
+            return key !== 'userLocale';
+        }).map(function(key) {
             return encodeURIComponent(key) + '=' + encodeURIComponent(args[key]);
         });
 
@@ -31,7 +32,6 @@ function onSuccessRedirect(req, res, args) {
 
 function onFailtureRedirect(req, res, args) {
     const Site = require('dw/system/Site');
-
     var userAgent = req.httpHeaders.get('user-agent');
     var isMobile = /android|iphone|ipad|ipod/.test(userAgent);
     var failedURL = null;
@@ -41,12 +41,14 @@ function onFailtureRedirect(req, res, args) {
     else
         failedURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentFailedURL');
 
-    if(failedURL.indexOf('{LOCALE}') != -1) {
-        failedURL =  failedURL.replace('{LOCALE}', args.UserLocale);
+    if(failedURL && failedURL.indexOf('{LOCALE}') != -1) {
+        failedURL =  failedURL.replace('{LOCALE}', args.userLocale);
     }
 
     if(!empty(args)) {
-        var queryParts = Object.keys(args).map(function(key) {
+        var queryParts = Object.keys(args).filter(function(key) {
+            return key !== 'userLocale';
+        }).map(function(key) {
             return encodeURIComponent(key) + '=' + encodeURIComponent(args[key]);
         });
 

@@ -6,15 +6,14 @@ var Transaction = require('dw/system/Transaction');
 var PaymentTransaction = require('dw/order/PaymentTransaction');
 var Logger = require('dw/system/Logger').getLogger('MarketPay', 'MarketPay');
 
-
 /**
  * Get current order
  * @param {string} orderNo - Order no. for requested Order
+ * @param {string} orderToken 
  * @returns {dw.order.Order} - Order 
  */
-function getOrder(orderNo) {
-    var OrderMgr = require('dw/order/OrderMgr');
-    return OrderMgr.getOrder(orderNo);
+function getOrder(orderNo, orderToken) {
+    return OrderMgr.getOrder(orderNo, orderToken);
 }
 
 function placeOrder(order, marketPayOrderXML) {
@@ -23,7 +22,7 @@ function placeOrder(order, marketPayOrderXML) {
         Transaction.begin();
         var placeOrderStatus = OrderMgr.placeOrder(order);
 
-        if (placeOrderStatus === Status.ERROR) {
+        if (placeOrderStatus.getStatus() === Status.ERROR) {
             Transaction.rollback();
             Logger.error('PlaceOrder failed for orderNo: {0}', order.orderNo);
             return new Status(Status.ERROR);
@@ -42,6 +41,7 @@ function placeOrder(order, marketPayOrderXML) {
 
         paymentInstrument.paymentTransaction.transactionID = txn.TransactionId.toString();
         paymentInstrument.paymentTransaction.type = order.custom.marketPayCapturedAmount == order.totalGrossPrice.value ? PaymentTransaction.TYPE_CAPTURE : PaymentTransaction.TYPE_AUTH;
+        paymentInstrument.paymentTransaction.setAmount(new dw.value.Money(order.custom.marketPayCapturedAmount, order.getCurrencyCode()));
 
         Transaction.commit();
     } catch (e) {
@@ -73,9 +73,7 @@ function handlePayments(order, marketPayOrderXML) {
                 return new Status(Status.ERROR);
             }
         }
-
         return new Status(Status.OK);
-
     } catch (e) {
 
         Logger.error("MarketPay - handlePayment - General error due to exception. Error message: " + e.message);
@@ -84,7 +82,6 @@ function handlePayments(order, marketPayOrderXML) {
 }
 
 function handleDuplicatePayment(latestTxn) {
-
     var marketPay = require('*/cartridge/scripts/services/marketPay');
 
     if (latestTxn != null) {
@@ -102,10 +99,32 @@ function handleDuplicatePayment(latestTxn) {
     }
 }
 
+function processOrder(status, order, latestTxn, orderXMLObject) {
+    if ((order.getStatus().value == dw.order.Order.ORDER_STATUS_NEW ||
+        order.getStatus().value == dw.order.Order.ORDER_STATUS_OPEN) &&
+        order.custom.marketPayTransactionId != latestTxn.TransactionId) {
+        // Duplicate transaction — order already processed, release/refund the new payment
+        handleDuplicatePayment(latestTxn);
+    } else {
+        //var status = req.form.status ? ;
+        var result = orderXMLObject.Body.Result.toString();
+        var reservedAmount = parseFloat(orderXMLObject.Body.Transactions.Transaction.ReservedAmount.toString());
+        // check order status and the transaction result
+        if ((status && status.toLowerCase() === 'succeeded') || (result && result.toLowerCase() === 'success') || reservedAmount > 0) {
+            // Payment success request is valid - Handle payment
+            var orderStatus = handlePayments(order, orderXMLObject);
+            if (orderStatus.getStatus() == Status.ERROR) {
+                throw new Error("Unable to handle payment");
+            }
+        }
+    }
+}
+
 module.exports = {
     handleDuplicatePayment: handleDuplicatePayment,
     handlePayments: handlePayments, 
     getOrder: getOrder, 
-    placeOrder: placeOrder
+    placeOrder: placeOrder, 
+    processOrder: processOrder
 };
 
