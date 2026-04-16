@@ -110,7 +110,7 @@ function processOrder(status, order, latestTxn, orderXMLObject) {
         var result = orderXMLObject.Body.Result.toString();
         var reservedAmount = parseFloat(orderXMLObject.Body.Transactions.Transaction.ReservedAmount.toString());
         // check order status and the transaction result
-        if ((status && status.toLowerCase().equals('succeeded')) || (result && result.toLowerCase().equals('success')) || reservedAmount > 0) {
+        if ((status && status.toLowerCase() === 'succeeded') || (result && result.toLowerCase() === 'success') || reservedAmount > 0) {
             // Payment success request is valid - Handle payment
             var orderStatus = handlePayments(order, orderXMLObject);
             if (orderStatus.getStatus() == Status.ERROR) {
