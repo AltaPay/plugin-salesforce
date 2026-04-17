@@ -6,7 +6,6 @@
 
 var server = require('server');
 var Logger = require('dw/system/Logger').getLogger('MarketPay', 'MarketPay');
-var Status = require('dw/system/Status');
 var COHelpers = require('*/cartridge/scripts/helpers/marketPayCheckoutHelpers');
 var ipHelpers = require('*/cartridge/scripts/helpers/ipHelpers');
 
