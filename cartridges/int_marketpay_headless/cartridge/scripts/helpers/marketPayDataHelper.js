@@ -252,7 +252,7 @@ function getSessionDataModel() {
             transactionInfo: {
                 ecomPlatform: "Salesforce",
                 ecomPluginName: "int_marketpay_headless",
-                ecomPluginVersion: "2.0.6"
+                ecomPluginVersion: "2.0.7"
             }
         },
         callbacks: {
