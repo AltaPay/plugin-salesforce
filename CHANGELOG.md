@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.0.7]
+
+### Fixed
+- Payment failed when the order line description exceeded 50 characters.
+- CapturedAmount is used instead of ReservedAmount in order payment setAmount.
+
 ## [2.0.6]
 
 ### Added
