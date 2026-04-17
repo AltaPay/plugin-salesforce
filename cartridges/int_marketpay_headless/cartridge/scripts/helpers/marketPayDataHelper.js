@@ -126,9 +126,15 @@ function populateOrderlineItems(marketPayOrderData, productLineItems) {
         for (var i = 0; i < productLineItems.length; i++) {
             var lineItem = productLineItems[i];
             var qty = lineItem.getQuantityValue();
+            if (qty <= 0) continue;
+            
+            var description = lineItem.getProductName() || '';
+            if (description.length > 50) {
+                description = description.substring(0, 50);
+            }
             marketPayOrderData.order.orderLines.push({
                 itemId: lineItem.getProductID(),
-                description: lineItem.getProductName() || '',
+                description: description,
                 quantity: qty,
                 unitPrice: Math.round((lineItem.getAdjustedNetPrice().getValue() / qty) * 100) / 100,
                 taxAmount: lineItem.getAdjustedTax().getValue(),
