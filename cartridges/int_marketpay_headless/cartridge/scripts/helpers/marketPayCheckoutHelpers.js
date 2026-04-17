@@ -33,7 +33,7 @@ function placeOrder(order, marketPayOrderXML) {
         order.custom.marketPayTransactionId = txn.TransactionId.toString();
         order.custom.marketPayPaymentId = txn.PaymentId.toString();
         order.custom.marketPayReservedAmount = parseFloat(txn.ReservedAmount.toString()) || 0;
-        order.custom.marketPayCapturedAmount = parseFloat(txn.CapturedAmount.toString()) || 0;;
+        order.custom.marketPayCapturedAmount = parseFloat(txn.CapturedAmount.toString()) || 0;
         order.custom.marketPayRefundedAmount = parseFloat(txn.RefundedAmount.toString()) || 0;
         order.setPaymentStatus(dw.order.Order.PAYMENT_STATUS_PAID);
 
@@ -41,7 +41,7 @@ function placeOrder(order, marketPayOrderXML) {
 
         paymentInstrument.paymentTransaction.transactionID = txn.TransactionId.toString();
         paymentInstrument.paymentTransaction.type = order.custom.marketPayCapturedAmount == order.totalGrossPrice.value ? PaymentTransaction.TYPE_CAPTURE : PaymentTransaction.TYPE_AUTH;
-        paymentInstrument.paymentTransaction.setAmount(new dw.value.Money(order.custom.marketPayCapturedAmount, order.getCurrencyCode()));
+        paymentInstrument.paymentTransaction.setAmount(new dw.value.Money(order.custom.marketPayReservedAmount, order.getCurrencyCode()));
 
         Transaction.commit();
     } catch (e) {
@@ -106,7 +106,6 @@ function processOrder(status, order, latestTxn, orderXMLObject) {
         // Duplicate transaction — order already processed, release/refund the new payment
         handleDuplicatePayment(latestTxn);
     } else {
-        //var status = req.form.status ? ;
         var result = orderXMLObject.Body.Result.toString();
         var reservedAmount = parseFloat(orderXMLObject.Body.Transactions.Transaction.ReservedAmount.toString());
         // check order status and the transaction result
