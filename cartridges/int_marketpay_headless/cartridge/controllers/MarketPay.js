@@ -60,7 +60,7 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
 
     } catch (e) {
         Logger.error('MarketPay - Payment failed - General Error due to exception. Error message: ' + e.message);
-        marketPayRedirectHelpers.onFailtureRedirect(req, res, {
+        marketPayRedirectHelpers.onFailureRedirect(req, res, {
             orderID: orderID,
             userLocale: order ? order.custom.marketPayUserLocale : marketPayDataHelper.getDefaultLocale()
         });
@@ -100,7 +100,7 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
         Logger.error('MarketPay - PaymentFail - General Error due to exception. Error message: ' + e.message);
     }
 
-    marketPayRedirectHelpers.onFailtureRedirect(req, res, {
+    marketPayRedirectHelpers.onFailureRedirect(req, res, {
         orderID: orderID,
         userLocale: order ? order.custom.marketPayUserLocale : marketPayDataHelper.getDefaultLocale()
     });

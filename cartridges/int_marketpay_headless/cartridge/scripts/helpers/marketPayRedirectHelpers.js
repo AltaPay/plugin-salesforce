@@ -30,7 +30,7 @@ function onSuccessRedirect(req, res, args) {
     res.redirect(successURL);
 }
 
-function onFailtureRedirect(req, res, args) {
+function onFailureRedirect(req, res, args) {
     const Site = require('dw/system/Site');
     var userAgent = req.httpHeaders.get('user-agent');
     var isMobile = /android|iphone|ipad|ipod/.test(userAgent);
@@ -62,7 +62,7 @@ function onFailtureRedirect(req, res, args) {
 
 module.exports = {
     onSuccessRedirect: onSuccessRedirect,
-    onFailtureRedirect: onFailtureRedirect
+    onFailureRedirect: onFailureRedirect
 };
 
 

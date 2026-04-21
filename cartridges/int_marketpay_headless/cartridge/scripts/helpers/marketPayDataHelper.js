@@ -155,7 +155,7 @@ function populateShippingPrice(marketPayOrderData, shipment, shippingTotalGrossP
         });
 }
 
-function populateRoudingDiff(marketPayOrderData, totalAmount) {
+function populateRoundingDiff(marketPayOrderData, totalAmount) {
 
     var roundingDiff = orderLinesDiff(marketPayOrderData.order.orderLines, totalAmount)
 
@@ -279,7 +279,7 @@ function getFormattedDataForMarketPaySession(basket) {
     populateOrderData(orderData, basket.getUUID(), basket.getTotalGrossPrice().getValue(), basket.currencyCode);
     populateOrderlineItems(orderData, basket.getProductLineItems());
     populateShippingPrice(orderData, basket.defaultShipment, basket.getShippingTotalGrossPrice().getValue());
-    populateRoudingDiff(orderData, basket.getTotalGrossPrice().getValue());
+    populateRoundingDiff(orderData, basket.getTotalGrossPrice().getValue());
     populateCustomerAndAddresses(orderData, basket.getCustomer(), basket.getCustomerEmail(), basket.getBillingAddress(), basket.getDefaultShipment());
 
     return orderData;
@@ -290,7 +290,7 @@ function getDataForUpdateSession(order, isAutoCapture) {
     populateOrderData(orderData, order.getOrderNo(), order.getTotalGrossPrice().getValue(), order.currencyCode);
     populateOrderlineItems(orderData, order.getProductLineItems());
     populateShippingPrice(orderData, order.defaultShipment, order.getShippingTotalGrossPrice().getValue());
-    populateRoudingDiff(orderData, order.getTotalGrossPrice().getValue());
+    populateRoundingDiff(orderData, order.getTotalGrossPrice().getValue());
     populateCustomerAndAddresses(orderData, order.getCustomer(), order.getCustomerEmail(), order.getBillingAddress(), order.getDefaultShipment());
     populateConfiguration(orderData, isAutoCapture)
     populateTransactionInfo(orderData, order.orderToken);
@@ -351,7 +351,7 @@ function getLatestTransaction(transactions) {
     return latestTransaction;
 }
 
-function getCurrentLocal() {
+function getCurrentLocale() {
     const Locale = require('dw/util/Locale');
     var currentLocale = Locale.getLocale(request.locale);
 
@@ -391,7 +391,7 @@ module.exports = {
     isMarketPayProcessor: isMarketPayProcessor,
     isAutoCapture: isAutoCapture,
     getLatestTransaction: getLatestTransaction,
-    getCurrentLocal: getCurrentLocal,
+    getCurrentLocale: getCurrentLocale,
     getDefaultLocale: getDefaultLocale, 
     getOrderToken: getOrderToken
 };
