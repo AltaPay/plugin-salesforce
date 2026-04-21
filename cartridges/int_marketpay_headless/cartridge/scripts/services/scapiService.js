@@ -206,11 +206,11 @@ function fetchAndUpdatePaymentStatus(orderId) {
         if (result.ok) {
             return true;
         } else {
-            Logger.error('No Payment Info founds for the order: ' + result.errorMessage);
+            Logger.error('No Payment Info found for the order: ' + result.errorMessage);
             return false;
         }
     } catch (e) {
-        Logger.error('No Payment Info founds for the order: ' + e.message + '\n' + e.stack);
+        Logger.error('No Payment Info found for the order: ' + e.message + '\n' + e.stack);
         return false;
     }
 }
