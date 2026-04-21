@@ -31,6 +31,7 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
     const marketPayRedirectHelpers = require('*/cartridge/scripts/helpers/marketPayRedirectHelpers');
     var orderID;
     var orderToken;
+    var order = null;
 
     try {
         orderID = req.form.shop_orderid;
@@ -43,7 +44,7 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
             throw new Error("No transaction found");
         }
 
-        var order = COHelpers.getOrder(orderID, orderToken);
+        order = COHelpers.getOrder(orderID, orderToken);
 
         if (order != null) {
             COHelpers.processOrder(req.form.status ? req.form.status : '', order, latestTxn, orderXMLObject);
