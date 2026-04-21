@@ -20,6 +20,8 @@ This plugin enables **AltaPay** as the Payment Service Provider (PSP) for storef
 
 - [Services Configuration](#services-configuration)
 
+- [Jobs Configuration](#jobs-configuration)
+
 - [Get MarketPay Payment Status](#get-marketpay-payment-status)
 
 ## Prerequisites
@@ -127,6 +129,28 @@ From the SFCC Business Manager:
 5. Enter the SLAS User and Password and click **Apply** button.
 
     ![slas_credentials](docs/headless/slas_credentials.png)
+
+### Jobs Configuration
+
+To process notification callback requests, the cartridge provides a custom job step (defined in steptypes.json) with the required logic. The job itself must be configured in Business Manager, where SFCC handles scheduling and execution.
+
+From the SFCC Business Manager:
+
+1. Navigate to: **Administration** > **Operations** > **Jobs**
+2. Click on **MarketPayWebhookNotification**.
+
+    ![jobs_1](docs/headless/jobs_1.png)
+
+3. Click on **JobSteps**.
+
+    ![jobs_2](docs/headless/jobs_2.png)
+
+4. Click Scope and choose your site.
+5. Then click **Schedule and History**. 
+
+    ![jobs_3](docs/headless/jobs_3.png)
+
+6. Enable and schedule the job (mandatory for processing notifications)
 
 ## Get MarketPay Payment Status
 
