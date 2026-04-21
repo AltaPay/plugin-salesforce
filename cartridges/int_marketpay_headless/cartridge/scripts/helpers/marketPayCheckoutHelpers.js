@@ -109,7 +109,7 @@ function processOrder(status, order, latestTxn, orderXMLObject) {
         handleDuplicatePayment(latestTxn);
     } else {
         var result = orderXMLObject.Body.Result.toString();
-        var reservedAmount = parseFloat(orderXMLObject.Body.Transactions.Transaction.ReservedAmount.toString());
+        var reservedAmount = parseFloat(latestTxn.ReservedAmount.toString()) || 0.0;
         // check order status and the transaction result
         if ((status && status.toLowerCase() === 'succeeded') || (result && result.toLowerCase() === 'success') || reservedAmount > 0) {
             // Payment success request is valid - Handle payment
