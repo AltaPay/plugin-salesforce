@@ -8,6 +8,7 @@ var server = require('server');
 var Logger = require('dw/system/Logger').getLogger('MarketPay', 'MarketPay');
 var COHelpers = require('*/cartridge/scripts/helpers/marketPayCheckoutHelpers');
 var ipHelpers = require('*/cartridge/scripts/helpers/ipHelpers');
+var notificationHelpers = require('*/cartridge/scripts/helpers/marketPayNotificationHelpers');
 
 server.post('CallbackForm', server.middleware.https, function (req, res, next) {
     var languageCode = req.form.language;
@@ -152,7 +153,7 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
         var order = COHelpers.getOrder(orderID, orderToken);
 
         if (order != null) {
-            COHelpers.processOrder(req.form.status ? req.form.status : '', order, latestTxn, orderXMLObject);
+            notificationHelpers.storeWebhookNotification(req.form);
             res.setStatusCode(200);
             res.json({ message: 'Acknowledged' });
         } else {

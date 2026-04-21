@@ -1,5 +1,6 @@
 const RESTResponseMgr = require('dw/system/RESTResponseMgr');
-const marketPay = require('*/cartridge/scripts/services/marketPay')
+const marketPay = require('*/cartridge/scripts/services/marketPay');
+const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
 const Logger = require('dw/system/Logger').getLogger('MarketPay','MarketPay');
 
 exports.createCheckoutSession = function () {
@@ -52,7 +53,7 @@ exports.paymentStatus = function () {
             return;
         }
 
-        var txn = marketPayOrderTransaction.Body.Transactions.Transaction;
+        var txn = marketPayDataHelper.getLatestTransaction(marketPayOrderTransaction.Body.Transactions.Transaction);
         var transactionId = txn.TransactionId.toString();
         var paymentId = txn.PaymentId.toString();
         var reservedAmount = parseFloat(txn.ReservedAmount.toString());
