@@ -109,7 +109,7 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
 });
 
 /**
- * This controller is for asynchronous payments, when the aquier returns an answer for payment request.
+ * This controller is for asynchronous payments, when the acquirer returns an answer for payment request.
  */
 server.post('PaymentNotification', server.middleware.https, function (req, res, next) {
     // Ignore new status

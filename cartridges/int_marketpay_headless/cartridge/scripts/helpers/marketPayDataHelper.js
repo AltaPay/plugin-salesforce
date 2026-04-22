@@ -37,7 +37,7 @@ function isMarketPayProcessor(paymentMethodId) {
  * @param {*} currencyCode 
  * @param {*} paymentMethodId 
  * @returns 
- * terminals for the current currency, local and paymentMethod id                    
+ * terminals for the current currency, locale and paymentMethod id                    
  */
 function getTerminalMapping(marketPayTerminalsMapping, currentLocale, currencyCode, paymentMethodId) {
     var currencyTerminals = marketPayTerminalsMapping.terminals[currencyCode];
@@ -193,7 +193,6 @@ function populateCustomerAndAddresses(marketPayOrderData, customer, customerEmai
         if (!marketPayOrderData.order.customer.email && billingAddress) {
             marketPayOrderData.order.customer.firstName = billingAddress.getFirstName() || '';
             marketPayOrderData.order.customer.lastName = billingAddress.getLastName() || '';
-            //marketPayOrderData.order.customer.email = basket.getCustomerEmail() || '';
             marketPayOrderData.order.customer.email = customerEmail || '';
         }
 
