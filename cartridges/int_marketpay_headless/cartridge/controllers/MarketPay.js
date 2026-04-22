@@ -38,12 +38,12 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
         var orderXMLObject = new XML(req.form.xml);
         var transactions = orderXMLObject.Body.Transactions.Transaction;
         var latestTxn = marketPayDataHelper.getLatestTransaction(transactions);
-        orderToken = marketPayDataHelper.getOrderToken(latestTxn);
 
         if (latestTxn == null) {
             throw new Error("No transaction found");
         }
 
+        orderToken = marketPayDataHelper.getOrderToken(latestTxn);
         order = COHelpers.getOrder(orderID, orderToken);
 
         if (order != null) {
@@ -145,12 +145,12 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
         var orderXMLObject = new XML(req.form.xml);
         var transactions = orderXMLObject.Body.Transactions.Transaction;
         var latestTxn = marketPayDataHelper.getLatestTransaction(transactions);
-        const orderToken = marketPayDataHelper.getOrderToken(latestTxn);
 
         if (latestTxn == null) {
             throw new Error("No transaction found");
         }
 
+        const orderToken = marketPayDataHelper.getOrderToken(latestTxn);
         var order = COHelpers.getOrder(orderID, orderToken);
 
         if (order != null) {
