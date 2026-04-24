@@ -58,6 +58,18 @@
                 <externally-managed-flag>false</externally-managed-flag>
                 <min-length>0</min-length>
             </attribute-definition>
+            <attribute-definition attribute-id="error">
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="errorMessage">
+                <type>string</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
             <attribute-definition attribute-id="processed">
                 <type>boolean</type>
                 <mandatory-flag>false</mandatory-flag>
@@ -94,6 +106,8 @@
                 <attribute attribute-id="webhookData"/>
                 <attribute attribute-id="processed"/>
                 <attribute attribute-id="shopOrderID"/>
+                <attribute attribute-id="errorMessage"/>
+                <attribute attribute-id="error"/>
             </attribute-group>
         </group-definitions>
     </custom-type>
