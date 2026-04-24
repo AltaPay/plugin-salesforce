@@ -35,7 +35,10 @@ function placeOrder(order, marketPayOrderXML) {
         order.custom.marketPayReservedAmount = parseFloat(txn.ReservedAmount.toString()) || 0;
         order.custom.marketPayCapturedAmount = parseFloat(txn.CapturedAmount.toString()) || 0;
         order.custom.marketPayRefundedAmount = parseFloat(txn.RefundedAmount.toString()) || 0;
-        if (order.custom.marketPayCapturedAmount === order.totalGrossPrice.value) {
+        if (
+            Math.round(order.custom.marketPayCapturedAmount * 100) ===
+            Math.round(order.totalGrossPrice.value * 100)
+        ) {
             order.setPaymentStatus(dw.order.Order.PAYMENT_STATUS_PAID);
         }
 
