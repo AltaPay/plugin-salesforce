@@ -1,0 +1,28 @@
+{
+    "step-types": {
+        "script-module-step": [
+            {
+                "@type-id": "custom.marketPayNotificationProcessJob",
+                "@supports-parallel-execution": "false",
+                "@supports-site-context": "true",
+                "@supports-organization-context": "false",
+                "description": "Processes unprocessed MarketPayWebhookNotification custom objects, retrieves the corresponding order and triggers payment processing.",
+                "module": "int_marketpay_headless/cartridge/scripts/jobs/marketPayNotificationProcessJob",
+                "function": "execute",
+                "parameters": {},
+                "status-codes": {
+                    "status-code": [
+                        {
+                            "@code": "OK",
+                            "description": "Job step completed successfully."
+                        },
+                        {
+                            "@code": "ERROR",
+                            "description": "Job step failed due to an unexpected error."
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}

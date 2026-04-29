@@ -119,7 +119,7 @@ exports.afterPOST = function (order) {
             if (freshMarketPayDataObj) {
                 CustomObjectMgr.remove(freshMarketPayDataObj);
             }
-            order.custom.marketPayUserLocale = marketPayDataHelper.getCurrentLocal();
+            order.custom.marketPayUserLocale = marketPayDataHelper.getCurrentLocale();
         });
     } catch (e) {
         Logger.error("MarketPay: Error updating session: " + e.message);

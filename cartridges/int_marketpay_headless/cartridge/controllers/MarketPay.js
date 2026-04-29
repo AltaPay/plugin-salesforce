@@ -6,9 +6,9 @@
 
 var server = require('server');
 var Logger = require('dw/system/Logger').getLogger('MarketPay', 'MarketPay');
-var Status = require('dw/system/Status');
 var COHelpers = require('*/cartridge/scripts/helpers/marketPayCheckoutHelpers');
 var ipHelpers = require('*/cartridge/scripts/helpers/ipHelpers');
+var notificationHelpers = require('*/cartridge/scripts/helpers/marketPayNotificationHelpers');
 
 server.post('CallbackForm', server.middleware.https, function (req, res, next) {
     var languageCode = req.form.language;
@@ -31,19 +31,20 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
     const marketPayRedirectHelpers = require('*/cartridge/scripts/helpers/marketPayRedirectHelpers');
     var orderID;
     var orderToken;
+    var order = null;
 
     try {
         orderID = req.form.shop_orderid;
         var orderXMLObject = new XML(req.form.xml);
         var transactions = orderXMLObject.Body.Transactions.Transaction;
         var latestTxn = marketPayDataHelper.getLatestTransaction(transactions);
-        orderToken = marketPayDataHelper.getOrderToken(latestTxn);
 
         if (latestTxn == null) {
             throw new Error("No transaction found");
         }
 
-        var order = COHelpers.getOrder(orderID, orderToken);
+        orderToken = marketPayDataHelper.getOrderToken(latestTxn);
+        order = COHelpers.getOrder(orderID, orderToken);
 
         if (order != null) {
             COHelpers.processOrder(req.form.status ? req.form.status : '', order, latestTxn, orderXMLObject);
@@ -59,7 +60,7 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
 
     } catch (e) {
         Logger.error('MarketPay - Payment failed - General Error due to exception. Error message: ' + e.message);
-        marketPayRedirectHelpers.onFailtureRedirect(req, res, {
+        marketPayRedirectHelpers.onFailureRedirect(req, res, {
             orderID: orderID,
             userLocale: order ? order.custom.marketPayUserLocale : marketPayDataHelper.getDefaultLocale()
         });
@@ -99,7 +100,7 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
         Logger.error('MarketPay - PaymentFail - General Error due to exception. Error message: ' + e.message);
     }
 
-    marketPayRedirectHelpers.onFailtureRedirect(req, res, {
+    marketPayRedirectHelpers.onFailureRedirect(req, res, {
         orderID: orderID,
         userLocale: order ? order.custom.marketPayUserLocale : marketPayDataHelper.getDefaultLocale()
     });
@@ -108,7 +109,7 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
 });
 
 /**
- * This controller is for asynchronous payments, when the aquier returns an answer for payment request.
+ * This controller is for asynchronous payments, when the acquirer returns an answer for payment request.
  */
 server.post('PaymentNotification', server.middleware.https, function (req, res, next) {
     // Ignore new status
@@ -144,16 +145,16 @@ server.post('PaymentNotification', server.middleware.https, function (req, res, 
         var orderXMLObject = new XML(req.form.xml);
         var transactions = orderXMLObject.Body.Transactions.Transaction;
         var latestTxn = marketPayDataHelper.getLatestTransaction(transactions);
-        const orderToken = marketPayDataHelper.getOrderToken(latestTxn);
 
         if (latestTxn == null) {
             throw new Error("No transaction found");
         }
 
+        const orderToken = marketPayDataHelper.getOrderToken(latestTxn);
         var order = COHelpers.getOrder(orderID, orderToken);
 
         if (order != null) {
-            COHelpers.processOrder(req.form.status ? req.form.status : '', order, latestTxn, orderXMLObject);
+            notificationHelpers.storeWebhookNotification(req.form);
             res.setStatusCode(200);
             res.json({ message: 'Acknowledged' });
         } else {

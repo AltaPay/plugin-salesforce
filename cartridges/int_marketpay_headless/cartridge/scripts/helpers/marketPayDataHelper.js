@@ -37,7 +37,7 @@ function isMarketPayProcessor(paymentMethodId) {
  * @param {*} currencyCode 
  * @param {*} paymentMethodId 
  * @returns 
- * terminals for the current currency, local and paymentMethod id                    
+ * terminals for the current currency, locale and paymentMethod id                    
  */
 function getTerminalMapping(marketPayTerminalsMapping, currentLocale, currencyCode, paymentMethodId) {
     var currencyTerminals = marketPayTerminalsMapping.terminals[currencyCode];
@@ -126,9 +126,15 @@ function populateOrderlineItems(marketPayOrderData, productLineItems) {
         for (var i = 0; i < productLineItems.length; i++) {
             var lineItem = productLineItems[i];
             var qty = lineItem.getQuantityValue();
+            if (qty <= 0) continue;
+            
+            var description = lineItem.getProductName() || '';
+            if (description.length > 50) {
+                description = description.substring(0, 50);
+            }
             marketPayOrderData.order.orderLines.push({
                 itemId: lineItem.getProductID(),
-                description: lineItem.getProductName() || '',
+                description: description,
                 quantity: qty,
                 unitPrice: Math.round((lineItem.getAdjustedNetPrice().getValue() / qty) * 100) / 100,
                 taxAmount: lineItem.getAdjustedTax().getValue(),
@@ -149,7 +155,7 @@ function populateShippingPrice(marketPayOrderData, shipment, shippingTotalGrossP
         });
 }
 
-function populateRoudingDiff(marketPayOrderData, totalAmount) {
+function populateRoundingDiff(marketPayOrderData, totalAmount) {
 
     var roundingDiff = orderLinesDiff(marketPayOrderData.order.orderLines, totalAmount)
 
@@ -187,7 +193,6 @@ function populateCustomerAndAddresses(marketPayOrderData, customer, customerEmai
         if (!marketPayOrderData.order.customer.email && billingAddress) {
             marketPayOrderData.order.customer.firstName = billingAddress.getFirstName() || '';
             marketPayOrderData.order.customer.lastName = billingAddress.getLastName() || '';
-            //marketPayOrderData.order.customer.email = basket.getCustomerEmail() || '';
             marketPayOrderData.order.customer.email = customerEmail || '';
         }
 
@@ -246,7 +251,7 @@ function getSessionDataModel() {
             transactionInfo: {
                 ecomPlatform: "Salesforce",
                 ecomPluginName: "int_marketpay_headless",
-                ecomPluginVersion: "2.0.6"
+                ecomPluginVersion: "2.0.7"
             }
         },
         callbacks: {
@@ -273,7 +278,7 @@ function getFormattedDataForMarketPaySession(basket) {
     populateOrderData(orderData, basket.getUUID(), basket.getTotalGrossPrice().getValue(), basket.currencyCode);
     populateOrderlineItems(orderData, basket.getProductLineItems());
     populateShippingPrice(orderData, basket.defaultShipment, basket.getShippingTotalGrossPrice().getValue());
-    populateRoudingDiff(orderData, basket.getTotalGrossPrice().getValue());
+    populateRoundingDiff(orderData, basket.getTotalGrossPrice().getValue());
     populateCustomerAndAddresses(orderData, basket.getCustomer(), basket.getCustomerEmail(), basket.getBillingAddress(), basket.getDefaultShipment());
 
     return orderData;
@@ -284,7 +289,7 @@ function getDataForUpdateSession(order, isAutoCapture) {
     populateOrderData(orderData, order.getOrderNo(), order.getTotalGrossPrice().getValue(), order.currencyCode);
     populateOrderlineItems(orderData, order.getProductLineItems());
     populateShippingPrice(orderData, order.defaultShipment, order.getShippingTotalGrossPrice().getValue());
-    populateRoudingDiff(orderData, order.getTotalGrossPrice().getValue());
+    populateRoundingDiff(orderData, order.getTotalGrossPrice().getValue());
     populateCustomerAndAddresses(orderData, order.getCustomer(), order.getCustomerEmail(), order.getBillingAddress(), order.getDefaultShipment());
     populateConfiguration(orderData, isAutoCapture)
     populateTransactionInfo(orderData, order.orderToken);
@@ -345,7 +350,7 @@ function getLatestTransaction(transactions) {
     return latestTransaction;
 }
 
-function getCurrentLocal() {
+function getCurrentLocale() {
     const Locale = require('dw/util/Locale');
     var currentLocale = Locale.getLocale(request.locale);
 
@@ -385,7 +390,7 @@ module.exports = {
     isMarketPayProcessor: isMarketPayProcessor,
     isAutoCapture: isAutoCapture,
     getLatestTransaction: getLatestTransaction,
-    getCurrentLocal: getCurrentLocal,
+    getCurrentLocale: getCurrentLocale,
     getDefaultLocale: getDefaultLocale, 
     getOrderToken: getOrderToken
 };

@@ -3,11 +3,11 @@
 function onSuccessRedirect(req, res, args) {
     const Site = require('dw/system/Site');
     var userAgent = req.httpHeaders.get('user-agent');
-    var isMobile = /android|iphone|ipad|ipod/.test(userAgent);
+    var isMobile = /android|iphone|ipad|ipod/i.test(userAgent);
     var successURL = null;
 
     if (isMobile)
-        successURL = Site.current.getCustomPreferenceValue('marketPayPaymentSuccessAppURL');
+        successURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentSuccessAppURL');
     else
         successURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentSuccessURL');
     
@@ -30,14 +30,14 @@ function onSuccessRedirect(req, res, args) {
     res.redirect(successURL);
 }
 
-function onFailtureRedirect(req, res, args) {
+function onFailureRedirect(req, res, args) {
     const Site = require('dw/system/Site');
     var userAgent = req.httpHeaders.get('user-agent');
-    var isMobile = /android|iphone|ipad|ipod/.test(userAgent);
+    var isMobile = /android|iphone|ipad|ipod/i.test(userAgent);
     var failedURL = null;
 
     if (isMobile)
-        failedURL = Site.current.getCustomPreferenceValue('marketPayPaymentFailedAppURL');
+        failedURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentFailedAppURL');
     else
         failedURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentFailedURL');
 
@@ -62,7 +62,7 @@ function onFailtureRedirect(req, res, args) {
 
 module.exports = {
     onSuccessRedirect: onSuccessRedirect,
-    onFailtureRedirect: onFailtureRedirect
+    onFailureRedirect: onFailureRedirect
 };
 
 
