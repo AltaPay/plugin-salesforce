@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata xmlns="http://www.demandware.com/xml/impex/metadata/2006-10-31">
-
     <type-extension type-id="Order">
         <custom-attribute-definitions>
             <attribute-definition attribute-id="marketPayTransactionId">
@@ -34,7 +33,9 @@
                 <externally-managed-flag>true</externally-managed-flag>
             </attribute-definition>
             <attribute-definition attribute-id="marketPayKnownIPProtection">
-                <display-name xml:lang="x-default">Restricts callbacks to known gateway IP addresses. Disable this option if the store is using a firewall or proxy service (such as Cloudflare).</display-name>
+                <display-name xml:lang="x-default">Restricts callbacks to known gateway IP
+                    addresses. Disable this option if the store is using a firewall or proxy service
+                    (such as Cloudflare).</display-name>
                 <type>boolean</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
@@ -60,22 +61,21 @@
                 <min-length>0</min-length>
             </attribute-definition>
         </custom-attribute-definitions>
-        <group-definitions>            
+        <group-definitions>
             <attribute-group group-id="MarketPay">
                 <display-name xml:lang="x-default">MarketPay</display-name>
-                <attribute attribute-id="marketPayTransactionId"/>                
-                <attribute attribute-id="marketPayPaymentId"/>
-                <attribute attribute-id="marketPayReservedAmount"/>
-                <attribute attribute-id="marketPayCapturedAmount"/>
-                <attribute attribute-id="marketPayRefundedAmount"/>
-                <attribute attribute-id="marketPayKnownIPProtection"/>
-                <attribute attribute-id="marketPayError"/>
-                <attribute attribute-id="marketPayErrorMessage"/>
-                <attribute attribute-id="marketPayUserLocale"/>                
-            </attribute-group>            
+                <attribute attribute-id="marketPayTransactionId" />
+                <attribute attribute-id="marketPayPaymentId" />
+                <attribute attribute-id="marketPayReservedAmount" />
+                <attribute attribute-id="marketPayCapturedAmount" />
+                <attribute attribute-id="marketPayRefundedAmount" />
+                <attribute attribute-id="marketPayKnownIPProtection" />
+                <attribute attribute-id="marketPayError" />
+                <attribute attribute-id="marketPayErrorMessage" />
+                <attribute attribute-id="marketPayUserLocale" />
+            </attribute-group>
         </group-definitions>
     </type-extension>
-
     <type-extension type-id="OrderPaymentInstrument">
         <custom-attribute-definitions>
             <attribute-definition attribute-id="marketPayPaymentMethodID">
@@ -110,17 +110,18 @@
         <group-definitions>
             <attribute-group group-id="MarketPay">
                 <display-name xml:lang="x-default">MarketPay</display-name>
-                <attribute attribute-id="marketPayPaymentMethodID"/>
-                <attribute attribute-id="marketPayPlatform"/>
-                <attribute attribute-id="marketTransactionID"/>                
+                <attribute attribute-id="marketPayPaymentMethodID" />
+                <attribute attribute-id="marketPayPlatform" />
+                <attribute attribute-id="marketTransactionID" />
             </attribute-group>
         </group-definitions>
     </type-extension>
-
     <type-extension type-id="SitePreferences">
-        <custom-attribute-definitions>            
+        <custom-attribute-definitions>
             <attribute-definition attribute-id="marketPayAppURL">
                 <display-name xml:lang="x-default">App URL</display-name>
+                <description xml:lang="x-default">This is an app URL where the customer will be
+                    redirected from wallet payment app when a payment fails or succeeds.</description>
                 <type>string</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
@@ -128,7 +129,9 @@
             </attribute-definition>
             <attribute-definition attribute-id="marketPayKnownIPProtection">
                 <display-name xml:lang="x-default">Known IP Protection</display-name>
-                <description xml:lang="x-default">Restricts callbacks to known gateway IP addresses. Disable this option if the store is using a firewall or proxy service (such as Cloudflare)</description>
+                <description xml:lang="x-default">Restricts callbacks to known gateway IP addresses.
+                    Disable this option if the store is using a firewall or proxy service (such as
+                    Cloudflare)</description>
                 <type>boolean</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
@@ -160,7 +163,8 @@
             </attribute-definition>
             <attribute-definition attribute-id="marketPayPaymentSuccessURL">
                 <display-name xml:lang="x-default">Payment Success URL</display-name>
-                <description xml:lang="x-default">URL where MarketPay Redirects After Successful Payment</description>
+                <description xml:lang="x-default">URL where MarketPay Redirects After Successful
+                    Payment</description>
                 <type>string</type>
                 <mandatory-flag>true</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
@@ -168,22 +172,23 @@
             </attribute-definition>
             <attribute-definition attribute-id="marketPayTerminals">
                 <display-name xml:lang="x-default">MarketPay Terminals</display-name>
-                <description xml:lang="x-default">Used for mapping of payment methods in Salesforce and terminals in the MarketPay payment gateway</description>
+                <description xml:lang="x-default">Used for mapping of payment methods in Salesforce
+                    and terminals in the MarketPay payment gateway</description>
                 <type>text</type>
                 <mandatory-flag>true</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
-            </attribute-definition>                     
+            </attribute-definition>
         </custom-attribute-definitions>
-        <group-definitions>            
+        <group-definitions>
             <attribute-group group-id="MarketPay">
                 <display-name xml:lang="x-default">MarketPay</display-name>
-                <attribute attribute-id="marketPayTerminals"/>
-                <attribute attribute-id="marketPayAppURL"/>
-                <attribute attribute-id="marketPayPaymentSuccessURL"/>
-                <attribute attribute-id="marketPayPaymentFailedURL"/>
-                <attribute attribute-id="marketPayOrganizationID"/>
-                <attribute attribute-id="marketPayOrganizationShortCode"/>
-                <attribute attribute-id="marketPayKnownIPProtection"/>
+                <attribute attribute-id="marketPayTerminals" />
+                <attribute attribute-id="marketPayPaymentSuccessURL" />
+                <attribute attribute-id="marketPayPaymentFailedURL" />
+                <attribute attribute-id="marketPayAppURL" />
+                <attribute attribute-id="marketPayOrganizationID" />
+                <attribute attribute-id="marketPayOrganizationShortCode" />
+                <attribute attribute-id="marketPayKnownIPProtection" />
             </attribute-group>
         </group-definitions>
     </type-extension>
