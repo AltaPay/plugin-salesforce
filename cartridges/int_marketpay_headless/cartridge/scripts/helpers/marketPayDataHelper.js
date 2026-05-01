@@ -230,8 +230,9 @@ function populateConfiguration(marketPayOrderData, isAutoCapture) {
     marketPayOrderData.configuration.autoCapture = isAutoCapture;
 }
 
-function populateTransactionInfo(marketPayOrderData, orderToken) {
+function populateTransactionInfo(marketPayOrderData, orderToken, platform) {
     marketPayOrderData.order.transactionInfo.orderToken = orderToken;
+    marketPayOrderData.order.transactionInfo.platform = platform;
 }
 
 function getSessionDataModel() {
@@ -286,13 +287,14 @@ function getFormattedDataForMarketPaySession(basket) {
 
 function getDataForUpdateSession(order, isAutoCapture) {
     var orderData = getSessionDataModel();
+    var latestPI = getLatestPaymentInstrumentFromOrder(order);
     populateOrderData(orderData, order.getOrderNo(), order.getTotalGrossPrice().getValue(), order.currencyCode);
     populateOrderlineItems(orderData, order.getProductLineItems());
     populateShippingPrice(orderData, order.defaultShipment, order.getShippingTotalGrossPrice().getValue());
     populateRoundingDiff(orderData, order.getTotalGrossPrice().getValue());
     populateCustomerAndAddresses(orderData, order.getCustomer(), order.getCustomerEmail(), order.getBillingAddress(), order.getDefaultShipment());
     populateConfiguration(orderData, isAutoCapture)
-    populateTransactionInfo(orderData, order.orderToken);
+    populateTransactionInfo(orderData, order.orderToken, latestPI.custom.marketPayPlatform.value);    
 
     return orderData;
 }
