@@ -379,6 +379,11 @@ function getOrderToken(transaction) {
     return orderToken;
 }
 
+function isApp(order){
+    var latestPI = getLatestPaymentInstrumentFromOrder(order);
+    return latestPI && latestPI.custom.marketPayPlatform.value === 'app';
+}
+
 module.exports = {
     getFormattedDataForMarketPaySession: getFormattedDataForMarketPaySession,
     getDataForUpdateSession: getDataForUpdateSession,
@@ -394,5 +399,6 @@ module.exports = {
     getLatestTransaction: getLatestTransaction,
     getCurrentLocale: getCurrentLocale,
     getDefaultLocale: getDefaultLocale, 
-    getOrderToken: getOrderToken
+    getOrderToken: getOrderToken,
+    isApp: isApp
 };
