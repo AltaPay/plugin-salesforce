@@ -235,6 +235,12 @@ function populateTransactionInfo(marketPayOrderData, orderToken, platform) {
     marketPayOrderData.order.transactionInfo.platform = platform;
 }
 
+function populateCallbacks(marketPayOrderData, isApp) {
+    if (isApp) {
+        marketPayOrderData.callbacks.redirect = Site.getCurrent().getCustomPreferenceValue('marketPayAppURL');
+    }
+}
+
 function getSessionDataModel() {
     const Locale = require('dw/util/Locale');
     const URLUtils = require('dw/web/URLUtils');
@@ -259,7 +265,6 @@ function getSessionDataModel() {
             formStyling: URLUtils.https(ROUTES.CALLBACK_FORM).toString(),
             success: { type: CALLBACK_TYPE.URL, value: URLUtils.https(ROUTES.SUCCESS).toString() },
             failure: { type: CALLBACK_TYPE.URL, value: URLUtils.https(ROUTES.FAILURE).toString() },
-            redirect: URLUtils.https(ROUTES.REDIRECT).toString(),
             notification: URLUtils.https(ROUTES.NOTIFICATION).toString()
         },
         configuration: {
@@ -295,6 +300,7 @@ function getDataForUpdateSession(order, isAutoCapture) {
     populateCustomerAndAddresses(orderData, order.getCustomer(), order.getCustomerEmail(), order.getBillingAddress(), order.getDefaultShipment());
     populateConfiguration(orderData, isAutoCapture)
     populateTransactionInfo(orderData, order.orderToken, latestPI.custom.marketPayPlatform.value);    
+    populateCallbacks(orderData, isApp(order));    
 
     return orderData;
 }
