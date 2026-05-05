@@ -387,7 +387,7 @@ function getOrderToken(transaction) {
 
 function isApp(order){
     var latestPI = getLatestPaymentInstrumentFromOrder(order);
-    return latestPI && latestPI.custom.marketPayPlatform.value === 'app';
+    return !!(latestPI && latestPI.custom && latestPI.custom.marketPayPlatform && latestPI.custom.marketPayPlatform.value === 'app');
 }
 
 module.exports = {
