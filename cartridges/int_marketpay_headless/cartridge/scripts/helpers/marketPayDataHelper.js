@@ -93,7 +93,7 @@ function getLatestPaymentInstrumentFromBasket(basket) {
 
 function getLatestPaymentInstrumentFromOrder(order) {
 
-    if(order.getPaymentInstruments().length == 0)
+    if (!order || order.getPaymentInstruments().length == 0)
         return null;
 
     var paymentInstruments = order.getPaymentInstruments();
