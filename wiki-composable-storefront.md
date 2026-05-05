@@ -99,18 +99,12 @@ From the SFCC Business Manager:
     | **Preference** | **Description** |
     |----------------|-----------------|
     | **MarketPay Terminals / Payment Methods** | Mapping of payment methods in Salesforce and terminals in the MarketPay payment gateway. <br> A terminal can only contain one payment method and one currency, However, it is possible to use the same terminal for multiple payment methods. By sharing your requirements with MarketPay, we will ensure that the correct configuration and JSON mapping are created to meet your needs. <br> ![terminals.png](docs/headless/terminals.png) <br> The setting must be structured as shown in the screen illustration. <br> The attribute **id** must correspond with the payment method added in: **Merchant Tools** > **Ordering** > **Payment Methods** plus the preferred currency. The attribute **name** is the name and identifier of the MarketPay terminal. The attribute **allowedlocales** defines which locales that can use the terminal. <br><br> **Note:** The JSON file containing the terminal configuration will be provided by AltaPay. This file defines the mapping between Salesforce payment methods and the terminals configured in the MarketPay payment gateway. |
-    | **Organization ID** | To find the organization ID in Business Manager, click App Launcher and then select Administration > Site Development > Salesforce Commerce API Settings. Example: `f_ecom_zzdc_001` |
-    | **Organization ShortCode** | To find your short code in Business Manager, click App Launcher and then select Administration > Site Development > Salesforce Commerce API Settings. Example: `kv7kzm78` |
+    | **Organization ID** | To find the organization ID in Business Manager, click App Launcher and then select **Administration** > **Site Development** > **Salesforce Commerce API Settings**. Example: `f_ecom_zzdc_001` |
+    | **Short Code** | To find your short code in Business Manager, click App Launcher and then select **Administration** > **Site Development** > **Salesforce Commerce API Settings**. Example: `kv7kzm78` |
     | **Known IP Protection** | Restricts callbacks to known gateway IP addresses. Disable this option if the store is using a firewall or proxy service (such as Cloudflare) |
-
-    ---
-
-    | **Preference** | **Description** |
-    |----------------|-----------------|
     | **Payment Success URL** | URL where MarketPay redirects after a successful payment. Example: `https://example.com/{LOCALE}/checkout/confirmation`. The `{LOCALE}` variable is replaced with the store's locale (e.g. `de`, `nl`) |
     | **Payment Failed URL** | URL where MarketPay redirects after a failed payment. Example: `https://example.com/{LOCALE}/checkout/confirmation`. The `{LOCALE}` variable is replaced with the store's locale (e.g. `de`, `nl`) |
-    | **Payment Success App URL** | URL where MarketPay redirects after a successful payment. Example: `exampleapp://{LOCALE}/checkout/confirmation`. The `{LOCALE}` variable is replaced with the store's locale (e.g. `de`, `nl`) |
-    | **Payment Failed App URL** | Payment failed mobile app deep link URL. Example: `exampleapp://{LOCALE}/checkout/confirmation`. The `{LOCALE}` variable is replaced with the store's locale (e.g. `de`, `nl`) |
+    | **App URL** | URL where MarketPay redirects after a successful/failed payment. Example: `exampleapp://{LOCALE}/checkout/confirmation`. The `{LOCALE}` variable is replaced with the store's locale (e.g. `de`, `nl`) |
 
 ### Services Configuration
 

@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.0.8]
+
+### Added
+- Merchants can now specify `c_marketPayPlatform:app` in `/payment-instruments` to enable the mobile app flow.
+
 ## [2.0.7]
 
 ### Fixed

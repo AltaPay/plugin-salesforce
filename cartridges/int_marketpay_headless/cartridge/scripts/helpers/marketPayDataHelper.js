@@ -93,7 +93,7 @@ function getLatestPaymentInstrumentFromBasket(basket) {
 
 function getLatestPaymentInstrumentFromOrder(order) {
 
-    if(order.getPaymentInstruments().length == 0)
+    if (!order || order.getPaymentInstruments().length == 0)
         return null;
 
     var paymentInstruments = order.getPaymentInstruments();
@@ -230,8 +230,15 @@ function populateConfiguration(marketPayOrderData, isAutoCapture) {
     marketPayOrderData.configuration.autoCapture = isAutoCapture;
 }
 
-function populateTransactionInfo(marketPayOrderData, orderToken) {
+function populateTransactionInfo(marketPayOrderData, orderToken, platform) {
     marketPayOrderData.order.transactionInfo.orderToken = orderToken;
+    marketPayOrderData.order.transactionInfo.platform = platform;
+}
+
+function populateCallbacks(marketPayOrderData, isApp) {
+    if (isApp) {
+        marketPayOrderData.callbacks.redirect = Site.getCurrent().getCustomPreferenceValue('marketPayAppURL');
+    }
 }
 
 function getSessionDataModel() {
@@ -251,14 +258,13 @@ function getSessionDataModel() {
             transactionInfo: {
                 ecomPlatform: "Salesforce",
                 ecomPluginName: "int_marketpay_headless",
-                ecomPluginVersion: "2.0.7"
+                ecomPluginVersion: "2.0.8"
             }
         },
         callbacks: {
             formStyling: URLUtils.https(ROUTES.CALLBACK_FORM).toString(),
             success: { type: CALLBACK_TYPE.URL, value: URLUtils.https(ROUTES.SUCCESS).toString() },
             failure: { type: CALLBACK_TYPE.URL, value: URLUtils.https(ROUTES.FAILURE).toString() },
-            redirect: URLUtils.https(ROUTES.REDIRECT).toString(),
             notification: URLUtils.https(ROUTES.NOTIFICATION).toString()
         },
         configuration: {
@@ -286,13 +292,15 @@ function getFormattedDataForMarketPaySession(basket) {
 
 function getDataForUpdateSession(order, isAutoCapture) {
     var orderData = getSessionDataModel();
+    var latestPI = getLatestPaymentInstrumentFromOrder(order);
     populateOrderData(orderData, order.getOrderNo(), order.getTotalGrossPrice().getValue(), order.currencyCode);
     populateOrderlineItems(orderData, order.getProductLineItems());
     populateShippingPrice(orderData, order.defaultShipment, order.getShippingTotalGrossPrice().getValue());
     populateRoundingDiff(orderData, order.getTotalGrossPrice().getValue());
     populateCustomerAndAddresses(orderData, order.getCustomer(), order.getCustomerEmail(), order.getBillingAddress(), order.getDefaultShipment());
     populateConfiguration(orderData, isAutoCapture)
-    populateTransactionInfo(orderData, order.orderToken);
+    populateTransactionInfo(orderData, order.orderToken, latestPI.custom.marketPayPlatform.value);    
+    populateCallbacks(orderData, isApp(order));    
 
     return orderData;
 }
@@ -377,6 +385,11 @@ function getOrderToken(transaction) {
     return orderToken;
 }
 
+function isApp(order){
+    var latestPI = getLatestPaymentInstrumentFromOrder(order);
+    return !!(latestPI && latestPI.custom && latestPI.custom.marketPayPlatform && latestPI.custom.marketPayPlatform.value === 'app');
+}
+
 module.exports = {
     getFormattedDataForMarketPaySession: getFormattedDataForMarketPaySession,
     getDataForUpdateSession: getDataForUpdateSession,
@@ -392,5 +405,6 @@ module.exports = {
     getLatestTransaction: getLatestTransaction,
     getCurrentLocale: getCurrentLocale,
     getDefaultLocale: getDefaultLocale, 
-    getOrderToken: getOrderToken
+    getOrderToken: getOrderToken,
+    isApp: isApp
 };

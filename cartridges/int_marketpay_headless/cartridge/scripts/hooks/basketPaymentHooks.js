@@ -114,6 +114,7 @@ exports.afterPOST = function (basket, paymentInstrument) {
         var marketPaySessionId = marketPayDataObj ? marketPayDataObj.custom.sessionID : null;
         var marketPayPaymentMethods = marketPayDataObj ? marketPayDataObj.custom.paymentMethods : null;
         var marketPayPaymentMethodID = paymentInstrument.c_marketPayPaymentMethodID;
+        var marketPayPlatform = paymentInstrument.c_marketPayPlatform ? paymentInstrument.c_marketPayPlatform : "web";
         var paymentMethodId = paymentInstrument.paymentMethodId;
         var onInitiatePaymentURL = marketPayDataHelper.getOnInitiatePaymentURL(
             marketPayPaymentMethodID,
@@ -137,6 +138,7 @@ exports.afterPOST = function (basket, paymentInstrument) {
 
                 Transaction.wrap(function () {
                     currentPaymentInstrument.custom.marketPayPaymentMethodID = marketPayPaymentMethodID;
+                    currentPaymentInstrument.custom.marketPayPlatform = marketPayPlatform;
                 });
                 break;
             }
