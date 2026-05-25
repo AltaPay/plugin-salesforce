@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.0.9]
+
+### Added
+- Add signature verification to enhance the callbacks security.
+
 ## [2.0.8]
 
 ### Added
