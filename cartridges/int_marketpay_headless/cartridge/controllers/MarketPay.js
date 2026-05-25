@@ -12,9 +12,6 @@ var notificationHelpers = require('*/cartridge/scripts/helpers/marketPayNotifica
 var signatureHelpers = require('*/cartridge/scripts/helpers/marketPaySignatureHelpers.js');
 
 server.post('CallbackForm', server.middleware.https, function (req, res, next) {
-    if (!signatureHelpers.validateRequest(req)) {
-        throw new Error("Invalid request.");
-    }
     var languageCode = req.form.language;
     var formTemplateClass = req.form.form_template;
 
