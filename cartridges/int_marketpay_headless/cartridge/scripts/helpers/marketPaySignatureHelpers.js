@@ -78,13 +78,6 @@ function validateRequest(req) {
     var signatureValid = signatures.some(function (sig) { return calculatedHex === sig; });
 
     if (!signatureValid) {
-
-        var Logger = require('dw/system/Logger');
-        var logger = Logger.getLogger('Marketpay', 'Marketpay');    
-
-        logger.error(`MarketPay Signature doesn't match`);
-        logger.error('reconstructed rawBody: {0}', rawBody);
-        logger.error('calculated HMAC: {0}', calculatedHex);
         return false;
     }
 
