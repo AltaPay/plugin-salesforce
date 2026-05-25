@@ -118,6 +118,14 @@
     </type-extension>
     <type-extension type-id="SitePreferences">
         <custom-attribute-definitions>
+            <attribute-definition attribute-id="marketPayCallbackSecret">
+                <display-name xml:lang="x-default">Callback Secret</display-name>
+                <description xml:lang="x-default"></description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
             <attribute-definition attribute-id="marketPayAppURL">
                 <display-name xml:lang="x-default">App URL</display-name>
                 <description xml:lang="x-default">This is an app URL where the customer will be
@@ -189,6 +197,7 @@
                 <attribute attribute-id="marketPayOrganizationID" />
                 <attribute attribute-id="marketPayOrganizationShortCode" />
                 <attribute attribute-id="marketPayKnownIPProtection" />
+                <attribute attribute-id="marketPayCallbackSecret" />   
             </attribute-group>
         </group-definitions>
     </type-extension>
