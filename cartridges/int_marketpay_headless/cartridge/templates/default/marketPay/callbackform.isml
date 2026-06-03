@@ -7,35 +7,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${pdict.title}</title>
   <style>
-    .content-wrapper {
-      max-width: 400px;
+    .form_checkout_standalone .content-wrapper {
+      max-width: 460px;
       margin: 0 auto;
       padding: 20px 50px;
     }
-    .pensio_payment_form_row {
-      margin-top: 20px;
-    }
-    .pensio_payment_form_input_cell select {
-      width: 40%;
-      padding: 5px 0;
-    }
-    .custom-label {
-      font-size: 13px;
-    }
-    input[type="text"],
-    input[type="tel"],
-    select {
-      border-width: 0 0 1px;
-      border-color: #000;
-      padding-inline: 0;
-    }
-    input[type="text"]:focus-visible,
-    input[type="tel"]:focus-visible,
-    select:focus-visible {
-      outline: none;
-    }
-    .pensio_payment_form_cardholder {
-      margin-top: 20px;
+  
+    div[id="invalid_cardnumber_length"],
+    div[id="invalid_expire_month"],
+    div[id="invalid_expire_year"],
+    div[id="invalid_cvc"],
+    div[id="invalid_cardholderemail"],
+    .pensio_required_field_indicator {
+      text-align: left;
     }
   </style>
 </head>
