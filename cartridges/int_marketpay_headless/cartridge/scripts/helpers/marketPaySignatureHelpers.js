@@ -23,8 +23,8 @@ function formEncode(str) {
 function validateRequest(req) {
     var secret = Site.getCurrent().getCustomPreferenceValue('marketPayCallbackSecret');
 
-    if (!secret) {
-        return true; // No secret set? Skip validation.
+    if (!secret || !secret.trim()) {
+        return true; // No secret set or just spaces? Skip validation.
     }
 
     // 1. Get the timestamp and signature(s) from the header

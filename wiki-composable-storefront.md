@@ -105,6 +105,7 @@ From the SFCC Business Manager:
     | **Payment Success URL** | URL where MarketPay redirects after a successful payment. Example: `https://example.com/{LOCALE}/checkout/confirmation`. The `{LOCALE}` variable is replaced with the store's locale (e.g. `de`, `nl`) |
     | **Payment Failed URL** | URL where MarketPay redirects after a failed payment. Example: `https://example.com/{LOCALE}/checkout/confirmation`. The `{LOCALE}` variable is replaced with the store's locale (e.g. `de`, `nl`) |
     | **App URL** | URL where MarketPay redirects after a successful/failed payment. Example: `exampleapp://{LOCALE}/checkout/confirmation`. The `{LOCALE}` variable is replaced with the store's locale (e.g. `de`, `nl`) |
+    | **Callback Secret** | Secret key used to validate callbacks from AltaPay. Follow [Secret setup](https://documentation.altapay.com/v2/Checkout-API/CallbackSecurity/) to set up the secret. |
 
 ### Services Configuration
 
