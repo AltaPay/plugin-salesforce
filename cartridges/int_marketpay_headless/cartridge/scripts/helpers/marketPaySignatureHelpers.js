@@ -5,8 +5,10 @@ var Encoding = require('dw/crypto/Encoding');
 var Bytes = require('dw/util/Bytes');
 var Site = require('dw/system/Site');
 
-// Matches Java URLEncoder: space→+, encode all chars except A-Za-z0-9 - _ . *
-// encodeURIComponent leaves ( ) ! ~ ' unencoded but Java URLEncoder encodes them.
+/**
+ * URL encodes strings to match the gateway's Java-style encoding.
+ * (Needed because standard JS leaves characters like '!' or '(' unencoded).
+ */
 function formEncode(str) {
     return encodeURIComponent(str)
         .replace(/%20/g, '+')
@@ -15,14 +17,17 @@ function formEncode(str) {
         });
 }
 
+/**
+ * Checks if the request is actually from the gateway by verifying its signature.
+ */
 function validateRequest(req) {
     var secret = Site.getCurrent().getCustomPreferenceValue('marketPayCallbackSecret');
 
     if (!secret) {
-        return true; // No secret configured, skip validation
+        return true; // No secret set? Skip validation.
     }
 
-    // Step 1: Parse the AltaPay-Signature header
+    // 1. Get the timestamp and signature(s) from the header
     var signatureHeader = req.httpHeaders.get('altapay-signature');
 
     if (!signatureHeader) {
@@ -45,10 +50,9 @@ function validateRequest(req) {
         return false;
     }
 
-    // Step 2: Prepare the payload — rawBody + "." + timestamp
-    // SFCC parses application/x-www-form-urlencoded bodies into httpParameterMap on
-    // request arrival, so requestBodyAsString is always null for this content type.
-    // Reconstruct by re-encoding parameters in received order (Tomcat preserves it).
+    // 2. Rebuild the raw request body
+    // SFCC parses form data automatically, so we have to manually stitch the
+    // body back together to check the signature.
     var paramMap = request.httpParameterMap;
     var parts = [];
     var paramNamesIter = paramMap.getParameterNames().iterator();
@@ -56,13 +60,12 @@ function validateRequest(req) {
         var paramName = paramNamesIter.next();
         var stringValues = paramMap.get(paramName).getStringValues();
         if (stringValues.isEmpty()) {
-            // SFCC returns empty Collection for params submitted with no value (e.g. "error_message=")
             parts.push(formEncode(paramName) + '=');
         } else {
             var valuesIter = stringValues.iterator();
             while (valuesIter.hasNext()) {
                 var paramValue = valuesIter.next();
-                // SFCC strips trailing \n from parameter values; AltaPay appends \n after </APIResponse>
+                // Add back the trailing newline that SFCC strips from the XML parameter.
                 if (paramName === 'xml') {
                     paramValue += '\n';
                 }
@@ -72,6 +75,7 @@ function validateRequest(req) {
     }
     var rawBody = parts.join('&');
 
+    // 3. Hash the body + timestamp and compare with the provided signatures
     var mac = new Mac(Mac.HMAC_SHA_256);
     var payload = rawBody + '.' + timestamp;
     var calculatedHex = Encoding.toHex(mac.digest(new Bytes(payload, 'UTF-8'), new Bytes(secret, 'UTF-8')));
