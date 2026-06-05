@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.0.6.1]
+
+### Fixed
+- Fix default form styling and Bancontact form conflicts
+
 ## [2.0.6]
 
 ### Added
