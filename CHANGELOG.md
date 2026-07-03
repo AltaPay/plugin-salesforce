@@ -6,6 +6,9 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Add signature verification to enhance the callbacks security.
 
+### Fixed
+- Fix default form styling and Bancontact form conflicts
+
 ## [2.0.8]
 
 ### Added
