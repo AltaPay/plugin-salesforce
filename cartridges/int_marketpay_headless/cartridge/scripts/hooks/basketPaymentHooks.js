@@ -9,6 +9,23 @@ const SCAPIService = require('*/cartridge/scripts/services/scapiService');
 exports.modifyGETResponse_v2 = function (basket, paymentMethodResultResponse) {
     const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHelper');
 
+    // MarketPay specific payment method IDs to validate
+    var marketPayMethods = [
+        'MARKETPAY_CREDITCARD',
+        'MARKETPAY_MOBILEPAY',
+        'MARKETPAY_VIPPS',
+        'MARKETPAY_KLARNA',
+        'MARKETPAY_IDEAL',
+        'MARKETPAY_VIABILL',
+        'MARKETPAY_SWISH',
+        'MARKETPAY_BANCONTACT',
+        'MARKETPAY_BANKPAYMENT',
+        'MARKETPAY_TWINT',
+        'MARKETPAY_TRUSTLY',
+        'MARKETPAY_PRZELEWY24',
+        'MARKETPAY_PAYPAL',
+    ];
+
     try {
         var result = SCAPIService.createMarketPaySession(basket.customer.ID, marketPayDataHelper.getFormattedDataForMarketPaySession(basket));
 
@@ -28,23 +45,6 @@ exports.modifyGETResponse_v2 = function (basket, paymentMethodResultResponse) {
         if (typeof marketPayTerminalsMapping === 'string') {
             marketPayTerminalsMapping = JSON.parse(marketPayTerminalsMapping);
         }
-
-        // MarketPay specific payment method IDs to validate
-        var marketPayMethods = [
-            'MARKETPAY_CREDITCARD',
-            'MARKETPAY_MOBILEPAY',
-            'MARKETPAY_VIPPS',
-            'MARKETPAY_KLARNA',
-            'MARKETPAY_IDEAL',
-            'MARKETPAY_VIABILL',
-            'MARKETPAY_SWISH',
-            'MARKETPAY_BANCONTACT',
-            'MARKETPAY_BANKPAYMENT',
-            'MARKETPAY_TWINT',
-            'MARKETPAY_TRUSTLY',
-            'MARKETPAY_PRZELEWY24',
-            'MARKETPAY_PAYPAL',
-        ];
 
         // Check if marketPayTerminalsMapping is valid
         if (!marketPayTerminalsMapping || !marketPayTerminalsMapping.terminals) {
@@ -84,8 +84,13 @@ exports.modifyGETResponse_v2 = function (basket, paymentMethodResultResponse) {
         Logger.error("MarketPay error in modifyGETResponse_v2: " + e.message);
         Logger.error("Stack trace: " + e.stack);
 
-        // Return original payment methods on error
-        return;
+        // Filter out MarketPay methods on error.
+        var allMethods = paymentMethodResultResponse.applicablePaymentMethods;
+        if (allMethods) {
+            paymentMethodResultResponse.applicablePaymentMethods = allMethods.toArray().filter(function (method) {
+                return marketPayMethods.indexOf(method.id) === -1;
+            });
+        }
     }
 };
 

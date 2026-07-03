@@ -9,6 +9,7 @@ var Logger = require('dw/system/Logger').getLogger('MarketPay', 'MarketPay');
 var COHelpers = require('*/cartridge/scripts/helpers/marketPayCheckoutHelpers');
 var ipHelpers = require('*/cartridge/scripts/helpers/ipHelpers');
 var notificationHelpers = require('*/cartridge/scripts/helpers/marketPayNotificationHelpers');
+var signatureHelpers = require('*/cartridge/scripts/helpers/marketPaySignatureHelpers.js');
 
 server.post('CallbackForm', server.middleware.https, function (req, res, next) {
     var languageCode = req.form.language;
@@ -34,6 +35,9 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
     var order = null;
 
     try {
+        if (!signatureHelpers.validateRequest(req)) {
+            throw new Error("Invalid request.");
+        }
         orderID = req.form.shop_orderid;
         var orderXMLObject = new XML(req.form.xml);
         var transactions = orderXMLObject.Body.Transactions.Transaction;
@@ -81,6 +85,9 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
     var order = null;
 
     try {
+        if (!signatureHelpers.validateRequest(req)) {
+            throw new Error("Invalid request.");
+        }
         var orderXMLObject = new XML(req.form.xml);
         var transactions = orderXMLObject.Body.Transactions.Transaction;
         var latestTxn = marketPayDataHelper.getLatestTransaction(transactions);
@@ -115,6 +122,12 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
  * This controller is for asynchronous payments, when the acquirer returns an answer for payment request.
  */
 server.post('PaymentNotification', server.middleware.https, function (req, res, next) {
+    if (!signatureHelpers.validateRequest(req)) {
+        res.setStatusCode(400);
+        res.json({ message: 'Invalid request.' });
+
+        return next();
+    }
     // Ignore new status
     if (req.form.status === 'new') {
         res.setStatusCode(200);
