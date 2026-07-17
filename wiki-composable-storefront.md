@@ -24,6 +24,12 @@ This plugin enables **AltaPay** as the Payment Service Provider (PSP) for storef
 
 - [Get MarketPay Payment Status](#get-marketpay-payment-status)
 
+[Mobile App Payment Flows](#mobile-app-payment-flows)
+
+- [Web-Based App Flow](#web-based-app-flow)
+
+- [Native App Flow](#native-app-flow)
+
 ## Prerequisites
 
 Before configuring the cartridges, you need the below information. These can
@@ -104,7 +110,7 @@ From the SFCC Business Manager:
     | **Known IP Protection** | Restricts callbacks to known gateway IP addresses. Disable this option if the store is using a firewall or proxy service (such as Cloudflare) |
     | **Payment Success URL** | URL where MarketPay redirects after a successful payment. Example: `https://example.com/{LOCALE}/checkout/confirmation`. The `{LOCALE}` variable is replaced with the store's locale (e.g. `de`, `nl`) |
     | **Payment Failed URL** | URL where MarketPay redirects after a failed payment. Example: `https://example.com/{LOCALE}/checkout/confirmation`. The `{LOCALE}` variable is replaced with the store's locale (e.g. `de`, `nl`) |
-    | **App URL** | URL where MarketPay redirects after a successful/failed payment. Example: `exampleapp://{LOCALE}/checkout/confirmation`. The `{LOCALE}` variable is replaced with the store's locale (e.g. `de`, `nl`) |
+    | **App URL** | URL where MarketPay redirects after a successful/failed payment. Example: `exampleapp://{LOCALE}/checkout/confirmation`. The `{LOCALE}` variable is replaced with the store's locale (e.g. `de`, `nl`). Used by the [Web-Based App Flow](#web-based-app-flow) — see [Mobile App Payment Flows](#mobile-app-payment-flows) for the per-checkout alternative. |
     | **Callback Secret** | Secret key used to validate callbacks from AltaPay. Follow [Secret setup](https://documentation.altapay.com/v2/Checkout-API/CallbackSecurity/) to set up the secret. |
 
 ### Services Configuration
@@ -150,6 +156,28 @@ From the SFCC Business Manager:
 ## Get MarketPay Payment Status
 
 You can use the B2C Commerce API’s [getOrder](https://developer.salesforce.com/docs/commerce/commerce-api/references/orders?meta=getOrder) endpoint to retrieve MarketPay payment data (e.g., transaction ID, captured amount, reserved amount, etc.). All MarketPay-related fields are prefixed with `c_marketPay`.
+
+## Mobile App Payment Flows
+
+For merchant apps (e.g. built on Salesforce Composable Storefront / React Native), the cartridge supports two ways of getting the customer back into the app after a payment attempt. Both are opt-in via custom properties on `POST /payment-instruments` (Shopper Baskets API), in addition to `c_marketPayPaymentMethodID`, which is required on every MarketPay payment instrument regardless of platform (web, app, or native):
+
+| **Property** | **Description** |
+|--------------|------------------|
+| `c_marketPayPlatform` | `"web"` (default) or `"app"`. Setting it to `"app"` enables the [Web-Based App Flow](#web-based-app-flow). |
+| `c_marketPayAppReturnURL` | A per-checkout deep link, e.g. `myapp://checkout/return`. Its presence enables the [Native App Flow](#native-app-flow). |
+
+### Web-Based App Flow
+
+Set `c_marketPayPlatform: "app"` on the payment instrument. The payment page (including Bancontact) still renders inside the app's WebView, and after a success or failure MarketPay redirects to the static **App URL** site preference (see [Credentials](#credentials)) — the same URL for every checkout on the site.
+
+### Native App Flow
+
+Set `c_marketPayAppReturnURL` on the payment instrument to a deep link specific to that checkout. No site preference is required — supplying the property is enough to enable the flow. When the order is placed, the cartridge:
+
+- Sends that URL as the session's redirect callback and flags the session with `isNativeFlow: true` (`PUT session/{sessionId}`).
+- Lets MarketPay hand control back to the merchant app directly (e.g. via an `AppReturnLink`) instead of routing through SFCC-hosted success/failure pages.
+
+If both `c_marketPayPlatform: "app"` and `c_marketPayAppReturnURL` are supplied, `c_marketPayAppReturnURL` takes precedence and the checkout uses the Native App Flow.
 
 ## Creating a New API User
 
