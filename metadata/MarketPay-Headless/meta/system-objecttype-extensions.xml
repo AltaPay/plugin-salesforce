@@ -108,9 +108,7 @@
             </attribute-definition>
             <attribute-definition attribute-id="marketPayAppReturnURL">
                 <display-name xml:lang="x-default">App Return URL</display-name>
-                <description xml:lang="x-default">Merchant app deep link/URL supplied per checkout
-                    (c_marketPayAppReturnURL) that MarketPay redirects to after the payment is
-                    completed.</description>
+                <description xml:lang="x-default">Merchant app deep link/URL supplied per checkout (c_marketPayAppReturnURL) that MarketPay redirects to after the payment is completed.</description>
                 <type>string</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
