@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.1.0]
+
+### Added
+- Add support for the Native App Flow: merchants can now specify `c_marketPayAppReturnURL` in `/payment-instruments` to have MarketPay redirect back to merchant app URL and to flag the session as `isNativeFlow`, alongside the existing `c_marketPayPlatform:app` web-based app flow.
+
 ## [2.0.9]
 
 ### Added

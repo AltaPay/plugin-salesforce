@@ -123,6 +123,9 @@ exports.afterPOST = function (order) {
         });
     } catch (e) {
         Logger.error("MarketPay: Error updating session: " + e.message);
+        if (typeof data !== 'undefined' && data) {
+            Logger.error("MarketPay: Update session payload: " + JSON.stringify(data));
+        }
         Transaction.wrap(function () {
             order.custom.marketPayError = true;
             order.custom.marketPayErrorMessage = e.message;

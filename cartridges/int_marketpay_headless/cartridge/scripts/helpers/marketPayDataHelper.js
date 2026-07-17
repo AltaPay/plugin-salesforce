@@ -235,8 +235,14 @@ function populateTransactionInfo(marketPayOrderData, orderToken, platform) {
     marketPayOrderData.order.transactionInfo.platform = platform;
 }
 
-function populateCallbacks(marketPayOrderData, isApp) {
-    if (isApp) {
+function populateCallbacks(marketPayOrderData, order) {
+    var appReturnURL = getAppReturnURL(order);
+
+    if (appReturnURL) {
+        // Native App Flow — redirect to URL supplied via c_marketPayAppReturnURL
+        marketPayOrderData.callbacks.redirect = appReturnURL;
+    } else if (isWebBasedMobileFlow(order)) {
+        // Web-based app flow — redirect to the URL specified in the Site Preference "marketPayAppURL"
         marketPayOrderData.callbacks.redirect = Site.getCurrent().getCustomPreferenceValue('marketPayAppURL');
     }
 }
@@ -258,7 +264,7 @@ function getSessionDataModel() {
             transactionInfo: {
                 ecomPlatform: "Salesforce",
                 ecomPluginName: "int_marketpay_headless",
-                ecomPluginVersion: "2.0.9"
+                ecomPluginVersion: "2.1.0"
             }
         },
         callbacks: {
@@ -299,8 +305,9 @@ function getDataForUpdateSession(order, isAutoCapture) {
     populateRoundingDiff(orderData, order.getTotalGrossPrice().getValue());
     populateCustomerAndAddresses(orderData, order.getCustomer(), order.getCustomerEmail(), order.getBillingAddress(), order.getDefaultShipment());
     populateConfiguration(orderData, isAutoCapture)
-    populateTransactionInfo(orderData, order.orderToken, latestPI.custom.marketPayPlatform.value);    
-    populateCallbacks(orderData, isApp(order));    
+    populateTransactionInfo(orderData, order.orderToken, latestPI.custom.marketPayPlatform.value);
+    populateCallbacks(orderData, order);
+    orderData.isNativeFlow = isNativeFlow(order);
 
     return orderData;
 }
@@ -385,9 +392,33 @@ function getOrderToken(transaction) {
     return orderToken;
 }
 
-function isApp(order){
+function isApp(order) {
+    return isNativeFlow(order) || isWebBasedMobileFlow(order);
+}
+
+/**
+ * A checkout is treated as Native App Flow whenever c_marketPayAppReturnURL was supplied on the
+ * payment instrument (POST /payment-instruments).
+ * @param {dw.order.Order} order
+ * @returns {boolean}
+ */
+function isNativeFlow(order) {
+    return !!getAppReturnURL(order);
+}
+
+function isWebBasedMobileFlow(order) {
     var latestPI = getLatestPaymentInstrumentFromOrder(order);
     return !!(latestPI && latestPI.custom && latestPI.custom.marketPayPlatform && latestPI.custom.marketPayPlatform.value === 'app');
+}
+
+/**
+ * Returns the URL (c_marketPayAppReturnURL) stored on the order's latest payment instrument, if any.
+ * @param {dw.order.Order} order
+ * @returns {string|null}
+ */
+function getAppReturnURL(order) {
+    var latestPI = getLatestPaymentInstrumentFromOrder(order);
+    return (latestPI && latestPI.custom && latestPI.custom.marketPayAppReturnURL) || null;
 }
 
 module.exports = {
@@ -406,5 +437,7 @@ module.exports = {
     getCurrentLocale: getCurrentLocale,
     getDefaultLocale: getDefaultLocale, 
     getOrderToken: getOrderToken,
-    isApp: isApp
+    isApp: isApp,
+    isNativeFlow: isNativeFlow,
+    getAppReturnURL: getAppReturnURL
 };

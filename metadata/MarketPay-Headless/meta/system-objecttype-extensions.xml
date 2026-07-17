@@ -106,6 +106,16 @@
                 <externally-managed-flag>true</externally-managed-flag>
                 <min-length>0</min-length>
             </attribute-definition>
+            <attribute-definition attribute-id="marketPayAppReturnURL">
+                <display-name xml:lang="x-default">App Return URL</display-name>
+                <description xml:lang="x-default">Merchant app deep link/URL supplied per checkout
+                    (c_marketPayAppReturnURL) that MarketPay redirects to after the payment is
+                    completed.</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
         </custom-attribute-definitions>
         <group-definitions>
             <attribute-group group-id="MarketPay">
@@ -113,6 +123,7 @@
                 <attribute attribute-id="marketPayPaymentMethodID" />
                 <attribute attribute-id="marketPayPlatform" />
                 <attribute attribute-id="marketTransactionID" />
+                <attribute attribute-id="marketPayAppReturnURL" />
             </attribute-group>
         </group-definitions>
     </type-extension>

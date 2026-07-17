@@ -120,6 +120,7 @@ exports.afterPOST = function (basket, paymentInstrument) {
         var marketPayPaymentMethods = marketPayDataObj ? marketPayDataObj.custom.paymentMethods : null;
         var marketPayPaymentMethodID = paymentInstrument.c_marketPayPaymentMethodID;
         var marketPayPlatform = paymentInstrument.c_marketPayPlatform ? paymentInstrument.c_marketPayPlatform : "web";
+        var marketPayAppReturnURL = paymentInstrument.c_marketPayAppReturnURL || null;
         var paymentMethodId = paymentInstrument.paymentMethodId;
         var onInitiatePaymentURL = marketPayDataHelper.getOnInitiatePaymentURL(
             marketPayPaymentMethodID,
@@ -144,6 +145,9 @@ exports.afterPOST = function (basket, paymentInstrument) {
                 Transaction.wrap(function () {
                     currentPaymentInstrument.custom.marketPayPaymentMethodID = marketPayPaymentMethodID;
                     currentPaymentInstrument.custom.marketPayPlatform = marketPayPlatform;
+                    if (marketPayAppReturnURL) {
+                        currentPaymentInstrument.custom.marketPayAppReturnURL = marketPayAppReturnURL;
+                    }
                 });
                 break;
             }
