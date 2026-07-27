@@ -111,6 +111,7 @@ From the SFCC Business Manager:
     | **Payment Success URL** | URL where MarketPay redirects after a successful payment. Example: `https://example.com/{LOCALE}/checkout/confirmation`. The `{LOCALE}` variable is replaced with the store's locale (e.g. `de`, `nl`) |
     | **Payment Failed URL** | URL where MarketPay redirects after a failed payment. Example: `https://example.com/{LOCALE}/checkout/confirmation`. The `{LOCALE}` variable is replaced with the store's locale (e.g. `de`, `nl`) |
     | **App URL** | URL where MarketPay redirects after a successful/failed payment. Example: `exampleapp://{LOCALE}/checkout/confirmation`. The `{LOCALE}` variable is replaced with the store's locale (e.g. `de`, `nl`). Used by the [Web-Based App Flow](#web-based-app-flow) — see [Mobile App Payment Flows](#mobile-app-payment-flows) for the per-checkout alternative. |
+    | **App Return URL Allowlist** | Comma-separated list of origins/schemes that a shopper-supplied `c_marketPayAppReturnURL` is allowed to use (see [Native App Flow](#native-app-flow)). For an HTTPS App Link/Universal Link, list the full origin, e.g. `https://m.example.com`. For a custom app protocol, list the scheme, e.g. `merchant-app://`. Any value that isn't listed here is rejected — required to enable Native App Flow. |
     | **Callback Secret** | Secret key used to validate callbacks from AltaPay. Follow [Secret setup](https://documentation.altapay.com/v2/Checkout-API/CallbackSecurity/) to set up the secret. |
 
 ### Services Configuration
@@ -172,7 +173,11 @@ Set `c_marketPayPlatform: "app"` on the payment instrument. The payment page (in
 
 ### Native App Flow
 
-Set `c_marketPayAppReturnURL` on the payment instrument to a deep link specific to that checkout. No site preference is required — supplying the property is enough to enable the flow. When the order is placed, the cartridge:
+Set `c_marketPayAppReturnURL` on the payment instrument to a deep link specific to that checkout, e.g. `https://m.example.com/app-return` (recommended — an [App Link](https://developer.android.com/training/app-links)/[Universal Link](https://developer.apple.com/ios/universal-links/) for the best experience when the app isn't installed) or a custom app protocol like `merchant-app://link-to-final-page`, per [AltaPay's callback documentation](https://documentation.altapay.com/v2/Checkout-API/Integration/#configuring-payment-status-callbacks).
+
+> **Security note:** `c_marketPayAppReturnURL` is shopper-supplied, so it's validated against the **App Return URL Allowlist** site preference (see [Credentials](#credentials)) before it's stored — this prevents it being used as an open redirect. You must add your app's origin(s)/scheme(s) to that preference, or the value is silently dropped (checkout still completes, just without Native App Flow) and a warning is logged.
+
+When the order is placed, the cartridge:
 
 - Sends that URL as the session's redirect callback and flags the session with `isNativeFlow: true` (`PUT session/{sessionId}`).
 - Lets MarketPay hand control back to the merchant app directly (e.g. via an `AppReturnLink`) instead of routing through SFCC-hosted success/failure pages.

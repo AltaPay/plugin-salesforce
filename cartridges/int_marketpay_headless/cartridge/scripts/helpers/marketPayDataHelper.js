@@ -421,6 +421,41 @@ function getAppReturnURL(order) {
     return (latestPI && latestPI.custom && latestPI.custom.marketPayAppReturnURL) || null;
 }
 
+/**
+ * Validates a shopper-supplied c_marketPayAppReturnURL against the merchant-configured
+ * 'marketPayAppReturnURLAllowlist' site preference.
+ * @param {string} url
+ * @returns {boolean}
+ */
+function isAllowedAppReturnURL(url) {
+    if (!url) {
+        return false;
+    }
+
+    var allowlistRaw = Site.getCurrent().getCustomPreferenceValue('marketPayAppReturnURLAllowlist');
+    if (!allowlistRaw) {
+        return false;
+    }
+
+    var allowedEntries = allowlistRaw.split(',')
+        .map(function (entry) { return entry.trim().toLowerCase(); })
+        .filter(function (entry) { return entry.length > 0; });
+
+    var match = /^([a-zA-Z][a-zA-Z0-9+.-]*):\/\/([^/?#]*)/.exec(url);
+    if (!match) {
+        return false;
+    }
+
+    var scheme = match[1].toLowerCase();
+    var host = match[2].toLowerCase();
+
+    if (scheme === 'https') {
+        return allowedEntries.indexOf('https://' + host) !== -1;
+    }
+
+    return allowedEntries.indexOf(scheme + '://') !== -1 || allowedEntries.indexOf(scheme + ':') !== -1;
+}
+
 module.exports = {
     getFormattedDataForMarketPaySession: getFormattedDataForMarketPaySession,
     getDataForUpdateSession: getDataForUpdateSession,
@@ -439,5 +474,6 @@ module.exports = {
     getOrderToken: getOrderToken,
     isApp: isApp,
     isNativeFlow: isNativeFlow,
-    getAppReturnURL: getAppReturnURL
+    getAppReturnURL: getAppReturnURL,
+    isAllowedAppReturnURL: isAllowedAppReturnURL
 };
