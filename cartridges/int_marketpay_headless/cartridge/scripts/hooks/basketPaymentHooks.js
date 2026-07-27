@@ -120,6 +120,15 @@ exports.afterPOST = function (basket, paymentInstrument) {
         var marketPayPaymentMethods = marketPayDataObj ? marketPayDataObj.custom.paymentMethods : null;
         var marketPayPaymentMethodID = paymentInstrument.c_marketPayPaymentMethodID;
         var marketPayPlatform = paymentInstrument.c_marketPayPlatform ? paymentInstrument.c_marketPayPlatform : "web";
+        var marketPayAppReturnURL = paymentInstrument.c_marketPayAppReturnURL || null;
+
+        // c_marketPayAppReturnURL is shopper-supplied — only trust values matching the merchant's
+        // configured allowlist, otherwise silently drop it (checkout still proceeds, just without
+        // Native App Flow) to avoid it being used as an open redirect.
+        if (marketPayAppReturnURL && !marketPayDataHelper.isAllowedAppReturnURL(marketPayAppReturnURL)) {
+            Logger.warn('MarketPay: Rejected c_marketPayAppReturnURL not present in marketPayAppReturnURLAllowlist: ' + marketPayAppReturnURL);
+            marketPayAppReturnURL = null;
+        }
         var paymentMethodId = paymentInstrument.paymentMethodId;
         var onInitiatePaymentURL = marketPayDataHelper.getOnInitiatePaymentURL(
             marketPayPaymentMethodID,
@@ -144,6 +153,7 @@ exports.afterPOST = function (basket, paymentInstrument) {
                 Transaction.wrap(function () {
                     currentPaymentInstrument.custom.marketPayPaymentMethodID = marketPayPaymentMethodID;
                     currentPaymentInstrument.custom.marketPayPlatform = marketPayPlatform;
+                    currentPaymentInstrument.custom.marketPayAppReturnURL = marketPayAppReturnURL || null;
                 });
                 break;
             }

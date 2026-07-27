@@ -106,6 +106,14 @@
                 <externally-managed-flag>true</externally-managed-flag>
                 <min-length>0</min-length>
             </attribute-definition>
+            <attribute-definition attribute-id="marketPayAppReturnURL">
+                <display-name xml:lang="x-default">App Return URL</display-name>
+                <description xml:lang="x-default">Merchant app deep link/URL supplied per checkout (c_marketPayAppReturnURL) that MarketPay redirects to after the payment is completed.</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
         </custom-attribute-definitions>
         <group-definitions>
             <attribute-group group-id="MarketPay">
@@ -113,6 +121,7 @@
                 <attribute attribute-id="marketPayPaymentMethodID" />
                 <attribute attribute-id="marketPayPlatform" />
                 <attribute attribute-id="marketTransactionID" />
+                <attribute attribute-id="marketPayAppReturnURL" />
             </attribute-group>
         </group-definitions>
     </type-extension>
@@ -186,6 +195,19 @@
                 <mandatory-flag>true</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
+            <attribute-definition attribute-id="marketPayAppReturnURLAllowlist">
+                <display-name xml:lang="x-default">App Return URL Allowlist</display-name>
+                <description xml:lang="x-default">Comma-separated list of origins/schemes allowed
+                    for c_marketPayAppReturnURL. For an HTTPS App Link/Universal Link,
+                    list the full origin, e.g. https://m.example.com. For
+                    a custom app protocol, list the scheme, e.g. merchant-app://. Any
+                    c_marketPayAppReturnURL that does not match an entry here is rejected and
+                    Native App Flow is not enabled for that checkout, to prevent it being used as an open redirect.</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
         </custom-attribute-definitions>
         <group-definitions>
             <attribute-group group-id="MarketPay">
@@ -194,10 +216,11 @@
                 <attribute attribute-id="marketPayPaymentSuccessURL" />
                 <attribute attribute-id="marketPayPaymentFailedURL" />
                 <attribute attribute-id="marketPayAppURL" />
+                <attribute attribute-id="marketPayAppReturnURLAllowlist" />
                 <attribute attribute-id="marketPayOrganizationID" />
                 <attribute attribute-id="marketPayOrganizationShortCode" />
                 <attribute attribute-id="marketPayKnownIPProtection" />
-                <attribute attribute-id="marketPayCallbackSecret" />   
+                <attribute attribute-id="marketPayCallbackSecret" />
             </attribute-group>
         </group-definitions>
     </type-extension>

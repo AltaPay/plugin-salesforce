@@ -5,7 +5,7 @@ function onSuccessRedirect(req, res, args) {
     var successURL = null;
 
     if (args.isApp)
-        successURL = Site.getCurrent().getCustomPreferenceValue('marketPayAppURL');
+        successURL = args.appReturnURL || Site.getCurrent().getCustomPreferenceValue('marketPayAppURL');
     else
         successURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentSuccessURL');
 
@@ -16,7 +16,7 @@ function onSuccessRedirect(req, res, args) {
 
         if (!empty(args)) {
             var queryParts = Object.keys(args).filter(function (key) {
-                return key !== 'userLocale' && key !== 'isApp';
+                return key !== 'userLocale' && key !== 'isApp' && key !== 'appReturnURL';
             }).map(function (key) {
                 return encodeURIComponent(key) + '=' + encodeURIComponent(args[key]);
             });
@@ -35,7 +35,7 @@ function onFailureRedirect(req, res, args) {
     var failedURL = null;
 
     if (args.isApp)
-        failedURL = Site.getCurrent().getCustomPreferenceValue('marketPayAppURL');
+        failedURL = args.appReturnURL || Site.getCurrent().getCustomPreferenceValue('marketPayAppURL');
     else
         failedURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentFailedURL');
 
@@ -46,7 +46,7 @@ function onFailureRedirect(req, res, args) {
 
         if (!empty(args)) {
             var queryParts = Object.keys(args).filter(function (key) {
-                return key !== 'userLocale' && key !== 'isApp';
+                return key !== 'userLocale' && key !== 'isApp' && key !== 'appReturnURL';
             }).map(function (key) {
                 return encodeURIComponent(key) + '=' + encodeURIComponent(args[key]);
             });

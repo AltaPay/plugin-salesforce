@@ -56,7 +56,8 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
             marketPayRedirectHelpers.onSuccessRedirect(req, res, {
                 orderID: orderID,
                 userLocale: order.custom.marketPayUserLocale,
-                isApp: marketPayDataHelper.isApp(order)
+                isApp: marketPayDataHelper.isApp(order),
+                appReturnURL: marketPayDataHelper.getAppReturnURL(order)
             });
         } else {
             Logger.error('MarketPay - Payment failed - Order with ID: ' + orderID + ' not found in SFCC!');
@@ -68,7 +69,8 @@ server.post('PaymentSuccess', server.middleware.https, function (req, res, next)
         marketPayRedirectHelpers.onFailureRedirect(req, res, {
             orderID: orderID,
             userLocale: order ? order.custom.marketPayUserLocale : marketPayDataHelper.getDefaultLocale(),
-            isApp: marketPayDataHelper.isApp(order)
+            isApp: marketPayDataHelper.isApp(order),
+            appReturnURL: marketPayDataHelper.getAppReturnURL(order)
         });
     }
 
@@ -112,7 +114,8 @@ server.post('PaymentFail', server.middleware.https, function (req, res, next) {
     marketPayRedirectHelpers.onFailureRedirect(req, res, {
         orderID: orderID,
         userLocale: order ? order.custom.marketPayUserLocale : marketPayDataHelper.getDefaultLocale(),
-        isApp: marketPayDataHelper.isApp(order)
+        isApp: marketPayDataHelper.isApp(order),
+        appReturnURL: marketPayDataHelper.getAppReturnURL(order)
     });
 
     return next();
