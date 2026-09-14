@@ -5,13 +5,12 @@ const Encoding = require('dw/crypto/Encoding');
 const Bytes = require('dw/util/Bytes');
 const CALLBACK_TYPE = { URL: 'URL', FUNCTION: 'FUNCTION' };
 const ROUTES = {
-    CALLBACK_FORM: 'MarketPay-CallbackForm',
-    SUCCESS: 'MarketPay-PaymentSuccess',
-    FAILURE: 'MarketPay-PaymentFail',
-    REDIRECT: 'MarketPay-Redirect',
-    NOTIFICATION: 'MarketPay-PaymentNotification'
+    CALLBACK_FORM: '/marketpay/callback-form',
+    SUCCESS: '/webhooks/marketpay/payment-success',
+    FAILURE: '/webhooks/marketpay/payment-fail',
+    REDIRECT: '/webhooks/marketpay/payment-redirect',
+    NOTIFICATION: '/webhooks/marketpay/payment-notification'
 };
-const MARKETPAY_IP_ADDRESS_SET = ["185.206.120.0/24", "2a10:a200::/29", '185.203.232.129', '185.203.233.129'];
 
 function orderLinesDiff(orderLines, total) {
     var orderLinesTotal = 0;
@@ -31,6 +30,7 @@ function isMarketPayProcessor(paymentMethodId) {
 }
 
 /**
+ * Gets the terminal mapping for the given parameters
  * 
  * @param {*} marketPayTerminalsMapping 
  * @param {*} currentLocale 
@@ -268,10 +268,10 @@ function getSessionDataModel() {
             }
         },
         callbacks: {
-            formStyling: URLUtils.https(ROUTES.CALLBACK_FORM).toString(),
-            success: { type: CALLBACK_TYPE.URL, value: URLUtils.https(ROUTES.SUCCESS).toString() },
-            failure: { type: CALLBACK_TYPE.URL, value: URLUtils.https(ROUTES.FAILURE).toString() },
-            notification: URLUtils.https(ROUTES.NOTIFICATION).toString()
+            formStyling: Site.getCurrent().getCustomPreferenceValue('marketPayMRTBaseURL') + ROUTES.CALLBACK_FORM,
+            success: { type: CALLBACK_TYPE.URL, value: Site.getCurrent().getCustomPreferenceValue('marketPayMRTBaseURL') + ROUTES.SUCCESS},
+            failure: { type: CALLBACK_TYPE.URL, value: Site.getCurrent().getCustomPreferenceValue('marketPayMRTBaseURL') + ROUTES.FAILURE},
+            notification: Site.getCurrent().getCustomPreferenceValue('marketPayMRTBaseURL') + ROUTES.NOTIFICATION
         },
         configuration: {
             paymentType: "PAYMENT",            
@@ -461,7 +461,6 @@ module.exports = {
     getDataForUpdateSession: getDataForUpdateSession,
     getOnInitiatePaymentURL: getOnInitiatePaymentURL,
     getBasicAuthHeader: getBasicAuthHeader,
-    MARKETPAY_IP_ADDRESS_SET: MARKETPAY_IP_ADDRESS_SET,
     getTerminalMapping: getTerminalMapping,
     getMarketPayDataForTerminalName: getMarketPayDataForTerminalName,
     getLatestPaymentInstrumentFromOrder: getLatestPaymentInstrumentFromOrder,

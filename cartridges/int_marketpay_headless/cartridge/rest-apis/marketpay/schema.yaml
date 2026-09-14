@@ -2,7 +2,7 @@ schema.yaml:
 openapi: 3.0.0
 info:
   version: 1.0.1
-  title: Get Session and Token API
+  title: MarketPay Custom APIs
 components:
   securitySchemes:
     ShopperToken:
@@ -19,6 +19,13 @@ components:
           scopes:
             c_checkoutsession_rw: Create and return session and token
             c_paymentstatus_rw: Retrieve payment status for a customer session
+    AmOAuth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://account.demandware.com/dwsso/oauth2/access_token
+          scopes:
+            c_marketpaycallbacks_rw: MarketPay custom SCAPI permisssion
 paths:
   /checkoutsession:
     post:
@@ -131,7 +138,6 @@ paths:
                               type: string
                     transactionInfo:
                       type: object
-                      additionalProperties: true
                 callbacks:
                   type: object
                 configuration:
@@ -219,4 +225,232 @@ paths:
                   value:
                     {
                       "type": "session not found",
+                    }
+  /payment-notification:
+    post:
+      summary: Receive an asynchronous payment notification from MarketPay for a placed order
+      operationId: paymentNotification
+      parameters:
+        - in: query
+          name: siteId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - shop_orderid
+                - status
+              properties:
+                shop_orderid:
+                  type: string
+                  minLength: 1
+                transaction_id:
+                  type: string
+                status:
+                  type: string
+                currency:
+                  type: string
+                  minLength: 3
+                  maxLength: 3
+                amount:
+                  type: number
+                xml:
+                  type: string
+                error_message:
+                  type: string
+                error_code:
+                  type: string
+                merchant_error_message:
+                  type: string
+                credit_card_token:
+                  type: string
+                nature:
+                  type: string
+                payment_status:
+                  type: string
+                type:
+                  type: string
+                blacklist_token:
+                  type: string
+                fraud_explanation:
+                  type: string
+                fraud_recommendation:
+                  type: string
+                fraud_risk_score:
+                  type: string
+                require_capture:
+                  type: string
+                masked_credit_card:
+                  type: string
+                payment_id:
+                  type: string
+                checksum:
+                  type: string
+                cardholder_message_must_be_shown:
+                  type: string
+      security:
+        - AmOAuth2: [c_marketpaycallbacks_rw]
+      responses:
+        "200":
+          description: Notification acknowledged
+          content:
+            application/json:
+              examples:
+                acknowledged:
+                  value:
+                    {
+                      "message": "Acknowledged",
+                    }
+        "400":
+          description: Invalid notification payload or order not found
+          content:
+            application/json:
+              examples:
+                order_not_found:
+                  value:
+                    {
+                      "type": "order not found",
+                    }
+  /payment-success:
+    post:
+      summary: Receive a payment success callback from MarketPay and finalize the order
+      operationId: paymentSuccess
+      parameters:
+        - in: query
+          name: siteId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - shop_orderid
+                - status
+              properties:
+                shop_orderid:
+                  type: string
+                  minLength: 1
+                transaction_id:
+                  type: string
+                status:
+                  type: string
+                currency:
+                  type: string
+                  minLength: 3
+                  maxLength: 3
+                amount:
+                  type: number
+                xml:
+                  type: string
+                error_message:
+                  type: string
+                error_code:
+                  type: string
+                merchant_error_message:
+                  type: string
+                credit_card_token:
+                  type: string
+                nature:
+                  type: string
+                payment_status:
+                  type: string
+                type:
+                  type: string
+                blacklist_token:
+                  type: string
+                fraud_explanation:
+                  type: string
+                fraud_recommendation:
+                  type: string
+                fraud_risk_score:
+                  type: string
+                require_capture:
+                  type: string
+                masked_credit_card:
+                  type: string
+                payment_id:
+                  type: string
+                checksum:
+                  type: string
+                cardholder_message_must_be_shown:
+                  type: string
+      security:
+        - AmOAuth2: [c_marketpaycallbacks_rw]
+      responses:
+        "200":
+          description: Payment finalized; returns the URL to redirect the shopper to
+          content:
+            application/json:
+              examples:
+                acknowledged:
+                  value:
+                    {
+                      "redirectUrl": "https://example.com/success?orderID=00000101&isApp=false",
+                    }
+        "400":
+          description: Invalid payload or order not found
+          content:
+            application/json:
+              examples:
+                order_not_found:
+                  value:
+                    {
+                      "type": "order not found",
+                    }
+  /payment-failed:
+    post:
+      summary: Receive a payment failure callback from MarketPay for a placed order
+      operationId: paymentFailed
+      parameters:
+        - in: query
+          name: siteId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - shop_orderid
+              properties:
+                shop_orderid:
+                  type: string
+                  minLength: 1
+      security:
+        - AmOAuth2: [c_marketpaycallbacks_rw]
+      responses:
+        "200":
+          description: Failure acknowledged; returns the URL to redirect the shopper to
+          content:
+            application/json:
+              examples:
+                acknowledged:
+                  value:
+                    {
+                      "redirectUrl": "https://example.com/failed?orderID=00000101&isApp=false",
+                    }
+        "400":
+          description: Invalid payload
+          content:
+            application/json:
+              examples:
+                invalid_payload:
+                  value:
+                    {
+                      "type": "shop_orderid missing from payload.",
                     }

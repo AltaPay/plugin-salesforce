@@ -1,66 +1,50 @@
 'use strict';
 
-function onSuccessRedirect(req, res, args) {
+function getSuccessRedirectURL(args) {
     const Site = require('dw/system/Site');
-    var successURL = null;
+    var successURL = args.isApp
+        ? args.appReturnURL || Site.getCurrent().getCustomPreferenceValue('marketPayAppURL')
+        : Site.getCurrent().getCustomPreferenceValue('marketPayPaymentSuccessURL');
 
-    if (args.isApp)
-        successURL = args.appReturnURL || Site.getCurrent().getCustomPreferenceValue('marketPayAppURL');
-    else
-        successURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentSuccessURL');
-
-    if (successURL) {
-        if (successURL.indexOf('{LOCALE}') != -1) {
-            successURL = successURL.replace('{LOCALE}', args.userLocale);
-        }
-
-        if (!empty(args)) {
-            var queryParts = Object.keys(args).filter(function (key) {
-                return key !== 'userLocale' && key !== 'isApp' && key !== 'appReturnURL';
-            }).map(function (key) {
-                return encodeURIComponent(key) + '=' + encodeURIComponent(args[key]);
-            });
-
-            if (queryParts.length > 0) {
-                successURL += (successURL.indexOf('?') !== -1 ? '&' : '?') + queryParts.join('&');
-            }
-        }
-
-        res.redirect(successURL);
-    }
+    return buildRedirectURL(successURL, args);
 }
 
-function onFailureRedirect(req, res, args) {
+function getFailureRedirectURL(args) {
     const Site = require('dw/system/Site');
-    var failedURL = null;
+    var failedURL = args.isApp
+        ? args.appReturnURL || Site.getCurrent().getCustomPreferenceValue('marketPayAppURL')
+        : Site.getCurrent().getCustomPreferenceValue('marketPayPaymentFailedURL');
 
-    if (args.isApp)
-        failedURL = args.appReturnURL || Site.getCurrent().getCustomPreferenceValue('marketPayAppURL');
-    else
-        failedURL = Site.getCurrent().getCustomPreferenceValue('marketPayPaymentFailedURL');
+    return buildRedirectURL(failedURL, args);
+}
 
-    if (failedURL) {
-        if (failedURL.indexOf('{LOCALE}') != -1) {
-            failedURL = failedURL.replace('{LOCALE}', args.userLocale);
-        }
-
-        if (!empty(args)) {
-            var queryParts = Object.keys(args).filter(function (key) {
-                return key !== 'userLocale' && key !== 'isApp' && key !== 'appReturnURL';
-            }).map(function (key) {
-                return encodeURIComponent(key) + '=' + encodeURIComponent(args[key]);
-            });
-
-            if (queryParts.length > 0) {
-                failedURL += (failedURL.indexOf('?') !== -1 ? '&' : '?') + queryParts.join('&');
-            }
-        }
-
-        res.redirect(failedURL);
+function buildRedirectURL(baseURL, args) {
+    if (!baseURL) {
+        return null;
     }
+
+    var url = baseURL;
+
+    if (url.indexOf('{LOCALE}') != -1) {
+        url = url.replace('{LOCALE}', args.userLocale);
+    }
+
+    if (!empty(args)) {
+        var queryParts = Object.keys(args).filter(function (key) {
+            return key !== 'userLocale' && key !== 'isApp' && key !== 'appReturnURL';
+        }).map(function (key) {
+            return encodeURIComponent(key) + '=' + encodeURIComponent(args[key]);
+        });
+
+        if (queryParts.length > 0) {
+            url += (url.indexOf('?') !== -1 ? '&' : '?') + queryParts.join('&');
+        }
+    }
+
+    return url;
 }
 
 module.exports = {
-    onSuccessRedirect: onSuccessRedirect,
-    onFailureRedirect: onFailureRedirect
+    getSuccessRedirectURL: getSuccessRedirectURL,
+    getFailureRedirectURL: getFailureRedirectURL
 };
