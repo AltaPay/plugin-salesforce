@@ -431,6 +431,50 @@ paths:
                 shop_orderid:
                   type: string
                   minLength: 1
+                transaction_id:
+                  type: string
+                status:
+                  type: string
+                currency:
+                  type: string
+                  minLength: 3
+                  maxLength: 3
+                amount:
+                  type: number
+                xml:
+                  type: string
+                error_message:
+                  type: string
+                error_code:
+                  type: string
+                merchant_error_message:
+                  type: string
+                credit_card_token:
+                  type: string
+                nature:
+                  type: string
+                payment_status:
+                  type: string
+                type:
+                  type: string
+                blacklist_token:
+                  type: string
+                fraud_explanation:
+                  type: string
+                fraud_recommendation:
+                  type: string
+                fraud_risk_score:
+                  type: string
+                require_capture:
+                  type: string
+                masked_credit_card:
+                  type: string
+                payment_id:
+                  type: string
+                checksum:
+                  type: string
+                cardholder_message_must_be_shown:
+                  type: string
       security:
         - AmOAuth2: [c_marketpaycallbacks_rw]
       responses:
@@ -452,5 +496,5 @@ paths:
                 invalid_payload:
                   value:
                     {
-                      "type": "shop_orderid missing from payload.",
+                      "type": "Invalid request.",
                     }

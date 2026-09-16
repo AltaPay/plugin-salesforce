@@ -4,7 +4,6 @@ const marketPayDataHelper = require('*/cartridge/scripts/helpers/marketPayDataHe
 const COHelpers = require('*/cartridge/scripts/helpers/marketPayCheckoutHelpers');
 const notificationHelpers = require('*/cartridge/scripts/helpers/marketPayNotificationHelpers');
 const marketPayRedirectHelpers = require('*/cartridge/scripts/helpers/marketPayRedirectHelpers');
-const ipHelpers = require('*/cartridge/scripts/helpers/ipHelpers');
 const Logger = require('dw/system/Logger').getLogger('MarketPay','MarketPay');
 
 exports.createCheckoutSession = function () {
@@ -100,64 +99,57 @@ exports.paymentNotification = function () {
     try {
         notificationData = JSON.parse(request.httpParameterMap.requestBodyAsString);
     } catch (error) {
-        Logger.error('MarketPay - paymentNotification - Unable to parse request body: ' + error.message);
         RESTResponseMgr
-            .createError(400, 'Notification-error', 'Invalid payload', 'Request body is not valid JSON.')
+            .createError(400, 'Notification-error', 'Invalid request.', 'Invalid request.')
             .render();
         return;
     }
 
     // Ignore new status
     if (notificationData.status === 'new') {
-        RESTResponseMgr.createEmptySuccess(200).render();
+        RESTResponseMgr.createSuccess({ message: 'Acknowledged' }, 200).render();
         return;
     }
 
     var orderID = notificationData.shop_orderid;
 
-    if (!orderID) {
+    if (notificationData.xml == null) {
+        Logger.error("MarketPay: Order XML is Null");
         RESTResponseMgr
-            .createError(400, 'Notification-error', 'Error processing request', 'shop_orderid missing from notification payload.')
-            .render();
-        return;
-    }
-
-    if (!notificationData.xml) {
-        Logger.error('MarketPay: Order XML is Null');
-        RESTResponseMgr
-            .createError(400, 'Notification-error', 'Order XML not found', 'Order XML not found in notification payload.')
+            .createError(400, 'Notification-error', 'Order XML not found', 'Order XML not found')
             .render();
         return;
     }
 
     try {
+        if (!orderID) {
+            throw new Error('Error processing request');
+        }
         var orderXMLObject = new XML(notificationData.xml);
         var transactions = orderXMLObject.Body.Transactions.Transaction;
         var latestTxn = marketPayDataHelper.getLatestTransaction(transactions);
 
         if (latestTxn == null) {
-            throw new Error('No transaction found');
+            throw new Error("No transaction found");
         }
 
         var orderToken = marketPayDataHelper.getOrderToken(latestTxn);
         var order = COHelpers.getOrder(orderID, orderToken);
 
-        if (order == null) {
+        if (order != null) {
+            notificationHelpers.storeWebhookNotification(notificationData);
+            RESTResponseMgr.createSuccess({ message: 'Acknowledged' }, 200).render();
+        } else {
             RESTResponseMgr
-                .createError(400, 'Notification-error', 'Order not found', 'Order not found in the CMS: ' + orderID)
+                .createError(400, 'Notification-error', 'Order not found in the CMS', 'Order not found in the CMS')
                 .render();
-            return;
         }
-
-        notificationHelpers.storeWebhookNotification(notificationData);
-        RESTResponseMgr.createEmptySuccess(200).render();
     } catch (error) {
-        Logger.error('MarketPay - paymentNotification - General error due to exception. Error message: ' + error.message);
+        Logger.error('MarketPay - findOrder - General error due to exception. Error message: {0}.', error.message);
         RESTResponseMgr
-            .createError(400, 'Notification-error', 'Error processing request', error.message)
+            .createError(400, 'Notification-error', 'Error processing request', 'Error processing request')
             .render();
     }
-            
 };
 
 exports.paymentNotification.public = true;
@@ -167,35 +159,20 @@ exports.paymentNotification.public = true;
  */
 exports.paymentSuccess = function () {
     var successData;
+    var orderID;
+    var order = null;
 
     try {
         successData = JSON.parse(request.httpParameterMap.requestBodyAsString);
     } catch (error) {
-        Logger.error('MarketPay - paymentSuccess - Unable to parse request body: ' + error.message);
         RESTResponseMgr
-            .createError(400, 'PaymentSuccess-error', 'Invalid payload', 'Request body is not valid JSON.')
-            .render();
-        return;
-    }
-
-    var orderID = successData.shop_orderid;
-
-    if (!orderID) {
-        RESTResponseMgr
-            .createError(400, 'PaymentSuccess-error', 'Error processing request', 'shop_orderid missing from payload.')
-            .render();
-        return;
-    }
-
-    if (!successData.xml) {
-        Logger.error('MarketPay: Order XML is Null');
-        RESTResponseMgr
-            .createError(400, 'PaymentSuccess-error', 'Order XML not found', 'Order XML not found in payload.')
+            .createError(400, 'PaymentSuccess-error', 'Invalid request.', 'Invalid request.')
             .render();
         return;
     }
 
     try {
+        orderID = successData.shop_orderid;
         var orderXMLObject = new XML(successData.xml);
         var transactions = orderXMLObject.Body.Transactions.Transaction;
         var latestTxn = marketPayDataHelper.getLatestTransaction(transactions);
@@ -205,29 +182,27 @@ exports.paymentSuccess = function () {
         }
 
         var orderToken = marketPayDataHelper.getOrderToken(latestTxn);
-        var order = COHelpers.getOrder(orderID, orderToken);
+        order = COHelpers.getOrder(orderID, orderToken);
 
-        if (order == null) {
-            RESTResponseMgr
-                .createError(400, 'PaymentSuccess-error', 'Order not found', 'Order not found in the CMS: ' + orderID)
-                .render();
-            return;
+        if (order != null) {
+            COHelpers.processOrder(successData.status ? successData.status : '', order, latestTxn, orderXMLObject);
+
+            var redirectUrl = marketPayRedirectHelpers.getSuccessRedirectURL({
+                orderID: orderID,
+                userLocale: order.custom.marketPayUserLocale,
+                isApp: marketPayDataHelper.isApp(order),
+                appReturnURL: marketPayDataHelper.getAppReturnURL(order)
+            });
+
+            RESTResponseMgr.createSuccess({ redirectUrl: redirectUrl }, 200).render();
+        } else {
+            Logger.error('MarketPay - Payment failed - Order with ID: ' + orderID + ' not found in SFCC!');
+            throw new Error('Order with ID: ' + orderID + ' not found in SFCC!');
         }
-
-        COHelpers.processOrder(successData.status ? successData.status : '', order, latestTxn, orderXMLObject);
-
-        var redirectUrl = marketPayRedirectHelpers.getSuccessRedirectURL({
-            orderID: orderID,
-            userLocale: order.custom.marketPayUserLocale,
-            isApp: marketPayDataHelper.isApp(order),
-            appReturnURL: marketPayDataHelper.getAppReturnURL(order)
-        });
-
-        RESTResponseMgr.createSuccess({ redirectUrl: redirectUrl }, 200).render();
     } catch (error) {
-        Logger.error('MarketPay - paymentSuccess - General error due to exception. Error message: ' + error.message);
+        Logger.error('MarketPay - Payment failed - General Error due to exception. Error message: ' + error.message);
         RESTResponseMgr
-            .createError(400, 'PaymentSuccess-error', 'Error processing request', error.message)
+            .createError(400, 'PaymentSuccess-error', 'Error processing request', 'Error processing request')
             .render();
     }
 };
@@ -243,34 +218,34 @@ exports.paymentFailed = function () {
     try {
         failureData = JSON.parse(request.httpParameterMap.requestBodyAsString);
     } catch (error) {
-        Logger.error('MarketPay - paymentFailed - Unable to parse request body: ' + error.message);
         RESTResponseMgr
-            .createError(400, 'PaymentFailed-error', 'Invalid payload', 'Request body is not valid JSON.')
+            .createError(400, 'PaymentFailed-error', 'Invalid request.', 'Invalid request.')
             .render();
         return;
     }
 
     var orderID = failureData.shop_orderid;
-
-    if (!orderID) {
-        RESTResponseMgr
-            .createError(400, 'PaymentFailed-error', 'Error processing request', 'shop_orderid missing from payload.')
-            .render();
-        return;
-    }
-
     var order = null;
 
     try {
-        order = COHelpers.getOrder(orderID);
+        var orderXMLObject = new XML(failureData.xml);
+        var transactions = orderXMLObject.Body.Transactions.Transaction;
+        var latestTxn = marketPayDataHelper.getLatestTransaction(transactions);
+
+        if (latestTxn == null) {
+            throw new Error('No transaction found');
+        }
+
+        var orderToken = marketPayDataHelper.getOrderToken(latestTxn);
+        order = COHelpers.getOrder(orderID, orderToken);
 
         if (!order) {
-            Logger.error('MarketPay - paymentFailed - Order not found. orderID: ' + orderID);
+            Logger.error('MarketPay - PaymentFail - Order not found. orderID: ' + orderID);
         } else if (order.getStatus().value !== dw.order.Order.ORDER_STATUS_FAILED) {
-            Logger.error('MarketPay - paymentFailed - Payment failure callback received. orderID: ' + orderID);
+            Logger.error('MarketPay - PaymentFail - Payment failure callback received. orderID: ' + orderID);
         }
     } catch (error) {
-        Logger.error('MarketPay - paymentFailed - General error due to exception. Error message: ' + error.message);
+        Logger.error('MarketPay - PaymentFail - General Error due to exception. Error message: ' + error.message);
     }
 
     var redirectUrl = marketPayRedirectHelpers.getFailureRedirectURL({
