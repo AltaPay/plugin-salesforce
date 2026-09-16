@@ -268,10 +268,10 @@ function getSessionDataModel() {
             }
         },
         callbacks: {
-            formStyling: Site.getCurrent().getCustomPreferenceValue('marketPayMRTBaseURL') + ROUTES.CALLBACK_FORM,
-            success: { type: CALLBACK_TYPE.URL, value: Site.getCurrent().getCustomPreferenceValue('marketPayMRTBaseURL') + ROUTES.SUCCESS},
-            failure: { type: CALLBACK_TYPE.URL, value: Site.getCurrent().getCustomPreferenceValue('marketPayMRTBaseURL') + ROUTES.FAILURE},
-            notification: Site.getCurrent().getCustomPreferenceValue('marketPayMRTBaseURL') + ROUTES.NOTIFICATION
+            formStyling: Site.getCurrent().getCustomPreferenceValue('marketPayCallbackBaseURL') + ROUTES.CALLBACK_FORM,
+            success: { type: CALLBACK_TYPE.URL, value: Site.getCurrent().getCustomPreferenceValue('marketPayCallbackBaseURL') + ROUTES.SUCCESS},
+            failure: { type: CALLBACK_TYPE.URL, value: Site.getCurrent().getCustomPreferenceValue('marketPayCallbackBaseURL') + ROUTES.FAILURE},
+            notification: Site.getCurrent().getCustomPreferenceValue('marketPayCallbackBaseURL') + ROUTES.NOTIFICATION
         },
         configuration: {
             paymentType: "PAYMENT",            

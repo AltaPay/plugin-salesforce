@@ -208,7 +208,7 @@
                 <externally-managed-flag>false</externally-managed-flag>
                 <min-length>0</min-length>
             </attribute-definition>
-            <attribute-definition attribute-id="marketPayMRTBaseURL">
+            <attribute-definition attribute-id="marketPayCallbackBaseURL">
                 <display-name xml:lang="x-default">MRT Base URL for Callbacks</display-name>
                 <type>string</type>
                 <mandatory-flag>false</mandatory-flag>
@@ -222,7 +222,7 @@
                 <attribute attribute-id="marketPayTerminals" />
                 <attribute attribute-id="marketPayPaymentSuccessURL" />
                 <attribute attribute-id="marketPayPaymentFailedURL" />
-                <attribute attribute-id="marketPayMRTBaseURL" />
+                <attribute attribute-id="marketPayCallbackBaseURL" />
                 <attribute attribute-id="marketPayAppURL" />
                 <attribute attribute-id="marketPayAppReturnURLAllowlist" />
                 <attribute attribute-id="marketPayOrganizationID" />
