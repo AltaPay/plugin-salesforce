@@ -7,7 +7,7 @@ const CALLBACK_TYPE = { URL: 'URL', FUNCTION: 'FUNCTION' };
 const ROUTES = {
     CALLBACK_FORM: '/marketpay/callback-form',
     SUCCESS: '/webhooks/marketpay/payment-success',
-    FAILURE: '/webhooks/marketpay/payment-fail',
+    FAILURE: '/webhooks/marketpay/payment-failed',
     REDIRECT: '/webhooks/marketpay/payment-redirect',
     NOTIFICATION: '/webhooks/marketpay/payment-notification'
 };
