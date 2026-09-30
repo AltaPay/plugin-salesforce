@@ -14,18 +14,13 @@ components:
           scopes:
             c_checkoutsession_rw: Create and return session and token
             c_paymentstatus_rw: Retrieve payment status for a customer session
+            c_marketpaycallbacks_rw: Receive MarketPay payment callbacks
         clientCredentials:
           tokenUrl: https://my-shortcode.api.commercecloud.salesforce.com/shopper/auth/v1/organizations/my-org-id/oauth2/token
           scopes:
             c_checkoutsession_rw: Create and return session and token
             c_paymentstatus_rw: Retrieve payment status for a customer session
-    AmOAuth2:
-      type: oauth2
-      flows:
-        clientCredentials:
-          tokenUrl: https://account.demandware.com/dwsso/oauth2/access_token
-          scopes:
-            c_marketpaycallbacks_rw: MarketPay custom SCAPI permisssion
+            c_marketpaycallbacks_rw: Receive MarketPay payment callbacks
 paths:
   /checkoutsession:
     post:
@@ -295,7 +290,7 @@ paths:
                 cardholder_message_must_be_shown:
                   type: string
       security:
-        - AmOAuth2: [c_marketpaycallbacks_rw]
+        - ShopperToken: ["c_marketpaycallbacks_rw"]
       responses:
         "200":
           description: Notification acknowledged
@@ -386,7 +381,7 @@ paths:
                 cardholder_message_must_be_shown:
                   type: string
       security:
-        - AmOAuth2: [c_marketpaycallbacks_rw]
+        - ShopperToken: ["c_marketpaycallbacks_rw"]
       responses:
         "200":
           description: Payment finalized; returns the URL to redirect the shopper to
@@ -476,7 +471,7 @@ paths:
                 cardholder_message_must_be_shown:
                   type: string
       security:
-        - AmOAuth2: [c_marketpaycallbacks_rw]
+        - ShopperToken: ["c_marketpaycallbacks_rw"]
       responses:
         "200":
           description: Failure acknowledged; returns the URL to redirect the shopper to
