@@ -1,6 +1,9 @@
 {
     "endpoints": [
       {"endpoint": "createCheckoutSession", "schema": "schema.yaml", "implementation": "script"},
-      {"endpoint": "paymentStatus", "schema": "schema.yaml", "implementation": "script"}
+      {"endpoint": "paymentStatus", "schema": "schema.yaml", "implementation": "script"},
+      {"endpoint": "paymentNotification", "schema": "schema.yaml", "implementation": "script"},
+      {"endpoint": "paymentSuccess", "schema": "schema.yaml", "implementation": "script"},
+      {"endpoint": "paymentFailed", "schema": "schema.yaml", "implementation": "script"}
     ]
   }
