@@ -13,7 +13,7 @@ All notable changes to this project will be documented in this file.
 **Upgrade note**
 > This is a breaking change. Before upgrading:
 > 1. Deploy the `marketpay-salesforce-pwa` npm package to a Managed Runtime environment.
-> 2. Grant the SLAS client used by that environment the `c_marketpaycallbacks_rw`, `c_checkoutsession_rw`, and `c_paymentstatus_rw` custom scopes (Business Manager > Administration > Site Development > Salesforce Commerce API Client Settings) — callbacks fail with a 403 without these.
+> 2. Grant the SLAS client used by that environment the `c_marketpaycallbacks_rw`, `c_checkoutsession_rw`, and `c_paymentstatus_rw` custom scopes (Business Manager > Administration > Site Development > Salesforce Commerce API Client Settings) — callbacks fail with a 403 without these. Grant them only to the private backend client, never to a public storefront client, since anyone holding them can call these endpoints directly.
 > 3. Update the `marketPayCallbackBaseURL` site preference to point at that environment.
 >
 > Do not upgrade to this version until this setup is complete.

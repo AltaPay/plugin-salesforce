@@ -131,6 +131,9 @@ From the SFCC Business Manager:
 
     ![slas_credentials](docs/headless/slas_credentials.png)
 
+> **Note:**
+> The SLAS clients that call the MarketPay endpoints (the one above and the one used by your MRT app) must be granted the `c_marketpaycallbacks_rw`, `c_checkoutsession_rw` and `c_paymentstatus_rw` custom scopes in **Administration** > **Site Development** > **Salesforce Commerce API Client Settings**. Grant them only to private backend clients, never to a public storefront client, since anyone holding them can call these endpoints directly.
+
 ### Jobs Configuration
 
 To process notification callback requests, the cartridge provides a custom job step (defined in steptypes.json) with the required logic. The job itself must be configured in Business Manager, where SFCC handles scheduling and execution.
