@@ -10,6 +10,9 @@ All notable changes to this project will be documented in this file.
 ### Removed
 - Removed the `Known IP Protection` and `Callback Secret` site preferences — this logic now lives in the PWA/MRT app's own environment variables (`MARKETPAY_KNOWN_IP_PROTECTION`, `MARKETPAY_SIGNATURE_PROTECTION`, `MARKETPAY_CALLBACK_SECRET`).
 
+### Fixed
+- Rename `status-code` attribute in `steptypes.json` to `status`.
+
 **Upgrade note**
 > This is a breaking change. Before upgrading:
 > 1. Deploy the `marketpay-salesforce-pwa` npm package to a Managed Runtime environment.
