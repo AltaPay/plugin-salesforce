@@ -107,12 +107,11 @@ From the SFCC Business Manager:
     | **MarketPay Terminals / Payment Methods** | Mapping of payment methods in Salesforce and terminals in the MarketPay payment gateway. <br> A terminal can only contain one payment method and one currency, However, it is possible to use the same terminal for multiple payment methods. By sharing your requirements with MarketPay, we will ensure that the correct configuration and JSON mapping are created to meet your needs. <br> ![terminals.png](docs/headless/terminals.png) <br> The setting must be structured as shown in the screen illustration. <br> The attribute **id** must correspond with the payment method added in: **Merchant Tools** > **Ordering** > **Payment Methods** plus the preferred currency. The attribute **name** is the name and identifier of the MarketPay terminal. The attribute **allowedlocales** defines which locales that can use the terminal. <br><br> **Note:** The JSON file containing the terminal configuration will be provided by AltaPay. This file defines the mapping between Salesforce payment methods and the terminals configured in the MarketPay payment gateway. |
     | **Organization ID** | To find the organization ID in Business Manager, click App Launcher and then select **Administration** > **Site Development** > **Salesforce Commerce API Settings**. Example: `f_ecom_zzdc_001` |
     | **Short Code** | To find your short code in Business Manager, click App Launcher and then select **Administration** > **Site Development** > **Salesforce Commerce API Settings**. Example: `kv7kzm78` |
-    | **Known IP Protection** | Restricts callbacks to known gateway IP addresses. Disable this option if the store is using a firewall or proxy service (such as Cloudflare) |
     | **Payment Success URL** | URL where MarketPay redirects after a successful payment. Example: `https://example.com/{LOCALE}/checkout/confirmation`. The `{LOCALE}` variable is replaced with the store's locale (e.g. `de`, `nl`) |
     | **Payment Failed URL** | URL where MarketPay redirects after a failed payment. Example: `https://example.com/{LOCALE}/checkout/confirmation`. The `{LOCALE}` variable is replaced with the store's locale (e.g. `de`, `nl`) |
     | **App URL** | URL where MarketPay redirects after a successful/failed payment. Example: `exampleapp://{LOCALE}/checkout/confirmation`. The `{LOCALE}` variable is replaced with the store's locale (e.g. `de`, `nl`). Used by the [Web-Based App Flow](#web-based-app-flow) — see [Mobile App Payment Flows](#mobile-app-payment-flows) for the per-checkout alternative. |
     | **App Return URL Allowlist** | Comma-separated list of origins/schemes that a shopper-supplied `c_marketPayAppReturnURL` is allowed to use (see [Native App Flow](#native-app-flow)). For an HTTPS App Link/Universal Link, list the full origin, e.g. `https://m.example.com`. For a custom app protocol, list the scheme, e.g. `merchant-app://`. Any value that isn't listed here is rejected — required to enable Native App Flow. |
-    | **Callback Secret** | Secret key used to validate callbacks from AltaPay. Follow [Secret setup](https://documentation.altapay.com/v2/Checkout-API/CallbackSecurity/) to set up the secret. |
+    | **MRT Base URL for Callbacks** | Base URL of your Managed Runtime (PWA Kit) deployment, e.g. `https://your-project-your-environment.mobify-storefront.com`. MarketPay sends payment notifications, success/failure redirects, and payment form styling requests to this URL. |
 
 ### Services Configuration
 
@@ -124,13 +123,18 @@ From the SFCC Business Manager:
 
 3. Update the URL, replace `https://testgateway.altapaysecure.com` with your gateway URL, and enter Gateway API user and Password and click **Apply** button.
 
-    ![alt text](<docs/headless/service_credentials.png>)
+    ![service_credentials](<docs/headless/service_credentials.png>)
 
 4. Click on **int.marketpay.slas.credentials**.
 
 5. Enter the SLAS User and Password and click **Apply** button.
 
     ![slas_credentials](docs/headless/slas_credentials.png)
+
+> **Note:**
+> The SLAS client above must be granted the `c_checkoutsession_rw` and `c_paymentstatus_rw` custom scopes in **Administration** > **Site Development** > **Salesforce Commerce API Client Settings**. Grant them only to a private backend client, never to a public storefront client, since anyone holding them can call these endpoints directly.
+>
+> The MRT app uses a separate Account Manager API client with the `c_marketpaycallbacks_rw` scope to send the MarketPay callbacks (see `ADMIN_CLIENT_ID_PRIVATE` and `ADMIN_CLIENT_SECRET` in the [salesforce-headless-commerce-pwa](https://github.com/AltaPay/salesforce-headless-commerce-pwa) README).
 
 ### Jobs Configuration
 

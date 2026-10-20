@@ -1,6 +1,6 @@
 'use strict';
 
-function onSuccessRedirect(req, res, args) {
+function getSuccessRedirectURL(args) {
     const Site = require('dw/system/Site');
     var successURL = null;
 
@@ -25,12 +25,12 @@ function onSuccessRedirect(req, res, args) {
                 successURL += (successURL.indexOf('?') !== -1 ? '&' : '?') + queryParts.join('&');
             }
         }
-
-        res.redirect(successURL);
     }
+
+    return successURL;
 }
 
-function onFailureRedirect(req, res, args) {
+function getFailureRedirectURL(args) {
     const Site = require('dw/system/Site');
     var failedURL = null;
 
@@ -55,12 +55,12 @@ function onFailureRedirect(req, res, args) {
                 failedURL += (failedURL.indexOf('?') !== -1 ? '&' : '?') + queryParts.join('&');
             }
         }
-
-        res.redirect(failedURL);
     }
+
+    return failedURL;
 }
 
 module.exports = {
-    onSuccessRedirect: onSuccessRedirect,
-    onFailureRedirect: onFailureRedirect
+    getSuccessRedirectURL: getSuccessRedirectURL,
+    getFailureRedirectURL: getFailureRedirectURL
 };

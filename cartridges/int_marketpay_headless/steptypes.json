@@ -11,7 +11,7 @@
                 "function": "execute",
                 "parameters": {},
                 "status-codes": {
-                    "status-code": [
+                    "status": [
                         {
                             "@code": "OK",
                             "description": "Job step completed successfully."

@@ -1,6 +1,27 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.0.0]
+
+### Changed
+- **Breaking:** In the `int_marketpay_headless` cartridge, retired the SFRA `MarketPay-*` storefront controllers (`CallbackForm`, `PaymentSuccess`, `PaymentFail`, `PaymentNotification`). MarketPay callback handling now goes through Managed Runtime (MRT) and SCAPI custom endpoints (`rest-apis/marketpay`) instead, so payment confirmation keeps working even when Storefront Protection is enabled.
+- The `marketPayCallbackBaseURL` site preference ("MRT Base URL for Callbacks") now controls where MarketPay sends callbacks. It must point at a deployed Managed Runtime environment running the companion `marketpay-salesforce-pwa` npm package.
+
+### Removed
+- Removed the `Known IP Protection` and `Callback Secret` site preferences — this logic now lives in the PWA/MRT app's own environment variables (`MARKETPAY_KNOWN_IP_PROTECTION`, `MARKETPAY_SIGNATURE_PROTECTION`, `MARKETPAY_CALLBACK_SECRET`).
+
+### Fixed
+- Rename `status-code` attribute in `steptypes.json` to `status`.
+
+**Upgrade note**
+> This is a breaking change. Before upgrading:
+> 1. Deploy the `marketpay-salesforce-pwa` npm package to a Managed Runtime environment.
+> 2. Create an Account Manager API client with the `c_marketpaycallbacks_rw` scope and set its credentials on the MRT app (`ADMIN_CLIENT_ID_PRIVATE`, `ADMIN_CLIENT_SECRET`, `SFCC_REALM_AND_INSTANCE` and `SFCC_OAUTH_SCOPES`) — callbacks fail without it.
+> 3. Grant the SLAS client used by the cartridge the `c_checkoutsession_rw` and `c_paymentstatus_rw` custom scopes (Business Manager > Administration > Site Development > Salesforce Commerce API Client Settings). Grant them only to a private backend client, never to a public storefront client, since anyone holding them can call these endpoints directly.
+> 4. Update the `marketPayCallbackBaseURL` site preference to point at that environment.
+>
+> Do not upgrade to this version until this setup is complete.
+
 ## [2.1.0]
 
 ### Added
