@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.1.1]
+
+### Fixed
+- Rename `status-code` attribute in `steptypes.json` to `status`.
+- Stop the notification job from retrying a failed release/refund of a duplicate payment on every run.
+
 ## [2.1.0]
 
 ### Added
