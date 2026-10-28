@@ -93,10 +93,15 @@ function handleDuplicatePayment(latestTxn) {
         var transactionStatus = latestTxn.TransactionStatus.toString();
         var transactionId = latestTxn.TransactionId.toString();
         var released;
-        if (transactionStatus === 'captured' || transactionStatus === 'bank_payment_finalized') {
-            released = marketPay.refundCapturedReservation(transactionId);
-        } else {
-            released = marketPay.releaseReservation(transactionId);
+        try {
+            if (transactionStatus === 'captured' || transactionStatus === 'bank_payment_finalized') {
+                released = marketPay.refundCapturedReservation(transactionId);
+            } else {
+                released = marketPay.releaseReservation(transactionId);
+            }
+        } catch (e) {
+            Logger.error('MarketPay - Could not release/refund duplicate reservation for transactionId: ' + transactionId + '. Error: ' + e.message);
+            return;
         }
         if (!released) {
             Logger.error('MarketPay - Could not release/refund duplicate reservation for transactionId: ' + transactionId);
