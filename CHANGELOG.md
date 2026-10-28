@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.0.1]
+
+### Fixed
+- Stop the notification job from retrying a failed release/refund of a duplicate payment on every run.
+
 ## [3.0.0]
 
 ### Changed
